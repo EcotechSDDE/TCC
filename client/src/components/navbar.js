@@ -6,16 +6,20 @@ import "bootstrap/dist/js/bootstrap.bundle"
 
 // We import NavLink to utilize the react router.
 import { NavLink } from "react-router-dom";
-import Logo from "././Logo.png";
 
 // Here, we display our Navbar
 export default function Navbar() {
     return (
         <div>
-            <nav className="navbar navbar-expand-lg navbar-light bg-light p-2">
-                <NavLink className="navbar-brand" to="/">
-                    <img style={{ "width": "25%" }} src={Logo} alt="Logo do IFC"></img>
-                </NavLink>
+             <nav className="navbar navbar-expand-lg navbar-dark bg-success p-2">
+                <div className="d-flex align-items-center">
+                    <NavLink className="navbar-brand" to="/">
+                        <img style={{ width: "50px", height: "auto" }} src="/logo.jpg" alt="Logo Ecotech" />
+                    </NavLink>
+                    <span className="ms-3 fw-bold">
+                        Sistema de Doações de Equipamentos Eletrônicos
+                    </span>
+                </div>
                 <button
                     className="navbar-toggler"
                     type="button"
