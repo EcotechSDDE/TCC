@@ -4,9 +4,9 @@ import "bootstrap/dist/js/bootstrap.bundle";
 
 export default function Footer() {
   return (
-    <footer className="bg-success text-light py-3">
+   <footer className="text-light py-2" style={{ backgroundColor: '#3b5534' }}>
       <div className="container text-center">
-        <div className="d-flex justify-content-center flex-wrap gap-3">
+        <div className="d-flex justify-content-center flex-wrap gap-5">
           <span>ecotechsdee@gmail.com</span>
           <span>felipeffernandes2007@gmail.com</span>
           <span>gabris.trajano@gmail.com</span>

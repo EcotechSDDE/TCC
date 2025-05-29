@@ -5,7 +5,6 @@ const REACT_APP_YOUR_HOSTNAME = 'http://localhost:5050'; // Seu back-end
 
 export default function Login() {
     const [form, setForm] = useState({
-        name: "",
         email: "",
         password: ""
     });
@@ -21,7 +20,6 @@ export default function Login() {
     async function onSubmit(e) {
         e.preventDefault();
 
-        // Enviar os dados para o backend (ajuste a rota conforme sua API)
         const response = await fetch(`${REACT_APP_YOUR_HOSTNAME}/login`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -37,14 +35,12 @@ export default function Login() {
         const result = await response.json();
 
         if (result.success) {
-            // Você pode salvar token se necessário
-            // localStorage.setItem("token", result.token);
-            navigate("/home"); // Redirecionar após login
+            navigate("/home"); 
         } else {
             window.alert("Credenciais inválidas.");
         }
 
-        setForm({ name: "", email: "", password: "" });
+        setForm({ email: "", password: "" });
     }
 
     return (
@@ -53,15 +49,6 @@ export default function Login() {
             <h2 style={styles.subtitle}>Sistema de Doações de Equipamentos Eletrônicos</h2>
 
             <form onSubmit={onSubmit} style={styles.form}>
-                <label style={styles.label}>Nome</label>
-                <input
-                    type="text"
-                    value={form.name}
-                    onChange={(e) => updateForm({ name: e.target.value })}
-                    style={styles.input}
-                    required
-                />
-
                 <label style={styles.label}>Email</label>
                 <input
                     type="email"
@@ -80,7 +67,14 @@ export default function Login() {
                     required
                 />
 
-                <button type="submit" style={styles.button}>Cadastrar</button>
+                <button type="submit" style={styles.button}>Entrar</button>
+                <button 
+                    type="button"
+                    onClick={() => navigate("/cadastrar")}
+                    style={styles.registerButton}
+                >
+                    Ainda não tem uma conta? Cadastre-se
+                </button>
             </form>
         </div>
     );
@@ -88,13 +82,13 @@ export default function Login() {
 
 const styles = {
     container: {
-        backgroundColor: "#4CAF50",
-        minHeight: "90vh",
+        backgroundColor: "#6f9064",
         padding: "10px",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        color: "#fff"
+        color: "#fff",
+        paddingTop: "30px",
     },
     title: {
         fontSize: "2.5rem",
@@ -113,7 +107,8 @@ const styles = {
         display: "flex",
         flexDirection: "column",
         gap: "15px",
-        width: "300px"
+        width: "300px",
+        marginBottom: "30px"
     },
     label: {
         fontSize: "1rem",
@@ -127,11 +122,20 @@ const styles = {
     },
     button: {
         padding: "10px",
-        backgroundColor: "#4f83cc",
+        backgroundColor: "#3b5534",
         color: "white",
         fontSize: "1rem",
         border: "none",
         borderRadius: "6px",
         cursor: "pointer"
+    },
+    registerButton: {
+        marginTop: "15px",
+        backgroundColor: "transparent",
+        border: "none",
+        color: "rgb(51, 51, 51)",
+        cursor: "pointer",
+        textDecoration: "underline",
+        fontSize: "1rem"
     }
 };

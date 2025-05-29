@@ -11,12 +11,12 @@ import { NavLink } from "react-router-dom";
 export default function Navbar() {
     return (
         <div>
-             <nav className="navbar navbar-expand-lg navbar-dark bg-success p-2">
+             <nav className="navbar navbar-expand-lg navbar-dark p-1" style={{ backgroundColor: '#3b5534' }}>
                 <div className="d-flex align-items-center">
                     <NavLink className="navbar-brand" to="/">
                         <img style={{ width: "50px", height: "auto" }} src="/Logo.png" alt="Logo Ecotech" />
                     </NavLink>
-                    <span className="ms-3 fw-bold">
+                    <span className="ms-3 fw-bold" style={{ color: "white" }}>
                         Sistema de Doações de Equipamentos Eletrônicos
                     </span>
                 </div>
@@ -28,16 +28,6 @@ export default function Navbar() {
                 >
                     <span className="navbar-toggler-icon"></span>
                 </button>
-
-                <div className="collapse navbar-collapse" id="navbarSupportedContent">
-                    <ul className="navbar-nav ms-auto">
-                        <li className="nav-item">
-                            <NavLink className="nav-link" to="/create">
-                                Cadastrar Usuários
-                            </NavLink>
-                        </li>
-                    </ul>
-                </div>
             </nav>
         </div>
     );
