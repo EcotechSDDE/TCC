@@ -5,6 +5,7 @@ import Footer from "./components/footer"
 import UserList from "./components/userList"
 import Edit from "./components/edit"
 import Create from "./components/create"
+import Login from "./components/login"
 
 const App = () => {
     return (
@@ -12,7 +13,8 @@ const App = () => {
             <Navbar />
             <main className="flex-fill container my-4">
                 <Routes>
-                    <Route exact path="/" element={<UserList />} />
+                    <Route exact path="/" element={<Login />} />
+                    <Route path="/list" element={<UserList />} />
                     <Route path="/edit/:id" element={<Edit />} />
                     <Route path="/create" element={<Create />} />
                 </Routes>

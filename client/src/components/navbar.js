@@ -14,7 +14,7 @@ export default function Navbar() {
              <nav className="navbar navbar-expand-lg navbar-dark bg-success p-2">
                 <div className="d-flex align-items-center">
                     <NavLink className="navbar-brand" to="/">
-                        <img style={{ width: "50px", height: "auto" }} src="/logo.png" alt="Logo Ecotech" />
+                        <img style={{ width: "50px", height: "auto" }} src="/Logo.png" alt="Logo Ecotech" />
                     </NavLink>
                     <span className="ms-3 fw-bold">
                         Sistema de Doações de Equipamentos Eletrônicos

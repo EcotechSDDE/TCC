@@ -35,7 +35,8 @@ userRoutes.route("/user/add").post(async function (req, res) {
         name: req.body.name,
         user: req.body.user,
         email: req.body.email,
-        function: req.body.function
+        function: req.body.function,
+        password: req.body.password
     }
     try {
         const result = await db_connect.collection("users").insertOne(myobj)
@@ -77,6 +78,23 @@ userRoutes.route("/:id").delete(async function (req, res) {
         res.status(200).json(result)
     } catch {
         res.status(204).json({ message: "It is gone!" })
+    }
+})
+
+userRoutes.route("/login").post(async function (req, res) {
+    const db_connect = dbo.getDb()
+    const { name, email, password } = req.body
+
+    try {
+        const user = await db_connect.collection("users").findOne({ name, email, password })
+
+        if (user) {
+            res.status(200).json({ success: true, message: "Login realizado com sucesso!", user })
+        } else {
+            res.status(401).json({ success: false, message: "Credenciais inválidas." })
+        }
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message })
     }
 })
 
