@@ -52,6 +52,7 @@ export default function Login() {
                 <label style={styles.label}>Email</label>
                 <input
                     type="email"
+                    placeholder="Digite seu email"
                     value={form.email}
                     onChange={(e) => updateForm({ email: e.target.value })}
                     style={styles.input}
@@ -61,6 +62,7 @@ export default function Login() {
                 <label style={styles.label}>Senha</label>
                 <input
                     type="password"
+                    placeholder="Digite sua senha"
                     value={form.password}
                     onChange={(e) => updateForm({ password: e.target.value })}
                     style={styles.input}
@@ -108,7 +110,7 @@ const styles = {
         flexDirection: "column",
         gap: "15px",
         width: "300px",
-        marginBottom: "30px"
+        marginBottom: "35px"
     },
     label: {
         fontSize: "1rem",
