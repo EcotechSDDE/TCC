@@ -1,23 +1,34 @@
-const express = require("express")
-const app = express()
-const cors = require("cors")
+const express = require("express");
+const mongoose = require("mongoose");
+const cors = require("cors");
+const userRoutes = require("./routes/user"); // rotas de usuário
 
-const port = 5050
+const app = express();
+const port = 5050;
 
-app.use(cors())
-app.use(express.json())
-app.use(require("./routes/user")) // cria as rotas para manipulação de usuários
+// Middlewares
+app.use(cors());
+app.use(express.json());
+app.use("/uploads", express.static("uploads")); // servir arquivos estáticos
+app.use(userRoutes); // rotas
 
-const dbo = require("./db/conn")
+// Rota de teste
+app.get("/", (req, res) => {
+  res.send("App is running");
+});
 
-app.get("/", function(req, res) {
-    res.send("App is running")
-})
-
-dbo.connectToMongoDB(function (error) {
-    if (error) throw error
-
+// Conexão com o MongoDB Atlas via Mongoose
+mongoose
+  .connect("mongodb+srv://ecotechsdee:dlpiYMQQGi5sVm3E@cluster0.7mfl0lv.mongodb.net/usuarios?retryWrites=true&w=majority&appName=Cluster0", {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+  })
+  .then(() => {
+    console.log(" Conectado ao MongoDB com Mongoose");
     app.listen(port, () => {
-        console.log("Servidor rodando na porta: " + port)
-    })
-})
+      console.log("🚀 Servidor rodando na porta: " + port);
+    });
+  })
+  .catch((error) => {
+    console.error("Erro ao conectar ao MongoDB:", error.message);
+  });

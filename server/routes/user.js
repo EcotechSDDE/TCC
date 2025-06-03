@@ -1,101 +1,90 @@
-const express = require("express")
-const userRoutes = express.Router()
-const dbo = require("../db/conn")
-const ObjectId = require("mongodb").ObjectId
+const express = require("express");
+const userRoutes = express.Router();
+const Usuario = require("../models/Usuario");
 
-// This section will help you get a list of all the users.
-userRoutes.route("/user").get(async function (req, res) {
-    const db_connect = dbo.getDb()
-    // console.log("ROUTE: /user")
+// 🔹 GET todos os usuários
+userRoutes.get("/user", async (req, res) => {
+  try {
+    const users = await Usuario.find();
+    res.status(200).json(users);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
 
-    try {
-        const result = await db_connect.collection("users").find({}).toArray()
-        res.status(200).json(result)
-    } catch (error) {
-        res.status(404).json({ message: error.message })
-    }
-})
+// 🔹 GET usuário por ID
+userRoutes.get("/user/:id", async (req, res) => {
+  try {
+    const user = await Usuario.findById(req.params.id);
+    if (!user) return res.status(404).json({ message: "Usuário não encontrado" });
+    res.status(200).json(user);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
 
-// This section will help you get a single user by id
-userRoutes.route("/user/:id").get(async function (req, res) {
-    const db_connect = dbo.getDb()
-    const myquery = { _id: new ObjectId(req.params.id) }
-    try {
-        const result = await db_connect.collection("users").findOne(myquery)
-        res.status(200).json(result)
-    } catch (error) {
-        res.status(404).json({ message: error.message })
-    }
-})
+// 🔹 POST - Criar novo usuário
+userRoutes.post("/user/add", async (req, res) => {
+  const { name, user, email, function: func, password } = req.body;
+  const novoUsuario = new Usuario({ name, user, email, function: func, password });
 
-// This section will help you create a new user.
-userRoutes.route("/user/add").post(async function (req, res) {
-    const db_connect = dbo.getDb()
-    const myobj = {
+  try {
+    const savedUser = await novoUsuario.save();
+    console.log("Usuário criado");
+    res.status(201).json(savedUser);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+// 🔹 POST - Atualizar usuário por ID
+userRoutes.post("/update/:id", async (req, res) => {
+  try {
+    const updatedUser = await Usuario.findByIdAndUpdate(
+      req.params.id,
+      {
         name: req.body.name,
         user: req.body.user,
         email: req.body.email,
-        function: req.body.function,
-        password: req.body.password
-    }
-    try {
-        const result = await db_connect.collection("users").insertOne(myobj)
-        console.log("1 document created")
-        res.status(201).json(result)
-    } catch (error) {
-        res.status(409).json({ message: error.message })
-    }
-})
+        function: req.body.function
+      },
+      { new: true }
+    );
 
-// This section will help you update a user by id.
-userRoutes.route("/update/:id").post(async function (req, res) {
-    const db_connect = dbo.getDb()
-    const myquery = { _id: new ObjectId(req.params.id) }
-    const newvalues = {
-        $set: {
-            name: req.body.name,
-            user: req.body.user,
-            email: req.body.email,
-            function: req.body.function
-        }
+    if (!updatedUser) return res.status(404).json({ message: "Usuário não encontrado" });
+
+    console.log("Usuário atualizado");
+    res.status(200).json(updatedUser);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+// 🔹 DELETE - Remover usuário por ID
+userRoutes.delete("/:id", async (req, res) => {
+  try {
+    await Usuario.findByIdAndDelete(req.params.id);
+    console.log("Usuário deletado");
+    res.status(200).json({ message: "Usuário deletado com sucesso" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// 🔹 POST - Login
+userRoutes.post("/login", async (req, res) => {
+  const { name, email, password } = req.body;
+
+  try {
+    const user = await Usuario.findOne({ name, email, password });
+    if (user) {
+      res.status(200).json({ success: true, message: "Login realizado com sucesso!", user });
+    } else {
+      res.status(401).json({ success: false, message: "Credenciais inválidas." });
     }
-    try {
-        const result = await db_connect.collection("users").updateOne(myquery, newvalues)
-        console.log("1 document updated")
-        res.status(200).json(result)
-    } catch (error) {
-        res.status(409).json({ message: error.message })
-    }
-})
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
 
-// This section will help you delete a user
-userRoutes.route("/:id").delete(async function (req, res) {
-    const db_connect = dbo.getDb()
-    const myquery = { _id: new ObjectId(req.params.id) }
-    try {
-        const result = await db_connect.collection("users").deleteOne(myquery)
-        console.log("1 document deleted")
-        res.status(200).json(result)
-    } catch {
-        res.status(204).json({ message: "It is gone!" })
-    }
-})
-
-userRoutes.route("/login").post(async function (req, res) {
-    const db_connect = dbo.getDb()
-    const { name, email, password } = req.body
-
-    try {
-        const user = await db_connect.collection("users").findOne({ name, email, password })
-
-        if (user) {
-            res.status(200).json({ success: true, message: "Login realizado com sucesso!", user })
-        } else {
-            res.status(401).json({ success: false, message: "Credenciais inválidas." })
-        }
-    } catch (error) {
-        res.status(500).json({ success: false, message: error.message })
-    }
-})
-
-module.exports = userRoutes
+module.exports = userRoutes;
