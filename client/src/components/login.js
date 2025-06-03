@@ -72,7 +72,7 @@ export default function Login() {
                 <button type="submit" style={styles.button}>Entrar</button>
                 <button 
                     type="button"
-                    onClick={() => navigate("/cadastrar")}
+                    onClick={() => navigate("/cadastro")}
                     style={styles.registerButton}
                 >
                     Ainda não tem uma conta? Cadastre-se

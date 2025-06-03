@@ -6,6 +6,7 @@ import UserList from "./components/userList"
 import Edit from "./components/edit"
 import Create from "./components/create"
 import Login from "./components/login"
+import Cadastro from "./components/cadastro"
 
 const App = () => {
     return (
@@ -14,6 +15,7 @@ const App = () => {
             <main className="flex-fill container my-4">
                 <Routes>
                     <Route exact path="/" element={<Login />} />
+                    <Route path="/cadastro" element={<Cadastro />} />
                     <Route path="/list" element={<UserList />} />
                     <Route path="/edit/:id" element={<Edit />} />
                     <Route path="/create" element={<Create />} />
