@@ -10,6 +10,7 @@ export default function Cadastro() {
         telefone: "",
         dataNascimento: "",
         cpfCnpj: "",
+        senha: "",
         imagem: null
     });
 
@@ -30,6 +31,7 @@ export default function Cadastro() {
         formData.append("telefone", form.telefone);
         formData.append("dataNascimento", form.dataNascimento);
         formData.append("cpfCnpj", form.cpfCnpj);
+        formData.append("senha", form.senha);
         if (form.imagem) {
             formData.append("imagem", form.imagem);
         }
@@ -99,6 +101,16 @@ export default function Cadastro() {
                     placeholder="Digite seu CPF ou CNPJ"
                     value={form.cpfCnpj}
                     onChange={(e) => updateForm({ cpfCnpj: e.target.value })}
+                    style={styles.input}
+                    required
+                />
+
+                <label style={styles.label}>Senha</label>
+                <input
+                    type="password"
+                    placeholder="Digite sua senha"
+                    value={form.senha}
+                    onChange={(e) => updateForm({ senha: e.target.value })}
                     style={styles.input}
                     required
                 />

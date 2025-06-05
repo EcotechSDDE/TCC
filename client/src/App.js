@@ -7,6 +7,7 @@ import Edit from "./components/edit"
 import Create from "./components/create"
 import Login from "./components/login"
 import Cadastro from "./components/cadastro"
+import Produtos from "./components/produtos"
 
 const App = () => {
     return (
@@ -19,6 +20,7 @@ const App = () => {
                     <Route path="/list" element={<UserList />} />
                     <Route path="/edit/:id" element={<Edit />} />
                     <Route path="/create" element={<Create />} />
+                    <Route path="/produtos" element={<Produtos />} />
                 </Routes>
             </main>
             <Footer /> 

@@ -38,10 +38,10 @@ userRoutes.get("/user/:id", async (req, res) => {
 
 // 🔹 POST - Criar novo usuário
 userRoutes.post("/user/add", upload.single('imagem'), async (req, res) => {
-  const { nome, email, telefone, cpfCnpj } = req.body;
+  const { nome, email, telefone, cpfCnpj, senha } = req.body;
   const dataNascimento = new Date(req.body.dataNascimento);
   const imagem = req.file ? req.file.filename : null; // Só o nome do arquivo
-  const novoUsuario = new Usuario({ nome, email, telefone, dataNascimento, cpfCnpj, imagem });
+  const novoUsuario = new Usuario({ nome, email, telefone, dataNascimento, cpfCnpj, imagem, senha });
 
   try {
     const savedUser = await novoUsuario.save();
@@ -88,11 +88,11 @@ userRoutes.delete("/:id", async (req, res) => {
 
 // 🔹 POST - Login
 userRoutes.post("/login", async (req, res) => {
-  const { name, email, password } = req.body;
+  const { email, password } = req.body;
 
   try {
-    const user = await Usuario.findOne({ name, email, password });
-    if (user) {
+    const user = await Usuario.findOne({ email});
+    if (user && user.senha === password) {
       res.status(200).json({ success: true, message: "Login realizado com sucesso!", user });
     } else {
       res.status(401).json({ success: false, message: "Credenciais inválidas." });

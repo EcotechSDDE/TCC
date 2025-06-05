@@ -35,7 +35,7 @@ export default function Login() {
         const result = await response.json();
 
         if (result.success) {
-            navigate("/home"); 
+            navigate("/produtos"); 
         } else {
             window.alert("Credenciais inválidas.");
         }
