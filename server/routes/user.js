@@ -1,6 +1,19 @@
 const express = require("express");
 const userRoutes = express.Router();
 const Usuario = require("../models/Usuario");
+const multer = require("multer");
+const path = require("path");
+
+// Configuração do multer para salvar imagens na pasta /uploads
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "uploads/");
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + path.extname(file.originalname));
+  }
+});
+const upload = multer({ storage: storage });
 
 // 🔹 GET todos os usuários
 userRoutes.get("/user", async (req, res) => {
@@ -24,9 +37,11 @@ userRoutes.get("/user/:id", async (req, res) => {
 });
 
 // 🔹 POST - Criar novo usuário
-userRoutes.post("/user/add", async (req, res) => {
-  const { name, user, email, function: func, password } = req.body;
-  const novoUsuario = new Usuario({ name, user, email, function: func, password });
+userRoutes.post("/user/add", upload.single('imagem'), async (req, res) => {
+  const { nome, email, telefone, cpfCnpj } = req.body;
+  const dataNascimento = new Date(req.body.dataNascimento);
+  const imagem = req.file ? req.file.filename : null; // Só o nome do arquivo
+  const novoUsuario = new Usuario({ nome, email, telefone, dataNascimento, cpfCnpj, imagem });
 
   try {
     const savedUser = await novoUsuario.save();

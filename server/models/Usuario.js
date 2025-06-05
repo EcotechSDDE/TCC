@@ -7,9 +7,6 @@ const UsuarioSchema = new mongoose.Schema({
     dataNascimento: { type: Date, required: true },
     cpfCnpj: { type: String, required: true, unique: true },
     imagem: { type: String }, // Caminho ou URL da imagem
-    senha: { type: String } // Caso queira adicionar autenticação depois
-}, {
-    timestamps: true
 });
 
 module.exports = mongoose.model('Usuario', UsuarioSchema);

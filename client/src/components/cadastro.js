@@ -34,7 +34,7 @@ export default function Cadastro() {
             formData.append("imagem", form.imagem);
         }
 
-        const response = await fetch(`${REACT_APP_YOUR_HOSTNAME}/usuarios`, {
+        const response = await fetch(`${REACT_APP_YOUR_HOSTNAME}/user/add`, {
             method: "POST",
             body: formData
         });
