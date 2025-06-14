@@ -8,6 +8,7 @@ import Create from "./components/create"
 import Login from "./components/login"
 import Cadastro from "./components/cadastro"
 import Produtos from "./components/produtos"
+import CadastroProduto from "./components/cadastroProduto"
 
 const App = () => {
     return (
@@ -21,6 +22,7 @@ const App = () => {
                     <Route path="/edit/:id" element={<Edit />} />
                     <Route path="/create" element={<Create />} />
                     <Route path="/produtos" element={<Produtos />} />
+                    <Route path="/cadastroProduto" element={<CadastroProduto />} />
                 </Routes>
             </main>
             <Footer /> 

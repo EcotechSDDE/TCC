@@ -2,6 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const userRoutes = require("./routes/user"); // rotas de usuário
+const DoacaoRoutes = require("./routes/doacao"); // rotas de doação
 
 const app = express();
 const port = 5050;
@@ -11,6 +12,7 @@ app.use(cors());
 app.use(express.json());
 app.use("/uploads", express.static("uploads")); // servir arquivos estáticos
 app.use(userRoutes); // rotas
+app.use(DoacaoRoutes); // rotas de doação
 
 // Rota de teste
 app.get("/", (req, res) => {

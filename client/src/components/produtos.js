@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 // Exemplo de dados estáticos (substitua por fetch do backend depois)
 const mockDoacoes = [
@@ -13,6 +14,7 @@ export default function Produtos() {
     const [doacoes, setDoacoes] = useState([]);
     const [pesquisa, setPesquisa] = useState("");
     const [filtro, setFiltro] = useState("");
+    const navigate = useNavigate();
 
     useEffect(() => {
         setDoacoes(mockDoacoes);
@@ -32,7 +34,7 @@ export default function Produtos() {
                     <button style={{ ...styles.aba, ...styles.abaAtiva }}>Receber</button>
                     <button
                         style={styles.aba}
-                        onClick={() => window.location.href = "/cadastro-doacao"}
+                        onClick={() => navigate("/cadastroProduto")}
                     >
                         Doar
                     </button>
@@ -75,7 +77,7 @@ export default function Produtos() {
                         <div style={styles.nome}>{item.nome}</div>
                         <button
                             style={styles.contato}
-                            onClick={() => window.open(`mailto:${item.contato}`)}
+                            onClick={() => navigate("/cadastroProduto")}
                         >
                             Entrar em contato
                         </button>
