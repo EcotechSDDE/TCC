@@ -56,73 +56,169 @@ export default function CadastroProduto() {
 
     return (
         <div style={styles.container}>
-            <h1 style={styles.title}>Cadastrar Doação</h1>
-            <form onSubmit={onSubmit} style={styles.form} encType="multipart/form-data">
-                <label style={styles.label}>Nome*</label>
-                <input type="text" value={form.nome} onChange={e => updateForm({ nome: e.target.value })} style={styles.input} required />
+            {/* Abas superiores conectadas */}
+            <div style={styles.abasContainer}>
+                <div style={styles.abasEsquerda}>
+                    <button
+                        style={styles.aba}
+                        onClick={() => navigate("/produtos")}
+                    >
+                        Receber
+                    </button>
+                    <button
+                        style={{ ...styles.aba, ...styles.abaAtiva }}
+                        disabled
+                    >
+                        Doar
+                    </button>
+                    <div style={{ ...styles.abaPesquisaFiltro, opacity: 0.5, pointerEvents: "none" }}>
+                        <input
+                            type="text"
+                            placeholder="Pesquisar..."
+                            style={styles.pesquisa}
+                            disabled
+                        />
+                        <select
+                            style={styles.filtro}
+                            disabled
+                        >
+                            <option value="">Filtrar</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
 
-                <label style={styles.label}>Modelo</label>
-                <input type="text" value={form.modelo} onChange={e => updateForm({ modelo: e.target.value })} style={styles.input} />
+            <div style={styles.quadradoGrande}>
+                <form onSubmit={onSubmit} style={styles.form} encType="multipart/form-data">
+                    <label style={styles.label}>Nome*</label>
+                    <input type="text" placeholder="Ex: Notebook" value={form.nome} onChange={e => updateForm({ nome: e.target.value })} style={styles.input} required />
 
-                <label style={styles.label}>Marca</label>
-                <input type="text" value={form.marca} onChange={e => updateForm({ marca: e.target.value })} style={styles.input} />
+                    <label style={styles.label}>Modelo</label>
+                    <input type="text" placeholder="Ex: Inspiron 15" value={form.modelo} onChange={e => updateForm({ modelo: e.target.value })} style={styles.input} />
 
-                <label style={styles.label}>Descrição</label>
-                <textarea value={form.descricao} onChange={e => updateForm({ descricao: e.target.value })} style={styles.input} />
+                    <label style={styles.label}>Marca</label>
+                    <input type="text" placeholder="Ex: Dell" value={form.marca} onChange={e => updateForm({ marca: e.target.value })} style={styles.input} />
 
-                <label style={styles.label}>Especificação</label>
-                <input type="text" value={form.especificacao} onChange={e => updateForm({ especificacao: e.target.value })} style={styles.input} />
+                    <label style={styles.label}>Descrição</label>
+                    <textarea placeholder="Descreva o produto" value={form.descricao} onChange={e => updateForm({ descricao: e.target.value })} style={styles.input} />
 
-                <label style={styles.label}>Potência</label>
-                <input type="text" value={form.potencia} onChange={e => updateForm({ potencia: e.target.value })} style={styles.input} />
+                    <label style={styles.label}>Especificação</label>
+                    <input type="text" placeholder="Ex: 8GB RAM, SSD 256GB" value={form.especificacao} onChange={e => updateForm({ especificacao: e.target.value })} style={styles.input} />
 
-                <label style={styles.label}>Tamanho</label>
-                <input type="text" value={form.tamanho} onChange={e => updateForm({ tamanho: e.target.value })} style={styles.input} />
+                    <label style={styles.label}>Potência</label>
+                    <input type="text" placeholder="Ex: 65W" value={form.potencia} onChange={e => updateForm({ potencia: e.target.value })} style={styles.input} />
 
-                <label style={styles.label}>Fotos</label>
-                <input type="file" multiple accept="image/*" onChange={e => updateForm({ fotos: e.target.files })} style={styles.input} />
+                    <label style={styles.label}>Tamanho</label>
+                    <input type="text" placeholder="Ex: 15.6 polegadas" value={form.tamanho} onChange={e => updateForm({ tamanho: e.target.value })} style={styles.input} />
 
-                <label style={styles.label}>Observação</label>
-                <input type="text" value={form.observacao} onChange={e => updateForm({ observacao: e.target.value })} style={styles.input} />
+                    <label style={styles.label}>Fotos</label>
+                    <input type="file" multiple accept="image/*" onChange={e => updateForm({ fotos: e.target.files })} style={styles.input} />
 
-                <label style={styles.label}>Tipo</label>
-                <input type="text" value={form.tipo} onChange={e => updateForm({ tipo: e.target.value })} style={styles.input} />
+                    <label style={styles.label}>Observação</label>
+                    <input type="text" placeholder="Ex: Pequeno risco na tampa" value={form.observacao} onChange={e => updateForm({ observacao: e.target.value })} style={styles.input} />
 
-                <label style={styles.label}>Tipo Material</label>
-                <input type="text" value={form.tipoMaterial} onChange={e => updateForm({ tipoMaterial: e.target.value })} style={styles.input} />
+                    <label style={styles.label}>Tipo</label>
+                    <input type="text" placeholder="Ex: Eletrônico" value={form.tipo} onChange={e => updateForm({ tipo: e.target.value })} style={styles.input} />
 
-                <label style={styles.label}>Status</label>
-                <input type="text" value={form.status} onChange={e => updateForm({ status: e.target.value })} style={styles.input} />
+                    <label style={styles.label}>Tipo Material</label>
+                    <input type="text" placeholder="Ex: Plástico" value={form.tipoMaterial} onChange={e => updateForm({ tipoMaterial: e.target.value })} style={styles.input} />
 
-                <label style={styles.label}>Cor</label>
-                <input type="text" value={form.cor} onChange={e => updateForm({ cor: e.target.value })} style={styles.input} />
+                    <label style={styles.label}>Status</label>
+                    <input type="text" placeholder="Ex: Usado" value={form.status} onChange={e => updateForm({ status: e.target.value })} style={styles.input} />
 
-                <label style={styles.label}>Endereço</label>
-                <input type="text" value={form.endereco} onChange={e => updateForm({ endereco: e.target.value })} style={styles.input} />
+                    <label style={styles.label}>Cor</label>
+                    <input type="text" placeholder="Ex: Preto" value={form.cor} onChange={e => updateForm({ cor: e.target.value })} style={styles.input} />
 
-                <button type="submit" style={styles.button}>Cadastrar Doação</button>
-            </form>
+                    <label style={styles.label}>Endereço</label>
+                    <input type="text" placeholder="Ex: Rua das Flores, 123" value={form.endereco} onChange={e => updateForm({ endereco: e.target.value })} style={styles.input} />
+
+                    <button type="submit" style={styles.button}>Cadastrar Doação</button>
+                </form>
+            </div>
         </div>
     );
 }
 
 const styles = {
     container: {
-        backgroundColor: "#3b5534", // cor diferente para destacar
-        padding: "10px",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        color: "#fff",
-        paddingTop: "30px",
-        minHeight: "100vh"
+        marginTop: "20px"
     },
-    title: {
-        fontSize: "2.2rem",
-        marginBottom: "20px"
+    abasContainer: {
+        width: "1200px",
+        display: "flex",
+        justifyContent: "flex-start",
+        marginBottom: "0px"
+    },
+    abasEsquerda: {
+        display: "flex",
+        flexDirection: "row",
+        alignItems: "flex-end",
+        gap: "0px"
+    },
+    aba: {
+        padding: "14px 38px 18px 38px",
+        backgroundColor: "#6f9064",
+        border: "none",
+        borderTopLeftRadius: "16px",
+        borderTopRightRadius: "16px",
+        borderBottom: "none",
+        color: "#3b5534",
+        fontWeight: "bold",
+        cursor: "pointer",
+        fontSize: "1.1rem",
+        marginRight: "2px",
+        zIndex: 2
+    },
+    abaAtiva: {
+        backgroundColor: "#C8E6C9",
+        color: "#3b5534",
+        borderTopLeftRadius: "16px",
+        borderTopRightRadius: "16px",
+        borderBottom: "none"
+    },
+    abaPesquisaFiltro: {
+        display: "flex",
+        alignItems: "center",
+        backgroundColor: "#C8E6C9",
+        borderTopRightRadius: "16px",
+        borderTopLeftRadius: "16px",
+        padding: "0 18px",
+        height: "54px",
+        marginLeft: "2px",
+        zIndex: 2
+    },
+    pesquisa: {
+        padding: "8px",
+        borderRadius: "6px",
+        border: "1px solid #ccc",
+        fontSize: "1rem",
+        marginRight: "10px"
+    },
+    filtro: {
+        padding: "8px",
+        borderRadius: "6px",
+        border: "1px solid #ccc",
+        fontSize: "1rem"
+    },
+    quadradoGrande: {
+        backgroundColor: "#C8E6C9",
+        borderRadius: "0 0 24px 24px",
+        padding: "50px 40px 40px 40px",
+        display: "flex",
+        flexDirection: "row",
+        gap: "40px",
+        width: "1200px",
+        minHeight: "320px",
+        justifyContent: "center",
+        alignItems: "center",
+        boxShadow: "0 2px 10px rgba(0,0,0,0.08)",
+        marginTop: "0px"
     },
     form: {
-        backgroundColor: "#C8E6C9",
+        backgroundColor: "#6f9064",
         padding: "30px",
         borderRadius: "12px",
         display: "flex",
@@ -143,8 +239,8 @@ const styles = {
     },
     button: {
         padding: "10px",
-        backgroundColor: "#6f9064",
-        color: "white",
+        backgroundColor: "#C8E6C9",
+        color: "#3b5534",
         fontSize: "1rem",
         border: "none",
         borderRadius: "6px",

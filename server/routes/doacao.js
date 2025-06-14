@@ -35,4 +35,14 @@ DoacaoRoutes.post("/doacao/add", upload.array('fotos', 5), async (req, res) => {
   }
 });
 
+//GET - Listar todas as doações
+DoacaoRoutes.get("/doacao", async (req, res) => {
+  try {
+    const doacoes = await Doacao.find();
+    res.status(200).json(doacoes);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
 module.exports = DoacaoRoutes;

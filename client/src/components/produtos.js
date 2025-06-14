@@ -1,14 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-// Exemplo de dados estáticos (substitua por fetch do backend depois)
-const mockDoacoes = [
-    { id: 1, nome: "Notebook", imagem: "/Logo.png", contato: "email@exemplo.com" },
-    { id: 2, nome: "Celular", imagem: "/Logo.png", contato: "email@exemplo.com" },
-    { id: 3, nome: "Monitor", imagem: "/Logo.png", contato: "email@exemplo.com" },
-    { id: 4, nome: "Impressora", imagem: "/Logo.png", contato: "email@exemplo.com" },
-    { id: 5, nome: "Tablet", imagem: "/Logo.png", contato: "email@exemplo.com" }
-];
+const REACT_APP_YOUR_HOSTNAME = 'http://localhost:5050'; 
 
 export default function Produtos() {
     const [doacoes, setDoacoes] = useState([]);
@@ -17,7 +10,16 @@ export default function Produtos() {
     const navigate = useNavigate();
 
     useEffect(() => {
-        setDoacoes(mockDoacoes);
+        async function fetchDoacoes() {
+            const response = await fetch(`${REACT_APP_YOUR_HOSTNAME}/doacao`);
+            if (!response.ok) {
+                window.alert("Erro ao buscar doações");
+                return;
+            }
+            const data = await response.json();
+            setDoacoes(data);
+        }
+        fetchDoacoes();
     }, []);
 
     const doacoesFiltradas = doacoes.filter((item) => {
@@ -70,7 +72,7 @@ export default function Produtos() {
                 {doacoesFiltradas.slice(0, 5).map((item) => (
                     <div key={item.id} style={styles.quadradoPequeno}>
                         <img
-                            src={item.imagem}
+                            src={item.fotos && item.fotos.length > 0 ? `${REACT_APP_YOUR_HOSTNAME}/uploads/${item.fotos[0]}` : "/Logo.png"}
                             alt={item.nome}
                             style={styles.imagem}
                         />
@@ -79,7 +81,7 @@ export default function Produtos() {
                             style={styles.contato}
                             onClick={() => navigate("/cadastroProduto")}
                         >
-                            Entrar em contato
+                            Mostrar Mais
                         </button>
                     </div>
                 ))}
@@ -124,7 +126,7 @@ const styles = {
     abaAtiva: {
         backgroundColor: "#6f9064",
         color: "#fff",
-        borderTopLeftRadius: "0px",
+        borderTopLeftRadius: "16px",
         borderTopRightRadius: "16px",
         borderBottom: "none"
     },
