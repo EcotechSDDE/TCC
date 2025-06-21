@@ -79,7 +79,7 @@ export default function Produtos() {
                         <div style={styles.nome}>{item.nome}</div>
                         <button
                             style={styles.contato}
-                            onClick={() => navigate("/cadastroProduto")}
+                            onClick={() => navigate("/DetalhesProduto")}
                         >
                             Mostrar Mais
                         </button>
@@ -111,7 +111,7 @@ const styles = {
     },
     aba: {
         padding: "14px 38px 18px 38px",
-        backgroundColor: "#C8E6C9",
+        backgroundColor: "#88bd8a",
         border: "none",
         borderTopLeftRadius: "16px",
         borderTopRightRadius: "16px",
@@ -133,7 +133,7 @@ const styles = {
     abaPesquisaFiltro: {
         display: "flex",
         alignItems: "center",
-        backgroundColor: "#C8E6C9",
+        backgroundColor: "#88bd8a",
         borderTopRightRadius: "16px",
         borderTopLeftRadius: "16px",
         padding: "0 18px",
@@ -156,7 +156,7 @@ const styles = {
     },
     quadradoGrande: {
         backgroundColor: "#6f9064",
-        borderRadius: "0 0 24px 24px",
+        borderRadius: "0 24px 24px 24px",
         padding: "50px 40px 40px 40px",
         display: "flex",
         flexDirection: "row",

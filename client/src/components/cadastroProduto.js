@@ -71,20 +71,6 @@ export default function CadastroProduto() {
                     >
                         Doar
                     </button>
-                    <div style={{ ...styles.abaPesquisaFiltro, opacity: 0.5, pointerEvents: "none" }}>
-                        <input
-                            type="text"
-                            placeholder="Pesquisar..."
-                            style={styles.pesquisa}
-                            disabled
-                        />
-                        <select
-                            style={styles.filtro}
-                            disabled
-                        >
-                            <option value="">Filtrar</option>
-                        </select>
-                    </div>
                 </div>
             </div>
 
@@ -173,7 +159,7 @@ const styles = {
         zIndex: 2
     },
     abaAtiva: {
-        backgroundColor: "#C8E6C9",
+        backgroundColor: "#88bd8a",
         color: "#3b5534",
         borderTopLeftRadius: "16px",
         borderTopRightRadius: "16px",
@@ -190,22 +176,9 @@ const styles = {
         marginLeft: "2px",
         zIndex: 2
     },
-    pesquisa: {
-        padding: "8px",
-        borderRadius: "6px",
-        border: "1px solid #ccc",
-        fontSize: "1rem",
-        marginRight: "10px"
-    },
-    filtro: {
-        padding: "8px",
-        borderRadius: "6px",
-        border: "1px solid #ccc",
-        fontSize: "1rem"
-    },
     quadradoGrande: {
-        backgroundColor: "#C8E6C9",
-        borderRadius: "0 0 24px 24px",
+        backgroundColor: "#88bd8a",
+        borderRadius: "0 24px 24px 24px",
         padding: "50px 40px 40px 40px",
         display: "flex",
         flexDirection: "row",
