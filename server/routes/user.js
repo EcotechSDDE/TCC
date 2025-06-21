@@ -1,6 +1,6 @@
 const express = require("express");
 const userRoutes = express.Router();
-const Usuario = require("../models/Usuario");
+const usuarioController = require("../controllers/usuarioController");
 const multer = require("multer");
 const path = require("path");
 
@@ -15,91 +15,22 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage: storage });
 
-// 🔹 GET todos os usuários
-userRoutes.get("/user", async (req, res) => {
-  try {
-    const users = await Usuario.find();
-    res.status(200).json(users);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
+// GET todos os usuários
+userRoutes.get("/user", usuarioController.listarUsuarios);
 
-// 🔹 GET usuário por ID
-userRoutes.get("/user/:id", async (req, res) => {
-  try {
-    const user = await Usuario.findById(req.params.id);
-    if (!user) return res.status(404).json({ message: "Usuário não encontrado" });
-    res.status(200).json(user);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
+// GET usuário por ID
+userRoutes.get("/user/:id", usuarioController.buscarUsuarioPorId);
 
-// 🔹 POST - Criar novo usuário
-userRoutes.post("/user/add", upload.single('imagem'), async (req, res) => {
-  const { nome, email, telefone, cpfCnpj, senha } = req.body;
-  const dataNascimento = new Date(req.body.dataNascimento);
-  const imagem = req.file ? req.file.filename : null; // Só o nome do arquivo
-  const novoUsuario = new Usuario({ nome, email, telefone, dataNascimento, cpfCnpj, imagem, senha });
+// POST - Criar novo usuário
+userRoutes.post("/user/add", upload.single('imagem'), usuarioController.criarUsuario);
 
-  try {
-    const savedUser = await novoUsuario.save();
-    console.log("Usuário criado");
-    res.status(201).json(savedUser);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-});
+// POST - Atualizar usuário por ID
+userRoutes.post("/update/:id", usuarioController.atualizarUsuario);
 
-// 🔹 POST - Atualizar usuário por ID
-userRoutes.post("/update/:id", async (req, res) => {
-  try {
-    const updatedUser = await Usuario.findByIdAndUpdate(
-      req.params.id,
-      {
-        name: req.body.name,
-        user: req.body.user,
-        email: req.body.email,
-        function: req.body.function
-      },
-      { new: true }
-    );
+// DELETE - Remover usuário por ID
+userRoutes.delete("/:id", usuarioController.deletarUsuario);
 
-    if (!updatedUser) return res.status(404).json({ message: "Usuário não encontrado" });
-
-    console.log("Usuário atualizado");
-    res.status(200).json(updatedUser);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-});
-
-// 🔹 DELETE - Remover usuário por ID
-userRoutes.delete("/:id", async (req, res) => {
-  try {
-    await Usuario.findByIdAndDelete(req.params.id);
-    console.log("Usuário deletado");
-    res.status(200).json({ message: "Usuário deletado com sucesso" });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
-
-// 🔹 POST - Login
-userRoutes.post("/login", async (req, res) => {
-  const { email, password } = req.body;
-
-  try {
-    const user = await Usuario.findOne({ email});
-    if (user && user.senha === password) {
-      res.status(200).json({ success: true, message: "Login realizado com sucesso!", user });
-    } else {
-      res.status(401).json({ success: false, message: "Credenciais inválidas." });
-    }
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-});
+// POST - Login
+userRoutes.post("/login", usuarioController.login);
 
 module.exports = userRoutes;
