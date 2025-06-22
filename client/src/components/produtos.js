@@ -69,8 +69,8 @@ export default function Produtos() {
                 {doacoesFiltradas.length === 0 && (
                     <div style={{ color: "#333", textAlign: "center", width: "100%" }}>Nenhuma doação encontrada.</div>
                 )}
-                {doacoesFiltradas.slice(0, 5).map((item) => (
-                    <div key={item.id} style={styles.quadradoPequeno}>
+                {doacoesFiltradas.map((item) => (
+                    <div key={item._id || item.id} style={styles.quadradoPequeno}>
                         <img
                             src={item.fotos && item.fotos.length > 0 ? `${REACT_APP_YOUR_HOSTNAME}/uploads/${item.fotos[0]}` : "/Logo.png"}
                             alt={item.nome}
@@ -160,19 +160,20 @@ const styles = {
         padding: "50px 40px 40px 40px",
         display: "flex",
         flexDirection: "row",
+        flexWrap: "wrap",
         gap: "40px",
         width: "1200px",
         minHeight: "320px",
         justifyContent: "flex-start",
-        alignItems: "center",
+        alignItems: "flex-start",
         boxShadow: "0 2px 10px rgba(0,0,0,0.08)",
         marginTop: "0px"
     },
     quadradoPequeno: {
         backgroundColor: "#C8E6C9",
         borderRadius: "12px",
-        width: "180px",
-        height: "240px",
+        width: "190px",
+        height: "253px",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
