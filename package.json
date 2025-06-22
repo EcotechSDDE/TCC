@@ -1,5 +1,12 @@
 {
+  "scripts": {
+    "start": "concurrently --kill-others-on-fail -n SERVER,CLIENT -c green,blue \"cd server && nodemon server.js\" \"cd client && npm start\""
+  },
   "dependencies": {
     "multer": "^2.0.1"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "nodemon": "^3.1.10"
   }
 }
