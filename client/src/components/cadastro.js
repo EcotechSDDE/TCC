@@ -79,7 +79,7 @@ export default function Cadastro() {
                 <label style={styles.label}>Telefone</label>
                 <input
                     type="tel"
-                    placeholder="(99) 99999-9999"
+                    placeholder="Digite seu telefone"
                     value={form.telefone}
                     onChange={(e) => updateForm({ telefone: e.target.value })}
                     style={styles.input}
