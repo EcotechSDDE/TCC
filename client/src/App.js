@@ -9,6 +9,7 @@ import Login from "./components/login"
 import Cadastro from "./components/cadastro"
 import Produtos from "./components/produtos"
 import CadastroProduto from "./components/cadastroProduto"
+import DetalhesProduto from "./components/detalhesProduto"
 
 const App = () => {
     return (
@@ -23,6 +24,7 @@ const App = () => {
                     <Route path="/create" element={<Create />} />
                     <Route path="/produtos" element={<Produtos />} />
                     <Route path="/cadastroProduto" element={<CadastroProduto />} />
+                    <Route path="/detalhesProduto/:id" element={<DetalhesProduto />} />
                 </Routes>
             </main>
             <Footer /> 

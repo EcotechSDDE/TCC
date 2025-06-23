@@ -79,7 +79,7 @@ export default function Produtos() {
                         <div style={styles.nome}>{item.nome}</div>
                         <button
                             style={styles.contato}
-                            onClick={() => navigate("/DetalhesProduto")}
+                            onClick={() => navigate(`/detalhesProduto/${item._id}`)}
                         >
                             Mostrar Mais
                         </button>
