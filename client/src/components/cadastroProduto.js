@@ -76,7 +76,7 @@ export default function CadastroProduto() {
 
             <div style={styles.quadradoGrande}>
                 <form onSubmit={onSubmit} style={styles.form} encType="multipart/form-data">
-                    <label style={styles.label}>Nome*</label>
+                    <label style={styles.label}>Nome</label>
                     <input type="text" placeholder="Digite o nome do dispositivo" value={form.nome} onChange={e => updateForm({ nome: e.target.value })} style={styles.input} required />
 
                     <label style={styles.label}>Modelo</label>

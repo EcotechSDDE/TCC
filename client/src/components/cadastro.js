@@ -1,9 +1,14 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import InputMask from "react-input-mask";
 
 const REACT_APP_YOUR_HOSTNAME = 'http://localhost:5050'; // Seu back-end
 
 export default function Cadastro() {
+
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
     const [form, setForm] = useState({
         nome: "",
         email: "",
@@ -28,6 +33,42 @@ export default function Cadastro() {
 
         if (form.senha !== form.confirmarSenha) {
             window.alert("Senhas não coincidem. Tente novamente."); 
+            return;
+        }
+
+        if (
+            !form.nome ||
+            !form.email ||
+            !form.telefone ||
+            !form.dataNascimento ||
+            !form.cpfCnpj ||
+            !form.senha ||
+            !form.confirmarSenha
+        ) {
+            window.alert("Preencha todos os campos obrigatórios!");
+            return;
+        }
+
+        function validateEmail(email) {
+            return /\S+@\S+\.\S+/.test(email);
+        }
+        function validateTelefone(telefone) {
+            return telefone.replace(/\D/g, "").length === 11;
+        }
+        function validateNome(nome) {
+            return nome.trim().split(" ").length > 1;
+        }
+
+        if (!validateEmail(form.email)) {
+            window.alert("Email inválido!");
+            return;
+        }
+        if (!validateTelefone(form.telefone)) {
+            window.alert("Telefone inválido!");
+            return;
+        }
+        if (!validateNome(form.nome)) {
+            window.alert("Digite o nome completo!");
             return;
         }
 
@@ -57,91 +98,120 @@ export default function Cadastro() {
     }
 
     return (
-        <div style={styles.container}>
-            <h1 style={styles.title}>EcoTech</h1>
-            <h2 style={styles.subtitle}>Crie seu perfil para doar ou receber equipamentos</h2>
+      <div style={styles.container}>
+        <h1 style={styles.title}>EcoTech</h1>
+        <h2 style={styles.subtitle}>
+          Crie seu perfil para doar ou receber equipamentos
+        </h2>
 
-            <form onSubmit={onSubmit} style={styles.form} encType="multipart/form-data">
-                <label style={styles.label}>Nome</label>
-                <input
-                    type="text"
-                    placeholder="Digite seu nome completo"
-                    value={form.nome}
-                    onChange={(e) => updateForm({ nome: e.target.value })}
-                    style={styles.input}
-                    required
-                />
+        <form
+          onSubmit={onSubmit}
+          style={styles.form}
+          encType="multipart/form-data"
+        >
+          <label style={styles.label}>Nome</label>
+          <input
+            type="text"
+            placeholder="Digite seu nome completo"
+            value={form.nome}
+            onChange={(e) => updateForm({ nome: e.target.value })}
+            style={styles.input}
+            required
+          />
 
-                <label style={styles.label}>Email</label>
-                <input
-                    type="email"
-                    placeholder="Digite seu email"
-                    value={form.email}
-                    onChange={(e) => updateForm({ email: e.target.value })}
-                    style={styles.input}
-                    required
-                />
+          <label style={styles.label}>Email</label>
+          <input
+            type="email"
+            placeholder="Digite seu email"
+            value={form.email}
+            onChange={(e) => updateForm({ email: e.target.value })}
+            style={styles.input}
+            required
+          />
 
-                <label style={styles.label}>Telefone</label>
-                <input
-                    type="tel"
-                    placeholder="Digite seu telefone"
-                    value={form.telefone}
-                    onChange={(e) => updateForm({ telefone: e.target.value })}
-                    style={styles.input}
-                    required
-                />
+          <label style={styles.label}>Telefone</label>
+          <InputMask
+            mask="(99) 99999-9999"
+            placeholder="Digite seu telefone"
+            value={form.telefone}
+            onChange={(e) => updateForm({ telefone: e.target.value })}
+            style={styles.input}
+            required
+          />
 
-                <label style={styles.label}>Data de Nascimento</label>
-                <input
-                    type="date"
-                    value={form.dataNascimento}
-                    onChange={(e) => updateForm({ dataNascimento: e.target.value })}
-                    style={styles.input}
-                    required
-                />
+          <label style={styles.label}>Data de Nascimento</label>
+          <input
+            type="date"
+            value={form.dataNascimento}
+            onChange={(e) => updateForm({ dataNascimento: e.target.value })}
+            style={styles.input}
+            required
+          />
 
-                <label style={styles.label}>CPF/CNPJ</label>
-                <input
-                    type="text"
-                    placeholder="Digite seu CPF ou CNPJ"
-                    value={form.cpfCnpj}
-                    onChange={(e) => updateForm({ cpfCnpj: e.target.value })}
-                    style={styles.input}
-                    required
-                />
+          <label style={styles.label}>CPF/CNPJ</label>
+          <InputMask
+            mask={
+              form.cpfCnpj.length > 14 ? "99.999.999/9999-99" : "999.999.999-99"
+            }
+            placeholder="Digite seu CPF ou CNPJ"
+            value={form.cpfCnpj}
+            onChange={(e) => updateForm({ cpfCnpj: e.target.value })}
+            style={styles.input}
+            required
+          />
 
-                <label style={styles.label}>Senha</label>
-                <input
-                    type="password"
-                    placeholder="Digite sua senha"
-                    value={form.senha}
-                    onChange={(e) => updateForm({ senha: e.target.value })}
-                    style={styles.input}
-                    required
-                />
+          <label style={styles.label}>Senha</label>
+          <input
+            type={showPassword ? "text" : "password"}
+            placeholder="Digite sua senha"
+            value={form.senha}
+            onChange={(e) => updateForm({ senha: e.target.value })}
+            style={styles.input}
+            required
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword((prev) => !prev)}
+            style={{
+              ...styles.button,
+              backgroundColor: "#ccc",
+              color: "#333",
+              marginTop: "5px",
+            }}
+          >
+            {showPassword ? "Ocultar" : "Mostrar"} Senha
+          </button>
 
-                <label style={styles.label}>Confirmar Senha</label>
-                <input
-                    type="password"
-                    placeholder="Confirme sua senha"
-                    value={form.confirmarSenha}
-                    onChange={(e) => updateForm({ confirmarSenha: e.target.value })}
-                    style={styles.input}
-                    required
-                />
+          <label style={styles.label}>Confirmar Senha</label>
+          <input
+            type={showConfirmPassword ? "text" : "password"}
+            placeholder="Confirme sua senha"
+            value={form.confirmarSenha}
+            onChange={(e) => updateForm({ confirmarSenha: e.target.value })}
+            style={styles.input}
+            required
+          />
+          <button
+            type="button"
+            onClick={() => setShowConfirmPassword((prev) => !prev)}
+            style={{...styles.button, backgroundColor: "#ccc", color: "#333", marginTop: "5px"}}
+          >
+            {showConfirmPassword ? "Ocultar" : "Mostrar"} Senha
+          </button>
 
-                <label style={styles.label}>Imagem de Perfil</label>
-                <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => updateForm({ imagem: e.target.files[0] })}
-                    style={styles.input}
-                />
+          <label style={styles.label}>Imagem de Perfil</label>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => updateForm({ imagem: e.target.files[0] })}
+            style={styles.input}
+          />
 
-                <button type="submit" style={styles.button}>Criar Perfil</button>
-            </form>
-        </div>
+          <button type="submit" style={styles.button}>
+            Criar Perfil
+          </button>
+        </form>
+      </div>
     );
 }
 
