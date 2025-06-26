@@ -1,12 +1,22 @@
 const Usuario = require("../models/Usuario");
+const bcrypt = require("bcrypt");
 
 // Criar novo usuário
 exports.criarUsuario = async (req, res) => {
     const { nome, email, telefone, cpfCnpj, senha } = req.body;
+    const senhaHash = await bcrypt.hash(req.body.senha, 10); // serve para criptografar a senha
     const dataNascimento = new Date(req.body.dataNascimento);
     const imagem = req.file ? req.file.filename : null;
 
-    const novoUsuario = new Usuario({ nome, email, telefone, dataNascimento, cpfCnpj, imagem, senha });
+    const novoUsuario = new Usuario({
+      nome,
+      email,
+      telefone,
+      dataNascimento,
+      cpfCnpj,
+      imagem,
+      senha: senhaHash, // serve para armazenar a senha criptografada
+    });
 
     try {
         const savedUser = await novoUsuario.save();
@@ -42,7 +52,7 @@ exports.login = async (req, res) => {
     const { email, password } = req.body;
     try {
         const user = await Usuario.findOne({ email });
-        if (user && user.senha === password) {
+        if (user && await bcrypt.compare(password, user.senha)) {
             res.status(200).json({ success: true, message: "Login realizado com sucesso!", user });
         } else {
             res.status(401).json({ success: false, message: "Credenciais inválidas." });

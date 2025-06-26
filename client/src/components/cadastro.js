@@ -11,6 +11,7 @@ export default function Cadastro() {
         dataNascimento: "",
         cpfCnpj: "",
         senha: "",
+        confirmarSenha: "",
         imagem: null
     });
 
@@ -24,6 +25,11 @@ export default function Cadastro() {
 
     async function onSubmit(e) {
         e.preventDefault();
+
+        if (form.senha !== form.confirmarSenha) {
+            window.alert("Senhas não coincidem. Tente novamente."); 
+            return;
+        }
 
         const formData = new FormData();
         formData.append("nome", form.nome);
@@ -111,6 +117,16 @@ export default function Cadastro() {
                     placeholder="Digite sua senha"
                     value={form.senha}
                     onChange={(e) => updateForm({ senha: e.target.value })}
+                    style={styles.input}
+                    required
+                />
+
+                <label style={styles.label}>Confirmar Senha</label>
+                <input
+                    type="password"
+                    placeholder="Confirme sua senha"
+                    value={form.confirmarSenha}
+                    onChange={(e) => updateForm({ confirmarSenha: e.target.value })}
                     style={styles.input}
                     required
                 />
