@@ -53,7 +53,7 @@ export default function Produtos() {
                             onChange={e => setFiltro(e.target.value)}
                             style={styles.filtro}
                         >
-                            <option value="">Filtrar</option>
+                            <option value="">Sem filtro</option>
                             <option value="notebook">Notebook</option>
                             <option value="celular">Celular</option>
                             <option value="monitor">Monitor</option>
@@ -170,18 +170,18 @@ const styles = {
         marginTop: "0px"
     },
     quadradoPequeno: {
-        backgroundColor: "#C8E6C9",
-        borderRadius: "12px",
-        width: "190px",
-        height: "253px",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "space-between",
-        padding: "20px 10px",
-        boxShadow: "0 1px 5px rgba(0,0,0,0.07)",
-        margin: "0"
-    },
+    backgroundColor: "#C8E6C9",
+    borderRadius: "12px",
+    width: "190px",
+    height: "253px",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    padding: "20px 10px",
+    boxShadow: "0 1px 5px rgba(0,0,0,0.07)",
+    margin: "0",
+    justifyContent: "flex-start" 
+},
     imagem: {
         width: "100px",
         height: "100px",
@@ -191,22 +191,28 @@ const styles = {
         marginTop: "10px"
     },
     nome: {
-        fontWeight: "bold",
-        color: "#3b5534",
-        fontSize: "1.2rem",
-        marginBottom: "10px",
-        textAlign: "center"
-    },
+    fontWeight: "bold",
+    color: "#3b5534",
+    fontSize: "1rem",
+    textAlign: "center",
+    marginBottom: "10px",
+    minHeight: "40px", 
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    textOverflow: "ellipsis",
+    overflow: "hidden",
+    wordWrap: "break-word"
+},
     contato: {
-        backgroundColor: "#3b5534",
-        color: "#fff",
-        border: "none",
-        borderRadius: "6px",
-        padding: "10px 0",
-        cursor: "pointer",
-        fontSize: "1rem",
-        width: "100%",
-        marginTop: "auto",
-        marginBottom: "0"
-    }
+    backgroundColor: "#3b5534",
+    color: "#fff",
+    border: "none",
+    borderRadius: "6px",
+    padding: "10px 0",
+    cursor: "pointer",
+    fontSize: "1rem",
+    width: "100%",
+    marginTop: "auto" 
+}
 };
