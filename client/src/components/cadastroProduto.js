@@ -55,73 +55,172 @@ export default function CadastroProduto() {
     }
 
     return (
-        <div style={styles.container}>
-            {/* Abas superiores conectadas */}
-            <div style={styles.abasContainer}>
-                <div style={styles.abasEsquerda}>
-                    <button
-                        style={styles.aba}
-                        onClick={() => navigate("/produtos")}
-                    >
-                        Receber
-                    </button>
-                    <button
-                        style={{ ...styles.aba, ...styles.abaAtiva }}
-                        disabled
-                    >
-                        Doar
-                    </button>
-                </div>
-            </div>
-
-            <div style={styles.quadradoGrande}>
-                <form onSubmit={onSubmit} style={styles.form} encType="multipart/form-data">
-                    <label style={styles.label}>Nome</label>
-                    <input type="text" placeholder="Digite o nome do dispositivo" value={form.nome} onChange={e => updateForm({ nome: e.target.value })} style={styles.input} required />
-
-                    <label style={styles.label}>Modelo</label>
-                    <input type="text" placeholder="Digite o modelo do dispositivo" value={form.modelo} onChange={e => updateForm({ modelo: e.target.value })} style={styles.input} />
-
-                    <label style={styles.label}>Marca</label>
-                    <input type="text" placeholder="Digite a marca do dispositivo" value={form.marca} onChange={e => updateForm({ marca: e.target.value })} style={styles.input} />
-
-                    <label style={styles.label}>Descrição</label>
-                    <textarea placeholder="Descreva o dispositivo" value={form.descricao} onChange={e => updateForm({ descricao: e.target.value })} style={styles.input} />
-
-                    <label style={styles.label}>Especificação</label>
-                    <input type="text" placeholder="Digite as especificações técnicas do dispositivo" value={form.especificacao} onChange={e => updateForm({ especificacao: e.target.value })} style={styles.input} />
-
-                    <label style={styles.label}>Potência</label>
-                    <input type="text" placeholder="Digite a potência do disposivo" value={form.potencia} onChange={e => updateForm({ potencia: e.target.value })} style={styles.input} />
-
-                    <label style={styles.label}>Tamanho</label>
-                    <input type="text" placeholder="Digite o tamanho do disposivo" value={form.tamanho} onChange={e => updateForm({ tamanho: e.target.value })} style={styles.input} />
-
-                    <label style={styles.label}>Fotos</label>
-                    <input type="file" multiple accept="image/*" onChange={e => updateForm({ fotos: e.target.files })} style={styles.input} />
-
-                    <label style={styles.label}>Observação</label>
-                    <input type="text" placeholder="Digite alguma observação se tiver" value={form.observacao} onChange={e => updateForm({ observacao: e.target.value })} style={styles.input} />
-
-                    <label style={styles.label}>Tipo</label>
-                    <input type="text" placeholder="Digite o tipo de dispositivo" value={form.tipo} onChange={e => updateForm({ tipo: e.target.value })} style={styles.input} />
-
-                    <label style={styles.label}>Tipo Material</label>
-                    <input type="text" placeholder="Digite o tipo de material do dispositivo" value={form.tipoMaterial} onChange={e => updateForm({ tipoMaterial: e.target.value })} style={styles.input} />
-
-                    <label style={styles.label}>Status</label>
-                    <input type="text" placeholder="Digite o status do dispositivo" value={form.status} onChange={e => updateForm({ status: e.target.value })} style={styles.input} />
-
-                    <label style={styles.label}>Cor</label>
-                    <input type="text" placeholder="Digite a cor do dispositivo" value={form.cor} onChange={e => updateForm({ cor: e.target.value })} style={styles.input} />
-
-                    <label style={styles.label}>Endereço</label>
-                    <input type="text" placeholder="Digite o endereço do dispositivo" value={form.endereco} onChange={e => updateForm({ endereco: e.target.value })} style={styles.input} />
-
-                    <button type="submit" style={styles.button}>Cadastrar Doação</button>
-                </form>
-            </div>
+      <div style={styles.container}>
+        {/* Abas superiores conectadas */}
+        <div style={styles.abasContainer}>
+          <div style={styles.abasEsquerda}>
+            <button style={styles.aba} onClick={() => navigate("/produtos")}>
+              Receber
+            </button>
+            <button style={{ ...styles.aba, ...styles.abaAtiva }} disabled>
+              Doar
+            </button>
+          </div>
         </div>
+
+        <div style={styles.quadradoGrande}>
+          <div style={{ display: "flex", flexDirection: "column", width: "100%" }}>
+            <form
+              onSubmit={onSubmit}
+              style={{ ...styles.form, background: 'none', boxShadow: 'none', width: '100%', marginBottom: 0 }}
+              encType="multipart/form-data"
+            >
+              <div style={styles.formContainer}>
+                {/* Coluna Esquerda */}
+                <div style={styles.formColumn}>
+                  <label style={styles.label}>Nome</label>
+                  <input
+                    type="text"
+                    placeholder="Digite o nome do dispositivo"
+                    value={form.nome}
+                    onChange={(e) => updateForm({ nome: e.target.value })}
+                    style={styles.input}
+                    required
+                  />
+
+                  <label style={styles.label}>Modelo</label>
+                  <input
+                    type="text"
+                    placeholder="Digite o modelo do dispositivo"
+                    value={form.modelo}
+                    onChange={(e) => updateForm({ modelo: e.target.value })}
+                    style={styles.input}
+                  />
+
+                  <label style={styles.label}>Marca</label>
+                  <input
+                    type="text"
+                    placeholder="Digite a marca do dispositivo"
+                    value={form.marca}
+                    onChange={(e) => updateForm({ marca: e.target.value })}
+                    style={styles.input}
+                  />
+
+                  <label style={styles.label}>Descrição</label>
+                  <textarea
+                    placeholder="Descreva o dispositivo"
+                    value={form.descricao}
+                    onChange={(e) => updateForm({ descricao: e.target.value })}
+                    style={styles.input}
+                  />
+
+                  <label style={styles.label}>Especificação</label>
+                  <input
+                    type="text"
+                    placeholder="Digite as especificações técnicas"
+                    value={form.especificacao}
+                    onChange={(e) =>
+                      updateForm({ especificacao: e.target.value })
+                    }
+                    style={styles.input}
+                  />
+
+                  <label style={styles.label}>Potência</label>
+                  <input
+                    type="text"
+                    placeholder="Digite a potência do dispositivo"
+                    value={form.potencia}
+                    onChange={(e) => updateForm({ potencia: e.target.value })}
+                    style={styles.input}
+                  />
+
+                  <label style={styles.label}>Tamanho</label>
+                  <input
+                    type="text"
+                    placeholder="Digite o tamanho do dispositivo"
+                    value={form.tamanho}
+                    onChange={(e) => updateForm({ tamanho: e.target.value })}
+                    style={styles.input}
+                  />
+                </div>
+
+                {/* Coluna Direita */}
+                <div style={styles.formColumn}>
+                  <label style={styles.label}>Fotos</label>
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    onChange={(e) => updateForm({ fotos: e.target.files })}
+                    style={styles.input}
+                  />
+
+                  <label style={styles.label}>Observação</label>
+                  <input
+                    type="text"
+                    placeholder="Digite alguma observação se tiver"
+                    value={form.observacao}
+                    onChange={(e) => updateForm({ observacao: e.target.value })}
+                    style={styles.input}
+                  />
+
+                  <label style={styles.label}>Tipo</label>
+                  <input
+                    type="text"
+                    placeholder="Digite o tipo de dispositivo"
+                    value={form.tipo}
+                    onChange={(e) => updateForm({ tipo: e.target.value })}
+                    style={styles.input}
+                  />
+
+                  <label style={styles.label}>Tipo Material</label>
+                  <input
+                    type="text"
+                    placeholder="Digite o tipo de material do dispositivo"
+                    value={form.tipoMaterial}
+                    onChange={(e) => updateForm({ tipoMaterial: e.target.value })}
+                    style={styles.input}
+                  />
+
+                  <label style={styles.label}>Status</label>
+                  <input
+                    type="text"
+                    placeholder="Digite o status do dispositivo"
+                    value={form.status}
+                    onChange={(e) => updateForm({ status: e.target.value })}
+                    style={styles.input}
+                  />
+
+                  <label style={styles.label}>Cor</label>
+                  <input
+                    type="text"
+                    placeholder="Digite a cor do dispositivo"
+                    value={form.cor}
+                    onChange={(e) => updateForm({ cor: e.target.value })}
+                    style={styles.input}
+                  />
+
+                  <label style={styles.label}>Endereço</label>
+                  <input
+                    type="text"
+                    placeholder="Digite o endereço do dispositivo"
+                    value={form.endereco}
+                    onChange={(e) => updateForm({ endereco: e.target.value })}
+                    style={styles.input}
+                  />
+                </div>
+              </div>
+
+              {/* Botão centralizado abaixo das colunas */}
+              <div style={{ display: 'flex', justifyContent: 'center', marginTop: '30px' }}>
+                <button type="submit" style={styles.button}>
+                  Cadastrar Doação
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
     );
 }
 
@@ -181,7 +280,7 @@ const styles = {
         borderRadius: "0 24px 24px 24px",
         padding: "50px 40px 40px 40px",
         display: "flex",
-        flexDirection: "row",
+        flexDirection: "column",
         gap: "40px",
         width: "1200px",
         minHeight: "320px",
@@ -218,5 +317,16 @@ const styles = {
         border: "none",
         borderRadius: "6px",
         cursor: "pointer"
+    },
+    formContainer: {
+    display: "flex",
+    gap: "40px",
+    justifyContent: "space-between"
+    },
+    formColumn: {
+        display: "flex",
+        flexDirection: "column",
+        gap: "15px",
+        flex: 1
     }
 };
