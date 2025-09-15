@@ -3,7 +3,10 @@
     "start": "concurrently --kill-others-on-fail -n SERVER,CLIENT -c green,blue \"cd server && nodemon server.js\" \"cd client && npm start\""
   },
   "dependencies": {
-    "multer": "^2.0.1"
+    "@react-google-maps/api": "^2.20.7",
+    "multer": "^2.0.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
   },
   "devDependencies": {
     "concurrently": "^9.1.2",
