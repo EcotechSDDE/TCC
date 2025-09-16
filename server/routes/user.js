@@ -4,6 +4,7 @@ const usuarioController = require("../controllers/usuarioController");
 const multer = require("multer");
 const path = require("path");
 const { body, validationResult } = require('express-validator');
+const { autenticar, autorizarAdmin } = require('../middleware/auth');
 
 // Configuração do multer para salvar imagens na pasta /uploads
 const storage = multer.diskStorage({
@@ -42,5 +43,11 @@ userRoutes.delete("/:id", usuarioController.deletarUsuario);
 
 // POST - Login
 userRoutes.post("/login", usuarioController.login);
+
+// Rota protegida para admins
+userRoutes.get('/admin/usuarios', autenticar, autorizarAdmin, usuarioController.listarUsuarios);
+
+// Rota protegida para usuários autenticados
+userRoutes.get('/user/me', autenticar, usuarioController.buscarUsuarioPorId);
 
 module.exports = userRoutes;

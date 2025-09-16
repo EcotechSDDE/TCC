@@ -1,13 +1,16 @@
 const Usuario = require("../models/Usuario");
 const bcrypt = require("bcrypt");
+const jwt = require('jsonwebtoken');
+const SECRET = process.env.JWT_SECRET || 'seusegredoaqui';
 
 // Criar novo usuário
 exports.criarUsuario = async (req, res) => {
-    const { nome, email, telefone, cpfCnpj, senha } = req.body;
+    const { nome, email, telefone, cpfCnpj, senha, tipo } = req.body;
     const senhaHash = await bcrypt.hash(req.body.senha, 10); // serve para criptografar a senha
     const dataNascimento = new Date(req.body.dataNascimento);
     const imagem = req.file ? req.file.filename : null;
 
+    // Se tipo não for fornecido, será 'comum' por padrão
     const novoUsuario = new Usuario({
       nome,
       email,
@@ -16,6 +19,7 @@ exports.criarUsuario = async (req, res) => {
       cpfCnpj,
       imagem,
       senha: senhaHash, // serve para armazenar a senha criptografada
+      tipo: tipo || 'comum'
     });
 
     try {
@@ -50,16 +54,20 @@ exports.buscarUsuarioPorId = async (req, res) => {
 // Login
 exports.login = async (req, res) => {
     const { email, password } = req.body;
-    try {
-        const user = await Usuario.findOne({ email });
-        if (user && await bcrypt.compare(password, user.senha)) {
-            res.status(200).json({ success: true, message: "Login realizado com sucesso!", user });
-        } else {
-            res.status(401).json({ success: false, message: "Credenciais inválidas." });
-        }
-    } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
-    }
+    const usuario = await Usuario.findOne({ email });
+    if (!usuario) return res.status(401).json({ message: 'Usuário não encontrado' });
+
+    const senhaValida = await bcrypt.compare(password, usuario.senha);
+    if (!senhaValida) return res.status(401).json({ message: 'Senha inválida' });
+
+    // Gera token com expiração de 30min
+    const token = jwt.sign(
+        { id: usuario._id, tipo: usuario.tipo },
+        SECRET,
+        { expiresIn: '30m' }
+    );
+
+    res.json({ token, usuario: { id: usuario._id, nome: usuario.nome, tipo: usuario.tipo } });
 };
 
 // Atualizar usuário por ID
