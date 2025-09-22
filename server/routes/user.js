@@ -17,6 +17,9 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage: storage });
 
+// Rota protegida para usuários autenticados
+userRoutes.get('/user/me', autenticar, usuarioController.buscarUsuarioLogado);
+
 // GET todos os usuários
 userRoutes.get("/user", usuarioController.listarUsuarios);
 
@@ -46,8 +49,5 @@ userRoutes.post("/login", usuarioController.login);
 
 // Rota protegida para admins
 userRoutes.get('/admin/usuarios', autenticar, autorizarAdmin, usuarioController.listarUsuarios);
-
-// Rota protegida para usuários autenticados
-userRoutes.get('/user/me', autenticar, usuarioController.buscarUsuarioPorId);
 
 module.exports = userRoutes;

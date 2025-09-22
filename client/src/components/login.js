@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../AuthContext";
 
 const REACT_APP_YOUR_HOSTNAME = "http://localhost:5050"; // Seu back-end
 
@@ -10,6 +11,7 @@ export default function Login() {
   });
 
   const navigate = useNavigate();
+  const { setToken } = useContext(AuthContext);
 
   function updateForm(value) {
     setForm((prev) => {
@@ -35,8 +37,7 @@ export default function Login() {
     const result = await response.json();
 
     if (result.token) {
-      localStorage.setItem("token", result.token);
-      localStorage.setItem("tipo", result.usuario.tipo);
+      setToken(result.token);
       navigate("/produtos");
     } else {
       window.alert("Credenciais inválidas.");
