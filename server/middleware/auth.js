@@ -8,6 +8,7 @@ function autenticar(req, res, next) {
   jwt.verify(token, SECRET, (err, decoded) => {
     if (err) return res.status(401).json({ message: 'Token inválido ou expirado' });
     req.usuario = decoded;
+    req.userId = decoded.id; // Corrigido para 'id' do token
     next();
   });
 }

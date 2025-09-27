@@ -8,9 +8,15 @@ exports.criarDoacao = async (req, res) => {
     } = req.body;
     const fotos = req.files ? req.files.map(file => file.filename) : [];
 
-    const novaDoacao = new Doacao({
+    const dadosDaDoacao = {
         nome, modelo, marca, descricao, especificacao, potencia, tamanho,
         fotos, observacao, tipo, tipoMaterial, status, cor, endereco
+    };
+
+    // Supondo que req.userId vem do middleware de autenticação
+    const novaDoacao = new Doacao({
+        ...dadosDaDoacao,
+        usuario: req.userId
     });
 
     try {

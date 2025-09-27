@@ -14,7 +14,8 @@ const DoacaoSchema = new mongoose.Schema({
     tipoMaterial: String,
     status: String,
     cor: String,
-    endereco: String
+    endereco: String,
+    usuario: { type: mongoose.Schema.Types.ObjectId, ref: 'Usuario', required: true }
 });
 
 module.exports = mongoose.model('Doacao', DoacaoSchema);

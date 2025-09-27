@@ -41,9 +41,18 @@ export default function CadastroProduto() {
       }
     });
 
-    const response = await fetch(`${REACT_APP_YOUR_HOSTNAME}/doacao/add`, {
+    const token = localStorage.getItem("token"); // pega o token salvo
+    if (!token) {
+      window.alert("Você precisa estar logado para cadastrar uma doação.");
+      navigate("/");
+      return;
+    }
+    const response = await fetch(`${REACT_APP_YOUR_HOSTNAME}/doacao/add`, { 
       method: "POST",
       body: formData,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     });
 
     if (!response.ok) {

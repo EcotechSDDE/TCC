@@ -8,6 +8,11 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     if (token) {
+      localStorage.setItem("token", token);
+    } else {
+      localStorage.removeItem("token");
+    }
+    if (token) {
       fetch("http://localhost:5050/user/me", {
         headers: { Authorization: `Bearer ${token}` }
       })
