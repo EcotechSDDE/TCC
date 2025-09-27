@@ -116,7 +116,7 @@ export default function Cadastro() {
     }
 
     return (
-      <div style={styles.container}>
+      <div style={{ ...styles.container, marginTop: "40px" }}>
         <h1 style={styles.title}>EcoTech</h1>
         <h2 style={styles.subtitle}>
           Crie seu perfil para doar ou receber equipamentos

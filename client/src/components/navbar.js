@@ -38,7 +38,7 @@ export default function Navbar() {
   const hideProfile = ["/", "/cadastro"].includes(location.pathname);
 
   return (
-    <nav className="navbar navbar-expand-lg navbar-dark p-1" style={{ backgroundColor: '#3b5534' }}>
+    <nav className="navbar navbar-expand-lg navbar-dark p-1 fixed-top" style={{ backgroundColor: '#3b5534', zIndex: 1000 }}>
       <div className="d-flex align-items-center">
         <NavLink className="navbar-brand" to="/">
           <img style={{ width: "50px", height: "auto" }} src="/Logo.png" alt="Logo Ecotech" />

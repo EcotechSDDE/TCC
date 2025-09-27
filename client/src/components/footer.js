@@ -4,7 +4,7 @@ import "bootstrap/dist/js/bootstrap.bundle";
 
 export default function Footer() {
   return (
-   <footer className="text-light py-2" style={{ backgroundColor: '#3b5534' }}>
+   <footer className="text-light py-2 fixed-bottom" style={{ backgroundColor: '#3b5534', zIndex: 1000, width: '100%' }}>
       <div className="container text-center">
         <div className="d-flex justify-content-center flex-wrap gap-5">
           <span>ecotechsdee@gmail.com</span>

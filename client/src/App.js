@@ -12,10 +12,14 @@ import CadastroProduto from "./components/cadastroProduto"
 import DetalhesProduto from "./components/detalhesProduto"
 
 const App = () => {
+
+    // Espaçamento padrão para todas as telas
+    const mainStyle = { paddingTop: "40px", paddingBottom: "40px" };
+
     return (
         <div className="d-flex flex-column min-vh-100">
             <Navbar />
-            <main className="flex-fill container my-4">
+            <main className="flex-fill container my-4" style={mainStyle}>
                 <Routes>
                     <Route exact path="/" element={<Login />} />
                     <Route path="/cadastro" element={<Cadastro />} />
