@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useRef, useEffect } from "react";
 import { AuthContext } from "../AuthContext";
 import { useLocation, useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.css";
@@ -10,6 +10,29 @@ export default function Navbar() {
   const [showMenu, setShowMenu] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+  const menuRef = useRef(null);
+  const imgRef = useRef(null);
+
+  // Fecha o menu ao clicar fora
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (
+        showMenu &&
+        menuRef.current &&
+        !menuRef.current.contains(event.target) &&
+        imgRef.current &&
+        !imgRef.current.contains(event.target)
+      ) {
+        setShowMenu(false);
+      }
+    }
+    if (showMenu) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showMenu]);
 
   // Não mostra ícone em login/cadastro
   const hideProfile = ["/", "/cadastro"].includes(location.pathname);
@@ -35,16 +58,20 @@ export default function Navbar() {
       {!hideProfile && token && user && (
         <div style={{ marginLeft: "auto", position: "relative" }}>
           <img
+            ref={imgRef}
             src={user && user.imagem ? `http://localhost:5050/uploads/${user.imagem}` : "/LogoIcone.png"}
             alt="Perfil"
-            style={{ width: 40, height: 40, borderRadius: "50%", cursor: "pointer" }}
+            style={{ width: 40, height: 40, borderRadius: "50%", cursor: "pointer", marginRight: "12px" }}
             onClick={() => setShowMenu(!showMenu)}
           />
           {showMenu && (
-            <div style={{
-              position: "absolute", right: 0, top: 50, background: "#fff", borderRadius: 8, boxShadow: "0 2px 8px #0002", zIndex: 10
-            }}>
-              <div style={{ padding: 10, cursor: "pointer" }} onClick={() => { logout(); navigate("/"); }}>
+            <div
+              ref={menuRef}
+              style={{
+                position: "absolute", right: 0, top: 50, background: "#fff", borderRadius: 8, boxShadow: "0 2px 8px #0002", zIndex: 10
+              }}
+            >
+              <div style={{ padding: 10, cursor: "pointer" }} onClick={() => { logout(); setShowMenu(false); navigate("/"); }}>
                 Sair
               </div>
             </div>

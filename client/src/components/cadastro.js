@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import InputMask from "react-input-mask";
+import { useContext } from "react";
+import { AuthContext } from "../AuthContext";
 
 const REACT_APP_YOUR_HOSTNAME = 'http://localhost:5050'; // Seu back-end
 
@@ -21,6 +23,7 @@ export default function Cadastro() {
     });
 
     const navigate = useNavigate();
+    const { setToken } = useContext(AuthContext);
 
     function updateForm(value) {
         setForm((prev) => {
@@ -94,7 +97,22 @@ export default function Cadastro() {
             return;
         }
 
-        navigate("/produtos");
+        // Cadastro OK, agora faça login automático:
+        const loginResponse = await fetch(`${REACT_APP_YOUR_HOSTNAME}/login`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: form.email, password: form.senha })
+        });
+        const loginResult = await loginResponse.json();
+
+        if (loginResult.token) {
+            // Use o AuthContext para salvar o token
+            setToken(loginResult.token);
+            navigate("/produtos");
+        } else {
+            window.alert("Cadastro realizado, mas não foi possível fazer login automático.");
+            navigate("/produtos");
+        }
     }
 
     return (
