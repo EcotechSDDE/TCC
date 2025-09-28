@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../AuthContext";
 
 const REACT_APP_YOUR_HOSTNAME = 'http://localhost:5050'; 
 
@@ -8,6 +9,7 @@ export default function Produtos() {
     const [pesquisa, setPesquisa] = useState("");
     const [filtro, setFiltro] = useState("");
     const navigate = useNavigate();
+    const { user, token } = useContext(AuthContext);
 
     useEffect(() => {
         async function fetchDoacoes() {
@@ -21,6 +23,20 @@ export default function Produtos() {
         }
         fetchDoacoes();
     }, []);
+
+    async function handleDelete(id) {
+        if (!window.confirm("Tem certeza que deseja deletar esta doação?")) return;
+        const response = await fetch(`${REACT_APP_YOUR_HOSTNAME}/doacao/${id}`, {
+            method: "DELETE",
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        if (response.ok) {
+            setDoacoes(doacoes.filter(d => d._id !== id));
+            window.alert("Doação deletada com sucesso!");
+        } else {
+            window.alert("Erro ao deletar doação.");
+        }
+    }
 
     const doacoesFiltradas = doacoes.filter((item) => {
         const nomeMatch = item.nome.toLowerCase().includes(pesquisa.toLowerCase());
@@ -83,6 +99,14 @@ export default function Produtos() {
                         >
                             Mostrar Mais
                         </button>
+                        {user && item.usuario && item.usuario._id === user._id && (
+                            <button
+                                style={styles.deleteButton}
+                                onClick={() => handleDelete(item._id)}
+                            >
+                                🗑️
+                            </button>
+                        )}
                     </div>
                 ))}
             </div>
@@ -170,18 +194,19 @@ const styles = {
         marginTop: "0px"
     },
     quadradoPequeno: {
-    backgroundColor: "#C8E6C9",
-    borderRadius: "12px",
-    width: "190px",
-    height: "253px",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    padding: "20px 10px",
-    boxShadow: "0 1px 5px rgba(0,0,0,0.07)",
-    margin: "0",
-    justifyContent: "flex-start" 
-},
+        backgroundColor: "#C8E6C9",
+        borderRadius: "12px",
+        width: "190px",
+        height: "253px",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        padding: "20px 10px",
+        boxShadow: "0 1px 5px rgba(0,0,0,0.07)",
+        margin: "0",
+        justifyContent: "flex-start",
+        position: "relative"
+    },
     imagem: {
         width: "100px",
         height: "100px",
@@ -191,28 +216,41 @@ const styles = {
         marginTop: "10px"
     },
     nome: {
-    fontWeight: "bold",
-    color: "#3b5534",
-    fontSize: "1rem",
-    textAlign: "center",
-    marginBottom: "10px",
-    minHeight: "40px", 
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    textOverflow: "ellipsis",
-    overflow: "hidden",
-    wordWrap: "break-word"
-},
+        fontWeight: "bold",
+        color: "#3b5534",
+        fontSize: "1rem",
+        textAlign: "center",
+        marginBottom: "10px",
+        minHeight: "40px", 
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        textOverflow: "ellipsis",
+        overflow: "hidden",
+        wordWrap: "break-word"
+    },
     contato: {
-    backgroundColor: "#3b5534",
-    color: "#fff",
-    border: "none",
-    borderRadius: "6px",
-    padding: "10px 0",
-    cursor: "pointer",
-    fontSize: "1rem",
-    width: "100%",
-    marginTop: "auto" 
-}
+        backgroundColor: "#3b5534",
+        color: "#fff",
+        border: "none",
+        borderRadius: "6px",
+        padding: "10px 0",
+        cursor: "pointer",
+        fontSize: "1rem",
+        width: "100%",
+        marginTop: "auto" 
+    },
+    deleteButton: {
+        position: "absolute",
+        top: 8,
+        left: 8,
+        background: "#eee",
+        color: "#3b5534",
+        border: "none",
+        borderRadius: "50%",
+        fontSize: "1rem",
+        padding: "4px 8px",
+        cursor: "pointer",
+        zIndex: 10
+    }
 };

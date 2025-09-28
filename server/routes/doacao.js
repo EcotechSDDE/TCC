@@ -21,4 +21,7 @@ DoacaoRoutes.post("/doacao/add", autenticar, upload.array('fotos', 5), doacaoCon
 // GET - Listar todas as doações
 DoacaoRoutes.get("/doacao", doacaoController.listarDoacoes);
 
+// DELETE - Remover doação por ID
+DoacaoRoutes.delete("/doacao/:id", autenticar, doacaoController.deletarDoacao);
+
 module.exports = DoacaoRoutes;
