@@ -140,7 +140,8 @@ export default function CadastroProduto() {
                 </select>
 
                 <label style={styles.label}>Descrição</label>
-                <textarea
+                <input
+                  type="text"
                   placeholder="Descreva o dispositivo"
                   value={form.descricao}
                   onChange={(e) => updateForm({ descricao: e.target.value })}
@@ -181,19 +182,12 @@ export default function CadastroProduto() {
                   onChange={(e) => updateForm({ tamanho: e.target.value })}
                   style={styles.input}
                 />
+
+                <label style={styles.label}>Localização</label>
               </div>
 
               {/* Coluna Direita */}
               <div style={styles.formColumn}>
-                <label style={styles.label}>Fotos</label>
-                <input
-                  type="file"
-                  multiple
-                  accept="image/*"
-                  onChange={(e) => updateForm({ fotos: e.target.files })}
-                  style={styles.input}
-                />
-
                 <label style={styles.label}>Observação</label>
                 <input
                   type="text"
@@ -266,7 +260,20 @@ export default function CadastroProduto() {
                   style={styles.input}
                 />
 
-                <label style={styles.label}>Localização</label>
+                <label style={styles.label}>Fotos</label>
+                <input
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  onChange={(e) => updateForm({ fotos: e.target.files })}
+                  style={styles.input}
+                />
+              </div>
+            </div>
+
+            {/* Mapa centralizado, maior, abaixo das colunas */}
+            <div style={{ display: "flex", justifyContent: "center", margin: "20px 0 10px 0" }}>
+              <div style={{ width: "1000px", height: "400px" }}>
                 <MapaGoogle
                   onPick={(coords) =>
                     updateForm({ endereco: `${coords.lat},${coords.lng}` })
@@ -275,12 +282,12 @@ export default function CadastroProduto() {
               </div>
             </div>
 
-            {/* Botão centralizado abaixo das colunas */}
+            {/* Botão centralizado abaixo do mapa, com menos espaço acima */}
             <div
               style={{
                 display: "flex",
                 justifyContent: "center",
-                marginTop: "30px",
+                marginTop: "-80px",
               }}
             >
               <button type="submit" style={styles.button}>
@@ -383,7 +390,7 @@ const styles = {
     padding: "10px",
     backgroundColor: "#C8E6C9",
     color: "#3b5534",
-    fontSize: "1rem",
+    fontSize: "1.3rem",
     border: "none",
     borderRadius: "6px",
     cursor: "pointer",
