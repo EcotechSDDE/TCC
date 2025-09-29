@@ -83,7 +83,14 @@ export default function CadastroProduto() {
           style={{ display: "flex", flexDirection: "column", width: "100%" }}
         >
           <form
-            onSubmit={onSubmit}
+            onSubmit={e => {
+              e.preventDefault();
+              if (!form.fotos || form.fotos.length < 3) {
+                window.alert('Selecione pelo menos 3 fotos da doação.');
+                return;
+              }
+              onSubmit(e);
+            }}
             style={{
               ...styles.form,
               background: "none",
@@ -268,6 +275,11 @@ export default function CadastroProduto() {
                   onChange={(e) => updateForm({ fotos: e.target.files })}
                   style={styles.input}
                 />
+                {form.fotos && form.fotos.length > 0 && (
+                  <div style={{ color: form.fotos.length < 3 ? 'red' : '#3b5534', fontSize: '0.95rem', marginTop: 4 }}>
+                    {form.fotos.length} foto(s) selecionada(s). {form.fotos.length < 3 ? 'Selecione pelo menos 3 fotos.' : 'OK!'}
+                  </div>
+                )}
               </div>
             </div>
 
