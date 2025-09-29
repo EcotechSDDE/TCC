@@ -6,6 +6,8 @@ const REACT_APP_YOUR_HOSTNAME = 'http://localhost:5050';
 export default function DetalhesProduto() {
     const { id } = useParams();
     const [doacao, setDoacao] = useState(null);
+    const [selectedImgIdx, setSelectedImgIdx] = useState(0);
+    const [zoomed, setZoomed] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -36,20 +38,149 @@ export default function DetalhesProduto() {
 
             {/* Quadrado grande */}
             <div style={styles.quadradoGrande}>
-                {/* Imagens à esquerda */}
+                {/* Imagens à esquerda - agora carrossel */}
                 <div style={styles.imagensContainer}>
-                    {doacao.fotos && doacao.fotos.length > 0 ? (
-                        doacao.fotos.map((foto, idx) => (
+                    {/* Imagem principal (carrossel) */}
+                    <div style={{ position: 'relative', width: zoomed ? '100vw' : 220, height: zoomed ? '100vh' : 220, marginBottom: 10, zIndex: zoomed ? 9999 : 1 }}>
+                        {/* Fundo escurecido no modo zoom */}
+                        {zoomed && (
+                            <div style={{
+                                position: 'fixed',
+                                top: 0,
+                                left: 0,
+                                width: '100vw',
+                                height: '100vh',
+                                background: 'rgba(0,0,0,0.7)',
+                                zIndex: 9998
+                            }} onClick={() => setZoomed(false)} />
+                        )}
+                        {/* Quadrado centralizado para imagem ampliada */}
+                        <div style={{
+                            position: zoomed ? 'fixed' : 'static',
+                            top: zoomed ? '50%' : undefined,
+                            left: zoomed ? '50%' : undefined,
+                            transform: zoomed ? 'translate(-50%, -50%)' : undefined,
+                            background: '#fff',
+                            borderRadius: zoomed ? 24 : 12,
+                            boxShadow: zoomed ? '0 0 40px #0008' : 'none',
+                            width: zoomed ? '80vw' : 220,
+                            height: zoomed ? '80vh' : 220,
+                            zIndex: zoomed ? 9999 : 1,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            overflow: 'hidden'
+                        }}>
+                            <img
+                                src={doacao.fotos && doacao.fotos.length > 0 ? `${REACT_APP_YOUR_HOSTNAME}/uploads/${doacao.fotos[selectedImgIdx]}` : "/Logo.png"}
+                                alt={doacao.nome}
+                                style={{
+                                    ...styles.imagem,
+                                    cursor: 'pointer',
+                                    width: zoomed ? '100%' : 220,
+                                    height: zoomed ? '100%' : 220,
+                                    objectFit: 'contain',
+                                    background: '#fff',
+                                    borderRadius: zoomed ? 24 : 12,
+                                    zIndex: zoomed ? 9999 : 1
+                                }}
+                                onClick={() => setZoomed(!zoomed)}
+                            />
+                            {/* Botão fechar no canto superior direito do quadrado */}
+                            {zoomed && (
+                                <button
+                                    style={{
+                                        position: 'absolute',
+                                        top: 16,
+                                        right: 16,
+                                        background: '#fff',
+                                        border: 'none',
+                                        borderRadius: '50%',
+                                        fontSize: 32,
+                                        cursor: 'pointer',
+                                        zIndex: 10001,
+                                        boxShadow: '0 0 10px #0004',
+                                        width: 48,
+                                        height: 48,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center'
+                                    }}
+                                    onClick={e => { e.stopPropagation(); setZoomed(false); }}
+                                >&#10006;</button>
+                            )}
+                            {/* Botões de navegação no modo zoom, dentro do quadrado */}
+                            {doacao.fotos && doacao.fotos.length > 1 && zoomed && (
+                                <>
+                                    {/* Botão voltar (esquerda) */}
+                                    <button
+                                        style={{
+                                            position: 'absolute',
+                                            left: 16,
+                                            top: '50%',
+                                            transform: 'translateY(-50%)',
+                                            background: '#fff',
+                                            border: 'none',
+                                            borderRadius: '50%',
+                                            fontSize: 32,
+                                            cursor: 'pointer',
+                                            zIndex: 10000,
+                                            boxShadow: '0 0 10px #0004',
+                                            width: 56,
+                                            height: 56,
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center'
+                                        }}
+                                        onClick={e => { e.stopPropagation(); setSelectedImgIdx(idx => idx > 0 ? idx - 1 : doacao.fotos.length - 1); }}
+                                    >&lt;</button>
+                                    {/* Botão avançar (direita) */}
+                                    <button
+                                        style={{
+                                            position: 'absolute',
+                                            right: 16,
+                                            top: '50%',
+                                            transform: 'translateY(-50%)',
+                                            background: '#fff',
+                                            border: 'none',
+                                            borderRadius: '50%',
+                                            fontSize: 32,
+                                            cursor: 'pointer',
+                                            zIndex: 10000,
+                                            boxShadow: '0 0 10px #0004',
+                                            width: 56,
+                                            height: 56,
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center'
+                                        }}
+                                        onClick={e => { e.stopPropagation(); setSelectedImgIdx(idx => idx < doacao.fotos.length - 1 ? idx + 1 : 0); }}
+                                    >&gt;</button>
+                                </>
+                            )}
+                            {/* Botões de navegação no modo normal */}
+                            {doacao.fotos && doacao.fotos.length > 1 && !zoomed && (
+                                <>
+                                    <button style={{ position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)', background: '#fff', border: 'none', borderRadius: '50%', fontSize: 18, cursor: 'pointer', zIndex: 10000, boxShadow: '0 0 10px #0004' }}
+                                        onClick={e => { e.stopPropagation(); setSelectedImgIdx(idx => idx > 0 ? idx - 1 : doacao.fotos.length - 1); }}>&lt;</button>
+                                    <button style={{ position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)', background: '#fff', border: 'none', borderRadius: '50%', fontSize: 18, cursor: 'pointer', zIndex: 10000, boxShadow: '0 0 10px #0004' }}
+                                        onClick={e => { e.stopPropagation(); setSelectedImgIdx(idx => idx < doacao.fotos.length - 1 ? idx + 1 : 0); }}>&gt;</button>
+                                </>
+                            )}
+                        </div>
+                    </div>
+                    {/* Miniaturas */}
+                    <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+                        {doacao.fotos && doacao.fotos.length > 0 && doacao.fotos.map((foto, idx) => (
                             <img
                                 key={idx}
                                 src={`${REACT_APP_YOUR_HOSTNAME}/uploads/${foto}`}
                                 alt={doacao.nome}
-                                style={styles.imagem}
+                                style={{ width: 48, height: 48, objectFit: 'cover', borderRadius: 6, border: idx === selectedImgIdx ? '2px solid #3b5534' : '2px solid #ccc', cursor: 'pointer' }}
+                                onClick={() => { setSelectedImgIdx(idx); setZoomed(false); }}
                             />
-                        ))
-                    ) : (
-                        <img src="/Logo.png" alt="Sem imagem" style={styles.imagem} />
-                    )}
+                        ))}
+                    </div>
                 </div>
                 {/* Informações à direita */}
                 <div style={styles.infoContainer}>
