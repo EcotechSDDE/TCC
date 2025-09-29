@@ -272,7 +272,7 @@ export default function CadastroProduto() {
                   type="file"
                   multiple
                   accept="image/*"
-                  onChange={(e) => updateForm({ fotos: e.target.files })}
+                  onChange={e => updateForm({ fotos: Array.from(e.target.files) })}
                   style={styles.input}
                 />
                 {form.fotos && form.fotos.length > 0 && (

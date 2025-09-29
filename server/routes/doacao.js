@@ -4,13 +4,16 @@ const doacaoController = require("../controllers/doacaoController");
 const multer = require("multer");
 const path = require("path");
 const { autenticar } = require('../middleware/auth');
+const crypto = require('crypto');
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, "uploads/");
   },
   filename: function (req, file, cb) {
-    cb(null, Date.now() + path.extname(file.originalname));
+    // Gera nome único: timestamp + random + extensão
+    const uniqueSuffix = Date.now() + '-' + crypto.randomBytes(6).toString('hex');
+    cb(null, uniqueSuffix + path.extname(file.originalname));
   }
 });
 const upload = multer({ storage: storage });

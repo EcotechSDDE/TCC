@@ -6,7 +6,7 @@ exports.criarDoacao = async (req, res) => {
         nome, modelo, marca, descricao, especificacao, potencia, tamanho,
         observacao, tipo, tipoMaterial, status, cor, endereco
     } = req.body;
-    const fotos = req.files ? req.files.map(file => file.filename) : [];
+    const fotos = req.files ? Array.from(new Set(req.files.map(file => file.filename))) : [];
 
     const dadosDaDoacao = {
         nome, modelo, marca, descricao, especificacao, potencia, tamanho,
