@@ -39,7 +39,7 @@ userRoutes.post("/user/add", upload.single('imagem'), [
 }, usuarioController.criarUsuario);
 
 // POST - Atualizar usuário por ID
-userRoutes.post("/update/:id", usuarioController.atualizarUsuario);
+userRoutes.post("/update/:id", upload.single('imagem'), usuarioController.atualizarUsuario);
 
 // DELETE - Remover usuário por ID
 userRoutes.delete("/:id", usuarioController.deletarUsuario);

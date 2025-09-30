@@ -89,14 +89,15 @@ exports.login = async (req, res) => {
 // Atualizar usuário por ID
 exports.atualizarUsuario = async (req, res) => {
     try {
+        const update = {};
+        if (req.body.nome) update.nome = req.body.nome;
+        if (req.body.email) update.email = req.body.email;
+        if (req.body.telefone) update.telefone = req.body.telefone;
+        if (req.body.senha) update.senha = await bcrypt.hash(req.body.senha, 10);
+        if (req.file) update.imagem = req.file.filename;
         const updatedUser = await Usuario.findByIdAndUpdate(
             req.params.id,
-            {
-                name: req.body.name,
-                user: req.body.user,
-                email: req.body.email,
-                function: req.body.function
-            },
+            update,
             { new: true }
         );
         if (!updatedUser) return res.status(404).json({ message: "Usuário não encontrado" });

@@ -71,6 +71,9 @@ export default function Navbar() {
                 position: "absolute", right: 0, top: 50, background: "#fff", borderRadius: 8, boxShadow: "0 2px 8px #0002", zIndex: 10
               }}
             >
+              <div style={{ padding: 10, cursor: "pointer", borderBottom: "1px solid #eee" }} onClick={() => { navigate(`/perfil/${user.id || user._id}`); setShowMenu(false); }}>
+                Perfil
+              </div>
               <div style={{ padding: 10, cursor: "pointer" }} onClick={() => { logout(); setShowMenu(false); navigate("/"); }}>
                 Sair
               </div>
