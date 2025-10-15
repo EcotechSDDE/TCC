@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { AuthContext } from "../AuthContext";
 
 const REACT_APP_YOUR_HOSTNAME = 'http://localhost:5050';
 
@@ -9,6 +10,7 @@ export default function DetalhesProduto() {
     const [selectedImgIdx, setSelectedImgIdx] = useState(0);
     const [zoomed, setZoomed] = useState(false);
     const navigate = useNavigate();
+    const { user } = useContext(AuthContext);
 
     useEffect(() => {
         async function fetchDoacao() {
@@ -199,10 +201,38 @@ export default function DetalhesProduto() {
                     <div style={styles.info}><b>Endereço:</b> {doacao.endereco}</div>
                     <button
                         style={styles.button}
-                        onClick={() => navigate("/contatos")}
+                        disabled={!doacao.usuario || doacao.usuario === null}
+                        onClick={() => {
+                            if (doacao.usuario && doacao._id) {
+                                // Garante que usuario é string (id)
+                                const usuarioId = typeof doacao.usuario === 'object' ? doacao.usuario._id : doacao.usuario;
+                                navigate(`/contatos?user=${usuarioId}&doacao=${doacao._id}`);
+                            }
+                        }}
                     >
                         Ir para Contatos
                     </button>
+                    {user && doacao.usuario && (doacao.usuario._id === user._id || doacao.usuario === user._id) && (
+                        <button
+                            style={{ ...styles.button, backgroundColor: '#c62828', marginTop: 10 }}
+                            onClick={async () => {
+                                if (window.confirm('Tem certeza que deseja deletar esta doação?')) {
+                                    const response = await fetch(`${REACT_APP_YOUR_HOSTNAME}/doacao/${doacao._id}`, {
+                                        method: 'DELETE',
+                                        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+                                    });
+                                    if (response.ok) {
+                                        alert('Doação deletada com sucesso!');
+                                        navigate('/produtos');
+                                    } else {
+                                        alert('Erro ao deletar doação.');
+                                    }
+                                }
+                            }}
+                        >
+                            Deletar Doação
+                        </button>
+                    )}
                 </div>
             </div>
         </div>

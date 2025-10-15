@@ -5,6 +5,8 @@ import "bootstrap/dist/css/bootstrap.css";
 import "bootstrap/dist/js/bootstrap.bundle"
 import { NavLink } from "react-router-dom";
 
+const REACT_APP_YOUR_HOSTNAME = 'http://localhost:5050';
+
 export default function Navbar() {
   const { user, logout, token } = useContext(AuthContext);
   const [showMenu, setShowMenu] = useState(false);
@@ -37,6 +39,14 @@ export default function Navbar() {
   // Não mostra ícone em login/cadastro
   const hideProfile = ["/", "/cadastro"].includes(location.pathname);
 
+  // Logout limpa tudo
+  const handleLogout = () => {
+    logout();
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    navigate('/');
+  };
+
   return (
     <nav className="navbar navbar-expand-lg navbar-dark p-1 fixed-top" style={{ backgroundColor: '#3b5534', zIndex: 1000 }}>
       <div className="d-flex align-items-center">
@@ -59,9 +69,9 @@ export default function Navbar() {
         <div style={{ marginLeft: "auto", position: "relative" }}>
           <img
             ref={imgRef}
-            src={user && user.imagem ? `http://localhost:5050/uploads/${user.imagem}` : "/LogoIcone.png"}
+            src={user && user.imagem && !user.imagem.startsWith('http') ? `${REACT_APP_YOUR_HOSTNAME}/uploads/${user.imagem}` : (user && user.imagem ? user.imagem : "/LogoIcone.png")}
             alt="Perfil"
-            style={{ width: 40, height: 40, borderRadius: "50%", cursor: "pointer", marginRight: "12px" }}
+            style={{ width: 40, height: 40, borderRadius: "50%", cursor: "pointer", marginRight: "12px", objectFit: "cover", background: "#fff" }}
             onClick={() => setShowMenu(!showMenu)}
           />
           {showMenu && (
@@ -74,7 +84,7 @@ export default function Navbar() {
               <div style={{ padding: 10, cursor: "pointer", borderBottom: "1px solid #eee" }} onClick={() => { navigate(`/perfil/${user.id || user._id}`); setShowMenu(false); }}>
                 Perfil
               </div>
-              <div style={{ padding: 10, cursor: "pointer" }} onClick={() => { logout(); setShowMenu(false); navigate("/"); }}>
+              <div style={{ padding: 10, cursor: "pointer" }} onClick={() => { handleLogout(); setShowMenu(false); }}>
                 Sair
               </div>
             </div>

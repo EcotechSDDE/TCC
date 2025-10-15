@@ -23,7 +23,7 @@ export default function Cadastro() {
     });
 
     const navigate = useNavigate();
-    const { setToken } = useContext(AuthContext);
+    const { setToken, setUser } = useContext(AuthContext);
 
     function updateForm(value) {
         setForm((prev) => {
@@ -106,8 +106,10 @@ export default function Cadastro() {
         const loginResult = await loginResponse.json();
 
         if (loginResult.token) {
-            // Use o AuthContext para salvar o token
             setToken(loginResult.token);
+            setUser(loginResult.usuario);
+            localStorage.setItem('token', loginResult.token);
+            localStorage.setItem('user', JSON.stringify(loginResult.usuario));
             navigate("/produtos");
         } else {
             window.alert("Cadastro realizado, mas não foi possível fazer login automático.");

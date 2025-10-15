@@ -11,7 +11,7 @@ export default function Login() {
   });
 
   const navigate = useNavigate();
-  const { setToken } = useContext(AuthContext);
+  const { setToken, setUser } = useContext(AuthContext);
 
   function updateForm(value) {
     setForm((prev) => {
@@ -38,6 +38,9 @@ export default function Login() {
 
     if (result.token) {
       setToken(result.token);
+      setUser(result.usuario);
+      localStorage.setItem('token', result.token);
+      localStorage.setItem('user', JSON.stringify(result.usuario));
       navigate("/produtos");
     } else {
       window.alert("Credenciais inválidas.");

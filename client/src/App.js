@@ -11,6 +11,7 @@ import Produtos from "./components/produtos"
 import CadastroProduto from "./components/cadastroProduto"
 import DetalhesProduto from "./components/detalhesProduto"
 import Perfil from "./components/perfil"
+import Contatos from "./components/contatos"
 
 const App = () => {
 
@@ -31,6 +32,7 @@ const App = () => {
                     <Route path="/cadastroProduto" element={<CadastroProduto />} />
                     <Route path="/detalhesProduto/:id" element={<DetalhesProduto />} />
                     <Route path="/perfil/:id" element={<Perfil />} />
+                    <Route path="/contatos" element={<Contatos />} />
                 </Routes>
             </main>
             <Footer /> 
