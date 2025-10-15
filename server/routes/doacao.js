@@ -24,6 +24,9 @@ DoacaoRoutes.post("/doacao/add", autenticar, upload.array('fotos', 5), doacaoCon
 // GET - Listar todas as doações
 DoacaoRoutes.get("/doacao", doacaoController.listarDoacoes);
 
+// GET - Buscar doação específica por ID
+DoacaoRoutes.get("/doacao/:id", doacaoController.buscarDoacaoPorId);
+
 // DELETE - Remover doação por ID
 DoacaoRoutes.delete("/doacao/:id", autenticar, doacaoController.deletarDoacao);
 

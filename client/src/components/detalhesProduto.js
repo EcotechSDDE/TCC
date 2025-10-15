@@ -199,7 +199,7 @@ export default function DetalhesProduto() {
                     <div style={styles.info}><b>Endereço:</b> {doacao.endereco}</div>
                     <button
                         style={styles.button}
-                        onClick={() => navigate("/contatos")}
+                        onClick={() => navigate(`/contato/${doacao._id}`)}
                     >
                         Ir para Contatos
                     </button>
