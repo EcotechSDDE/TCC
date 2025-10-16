@@ -2,7 +2,7 @@ import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../AuthContext";
 
-const REACT_APP_YOUR_HOSTNAME = "http://localhost:5050"; // Seu back-end
+const REACT_APP_YOUR_HOSTNAME = "http://localhost:5050"; // back-end aqui
 
 export default function Login() {
   const [form, setForm] = useState({
@@ -62,44 +62,55 @@ export default function Login() {
   }
 
   return (
-    <div style={{ ...styles.container, marginTop: "40px" }}>
+    <div style={ styles.container }>
       <h1 style={styles.title}>EcoTech</h1>
       <h2 style={styles.subtitle}>
         Sistema de Doações de Equipamentos Eletrônicos
       </h2>
 
-      <form onSubmit={onSubmit} style={styles.form}>
-        <label style={styles.label}>Email</label>
-        <input
-          type="email"
-          placeholder="Digite seu email"
-          value={form.email}
-          onChange={(e) => updateForm({ email: e.target.value })}
-          style={styles.input}
-          required
-        />
+      <div style={styles.content}>
+        <div style={styles.textContainer}>
+          <p style={styles.text}>
+            O sistema foi desenvolvido para gerenciar a doação de equipamentos
+            eletrônicos, proporcionando um local adequado para o descarte
+            responsável. Otimizando a coleta, assegurando a destinação correta e
+            incentivando a conscientização ambiental.
+          </p>
+        </div>
 
-        <label style={styles.label}>Senha</label>
-        <input
-          type="password"
-          placeholder="Digite sua senha"
-          value={form.password}
-          onChange={(e) => updateForm({ password: e.target.value })}
-          style={styles.input}
-          required
-        />
+        <form onSubmit={onSubmit} style={styles.form}>
+          <label style={styles.label}>Email</label>
+          <input
+            type="email"
+            placeholder="Digite seu email"
+            value={form.email}
+            onChange={(e) => updateForm({ email: e.target.value })}
+            style={styles.input}
+            required
+          />
 
-        <button type="submit" style={styles.button}>
-          Entrar
-        </button>
-        <button
-          type="button"
-          onClick={() => navigate("/cadastro")}
-          style={styles.registerButton}
-        >
-          Ainda não tem uma conta? Cadastre-se
-        </button>
-      </form>
+          <label style={styles.label}>Senha</label>
+          <input
+            type="password"
+            placeholder="Digite sua senha"
+            value={form.password}
+            onChange={(e) => updateForm({ password: e.target.value })}
+            style={styles.input}
+            required
+          />
+
+          <button type="submit" style={styles.button}>
+            Entrar
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate("/cadastro")}
+            style={styles.registerButton}
+          >
+            Ainda não tem uma conta? Cadastre-se
+          </button>
+        </form>
+      </div>
     </div>
   );
 }
@@ -112,54 +123,79 @@ const styles = {
     flexDirection: "column",
     alignItems: "center",
     color: "#fff",
-    paddingTop: "30px",
+    paddingTop: "20px",
+    maxWidth: "750px",
+    width: "90%",
+    margin: "40px auto",
+    borderRadius: "20px",
   },
   title: {
-    fontSize: "2.5rem",
-    marginBottom: "10px",
+    fontSize: "2rem",
+    marginBottom: "5px",
   },
   subtitle: {
-    fontSize: "1.2rem",
-    marginBottom: "30px",
+    fontSize: "1rem",
+    marginBottom: "20px",
     textAlign: "center",
-    maxWidth: "600px",
+    maxWidth: "500px",
   },
   form: {
     backgroundColor: "#C8E6C9",
-    padding: "30px",
+    padding: "20px",
     borderRadius: "12px",
     display: "flex",
     flexDirection: "column",
-    gap: "15px",
-    width: "300px",
-    marginBottom: "35px",
+    gap: "10px",
+    width: "260px",
+    marginBottom: "20px",
   },
   label: {
-    fontSize: "1rem",
+    fontSize: "0.9rem",
     color: "#333",
   },
   input: {
-    padding: "10px",
-    fontSize: "1rem",
+    padding: "8px",
+    fontSize: "0.95rem",
     borderRadius: "6px",
     border: "1px solid #ccc",
   },
   button: {
-    padding: "10px",
+    padding: "8px",
     backgroundColor: "#3b5534",
     color: "white",
-    fontSize: "1rem",
+    fontSize: "0.95rem",
     border: "none",
     borderRadius: "6px",
     cursor: "pointer",
   },
   registerButton: {
-    marginTop: "15px",
+    marginTop: "10px",
     backgroundColor: "transparent",
     border: "none",
     color: "rgb(51, 51, 51)",
     cursor: "pointer",
     textDecoration: "underline",
-    fontSize: "1rem",
+    fontSize: "0.9rem",
+  },
+  content: {
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: "30px",
+    maxWidth: "700px",
+    width: "100%",
+    marginTop: "10px",
+  },
+  textContainer: {
+    maxWidth: "350px",
+    textAlign: "justify",
+    padding: "8px",
+    backgroundColor: "#C8E6C9",
+    borderRadius: "12px",
+    color: "#333",
+  },
+  text: {
+    fontSize: "0.95rem",
+    lineHeight: "1.4",
   },
 };
