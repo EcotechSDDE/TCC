@@ -1,15 +1,15 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const denunciaController = require("../controllers/denunciaController");
-const { autenticar, autorizarAdmin } = require("../middleware/auth");
+const { autenticar, autorizarAdmin } = require('../middleware/auth');
+const denunciaController = require('../controllers/denunciaController');
 
-// Criar denúncia (usuário comum)
-router.post("/denuncia", autenticar, denunciaController.criarDenuncia);
+// Usuário comum cria denúncia
+router.post('/', autenticar, denunciaController.criarDenuncia);
 
-// Listar todas as denúncias (apenas admin)
-router.get("/denuncia", autenticar, autorizarAdmin, denunciaController.listarDenuncias);
+// Admin vê todas as denúncias
+router.get('/', autenticar, autorizarAdmin, denunciaController.listarDenuncias);
 
-// Resolver denúncia (apenas admin)
-router.put("/denuncia/:id/resolver", autenticar, autorizarAdmin, denunciaController.resolverDenuncia);
+// Admin resolve denúncia
+router.put('/:id/resolver', autenticar, autorizarAdmin, denunciaController.resolverDenuncia);
 
 module.exports = router;

@@ -12,9 +12,9 @@ const port = 5050;
 app.use(cors());
 app.use(express.json());
 app.use("/uploads", express.static("uploads")); // servir arquivos estáticos
-app.use(userRoutes); // rotas
-app.use(DoacaoRoutes); // rotas de doação
-app.use(DenunciaRoutes); // rotas de denúncia
+app.use("/user", userRoutes); // rotas de usuário
+app.use("/doacao", DoacaoRoutes); // rotas de doação
+app.use("/denuncia", DenunciaRoutes); // rotas de denúncia
 
 // Rota de teste
 app.get("/", (req, res) => {

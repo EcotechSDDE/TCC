@@ -2,57 +2,61 @@ import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../AuthContext";
 
-const REACT_APP_YOUR_HOSTNAME = "http://localhost:5050"; // back-end aqui
+const REACT_APP_YOUR_HOSTNAME = "http://localhost:5050"; // backend
 
 export default function Login() {
-  const [form, setForm] = useState({
-    email: "",
-    password: "",
-  });
-
+  const [form, setForm] = useState({ email: "", password: "" });
   const navigate = useNavigate();
-  const { setToken } = useContext(AuthContext);
+  const { setToken, setUser } = useContext(AuthContext);
 
   function updateForm(value) {
-    setForm((prev) => {
-      return { ...prev, ...value };
-    });
+    setForm((prev) => ({ ...prev, ...value }));
   }
 
   async function onSubmit(e) {
     e.preventDefault();
 
-    const response = await fetch(`${REACT_APP_YOUR_HOSTNAME}/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    });
+    try {
+      // Observe que agora é /user/login
+      const response = await fetch(`${REACT_APP_YOUR_HOSTNAME}/user/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
 
-    if (!response.ok) {
-      const message = `Erro ao fazer login: ${response.statusText}`;
-      window.alert(message);
-      return;
+      if (!response.ok) {
+        const text = await response.text(); // pega a resposta completa
+        console.error("Erro no login:", text);
+        window.alert(
+          `Erro ao fazer login: ${response.status} ${response.statusText}`
+        );
+        return;
+      }
+
+      const result = await response.json();
+
+      if (result.token && result.usuario) {
+        // Salva token e usuário no contexto e localStorage
+        setToken(result.token);
+        setUser(result.usuario);
+        localStorage.setItem("token", result.token);
+        localStorage.setItem("user", JSON.stringify(result.usuario));
+        localStorage.setItem("tipo", result.usuario.tipo);
+
+        navigate("/produtos"); // redireciona para página de produtos
+      } else {
+        window.alert("Credenciais inválidas.");
+      }
+
+      setForm({ email: "", password: "" });
+    } catch (err) {
+      console.error("Erro ao conectar com o servidor:", err);
+      window.alert("Erro ao conectar com o servidor.");
     }
-
-    const result = await response.json();
-
-    if (result.token) {
-      setToken(result.token);
-      navigate("/produtos");
-    } else {
-      window.alert("Credenciais inválidas.");
-    }
-
-    setForm({ email: "", password: "" });
-  }
-
-  const tipo = localStorage.getItem("tipo");
-  if (tipo === "admin") {
-    /* mostra recursos de admin */
   }
 
   return (
-    <div style={ styles.container }>
+    <div style={styles.container}>
       <h1 style={styles.title}>EcoTech</h1>
       <h2 style={styles.subtitle}>
         Sistema de Doações de Equipamentos Eletrônicos
@@ -63,8 +67,8 @@ export default function Login() {
           <p style={styles.text}>
             O sistema foi desenvolvido para gerenciar a doação de equipamentos
             eletrônicos, proporcionando um local adequado para o descarte
-            responsável. Otimizando a coleta, assegurando a destinação correta e
-            incentivando a conscientização ambiental.
+            responsável, assegurando a destinação correta e incentivando a
+            conscientização ambiental.
           </p>
         </div>
 
@@ -108,21 +112,17 @@ export default function Login() {
 const styles = {
   container: {
     backgroundColor: "#6f9064",
-    padding: "10px",
+    padding: "20px",
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
     color: "#fff",
-    paddingTop: "20px",
     maxWidth: "750px",
     width: "90%",
     margin: "40px auto",
     borderRadius: "20px",
   },
-  title: {
-    fontSize: "2rem",
-    marginBottom: "5px",
-  },
+  title: { fontSize: "2rem", marginBottom: "5px" },
   subtitle: {
     fontSize: "1rem",
     marginBottom: "20px",
@@ -139,10 +139,7 @@ const styles = {
     width: "260px",
     marginBottom: "20px",
   },
-  label: {
-    fontSize: "0.9rem",
-    color: "#333",
-  },
+  label: { fontSize: "0.9rem", color: "#333" },
   input: {
     padding: "8px",
     fontSize: "0.95rem",
@@ -152,7 +149,7 @@ const styles = {
   button: {
     padding: "8px",
     backgroundColor: "#3b5534",
-    color: "white",
+    color: "#fff",
     fontSize: "0.95rem",
     border: "none",
     borderRadius: "6px",
@@ -162,7 +159,7 @@ const styles = {
     marginTop: "10px",
     backgroundColor: "transparent",
     border: "none",
-    color: "rgb(51, 51, 51)",
+    color: "#333",
     cursor: "pointer",
     textDecoration: "underline",
     fontSize: "0.9rem",
@@ -184,8 +181,5 @@ const styles = {
     borderRadius: "12px",
     color: "#333",
   },
-  text: {
-    fontSize: "0.95rem",
-    lineHeight: "1.4",
-  },
+  text: { fontSize: "0.95rem", lineHeight: "1.4" },
 };

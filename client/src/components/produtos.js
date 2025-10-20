@@ -79,7 +79,7 @@ export default function Produtos() {
                   ...styles.aba,
                   ...(abaAtiva === "denuncias" ? styles.abaAtiva : {}),
                 }}
-                onClick={() => setAbaAtiva("denuncias")}
+                onClick={() => navigate("/denuncias")}
               >
                 Denúncias
               </button>
@@ -181,7 +181,9 @@ export default function Produtos() {
           <p style={styles.textoAdmin}>📊 Visualize relatórios do sistema.</p>
         )}
         {abaAtiva === "suporte" && (
-          <p style={styles.textoAdmin}>💬 Veja e responda mensagens de suporte.</p>
+          <p style={styles.textoAdmin}>
+            💬 Veja e responda mensagens de suporte.
+          </p>
         )}
       </div>
     </div>

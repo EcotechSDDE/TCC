@@ -32,7 +32,7 @@ exports.criarDenuncia = async (req, res) => {
 // Listar todas as denúncias (admin)
 exports.listarDenuncias = async (req, res) => {
   try {
-    const denuncias = await Denuncia.find().populate('usuario').populate('doacao');
+    const denuncias = await Denuncia.find().populate('usuario', 'nome email').populate('doacao', 'nome');
     res.status(200).json(denuncias);
   } catch (error) {
     res.status(400).json({ message: error.message });

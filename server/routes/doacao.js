@@ -7,32 +7,21 @@ const { autenticar, autorizarAdmin } = require('../middleware/auth');
 const crypto = require('crypto');
 
 const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "uploads/");
-  },
-  filename: function (req, file, cb) {
-    // Gera nome único: timestamp + random + extensão
+  destination: (req, file, cb) => cb(null, "uploads/"),
+  filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + '-' + crypto.randomBytes(6).toString('hex');
     cb(null, uniqueSuffix + path.extname(file.originalname));
   }
 });
-const upload = multer({ storage: storage });
+const upload = multer({ storage });
 
-// POST - Criar nova doação
-DoacaoRoutes.post("/doacao/add", autenticar, upload.array('fotos', 5), doacaoController.criarDoacao);
-
-// GET - Listar todas as doações
-DoacaoRoutes.get("/doacao", doacaoController.listarDoacoes);
-
-// GET - Buscar doação específica por ID
-DoacaoRoutes.get("/doacao/:id", doacaoController.buscarDoacaoPorId);
-
-// DELETE - Remover doação por ID
-DoacaoRoutes.delete("/doacao/:id", autenticar, doacaoController.deletarDoacao);
-
-// Rotas ADMIN - Gerenciar doações
-DoacaoRoutes.put('/doacao/:id', autenticar, autorizarAdmin, doacaoController.editarDoacao); // Editar doação
-DoacaoRoutes.delete('/doacao/:id/admin', autenticar, autorizarAdmin, doacaoController.removerDoacaoAdmin); // Remover doação (admin)
-DoacaoRoutes.put('/doacao/:id/status', autenticar, autorizarAdmin, doacaoController.alterarStatusDoacao); // Alterar status
+// ✅ ROTAS SEM DUPLICAÇÃO
+DoacaoRoutes.post("/add", autenticar, upload.array('fotos', 5), doacaoController.criarDoacao); // /doacao/add
+DoacaoRoutes.get("/", doacaoController.listarDoacoes); // /doacao
+DoacaoRoutes.get("/:id", doacaoController.buscarDoacaoPorId); // /doacao/:id
+DoacaoRoutes.delete("/:id", autenticar, doacaoController.deletarDoacao);
+DoacaoRoutes.put('/:id', autenticar, autorizarAdmin, doacaoController.editarDoacao);
+DoacaoRoutes.delete('/:id/admin', autenticar, autorizarAdmin, doacaoController.removerDoacaoAdmin);
+DoacaoRoutes.put('/:id/status', autenticar, autorizarAdmin, doacaoController.alterarStatusDoacao);
 
 module.exports = DoacaoRoutes;
