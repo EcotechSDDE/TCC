@@ -67,3 +67,37 @@ exports.buscarDoacaoPorId = async (req, res) => {
         res.status(400).json({ message: error.message });
     }
 };
+
+// Editar doação (admin)
+exports.editarDoacao = async (req, res) => {
+    try {
+        const doacaoAtualizada = await Doacao.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        res.status(200).json(doacaoAtualizada);
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+};
+
+// Remover doação (admin)
+exports.removerDoacaoAdmin = async (req, res) => {
+    try {
+        await Doacao.findByIdAndDelete(req.params.id);
+        res.status(200).json({ message: 'Doação removida com sucesso' });
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+};
+
+// Alterar status da doação (admin)
+exports.alterarStatusDoacao = async (req, res) => {
+    try {
+        const { status } = req.body;
+        const doacao = await Doacao.findById(req.params.id);
+        if (!doacao) return res.status(404).json({ message: 'Doação não encontrada' });
+        doacao.status = status;
+        await doacao.save();
+        res.status(200).json({ status: doacao.status });
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+};

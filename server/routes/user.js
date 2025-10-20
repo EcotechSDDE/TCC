@@ -50,4 +50,10 @@ userRoutes.post("/login", usuarioController.login);
 // Rota protegida para admins
 userRoutes.get('/admin/usuarios', autenticar, autorizarAdmin, usuarioController.listarUsuarios);
 
+// Rotas ADMIN - Gerenciar usuários
+userRoutes.put('/user/:id', autenticar, autorizarAdmin, usuarioController.editarUsuario); // Editar usuário
+userRoutes.put('/user/:id/bloquear', autenticar, autorizarAdmin, usuarioController.bloquearUsuario); // Bloquear/desbloquear usuário
+userRoutes.delete('/user/:id', autenticar, autorizarAdmin, usuarioController.excluirUsuario); // Excluir usuário
+userRoutes.put('/user/:id/admin', autenticar, autorizarAdmin, usuarioController.atribuirAdmin); // Atribuir/remover admin
+
 module.exports = userRoutes;

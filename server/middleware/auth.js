@@ -7,14 +7,22 @@ function autenticar(req, res, next) {
 
   jwt.verify(token, SECRET, (err, decoded) => {
     if (err) return res.status(401).json({ message: 'Token inválido ou expirado' });
-    req.usuario = decoded;
-    req.userId = decoded.id; // Corrigido para 'id' do token
+
+    req.usuario = {
+      _id: decoded.id,
+      id: decoded.id,
+      email: decoded.email,
+      tipo: decoded.tipo,
+    };
+
     next();
   });
 }
 
 function autorizarAdmin(req, res, next) {
-  if (req.usuario?.tipo !== 'admin') return res.status(403).json({ message: 'Acesso negado' });
+  if (req.usuario?.tipo !== 'admin') {
+    return res.status(403).json({ message: 'Acesso negado: apenas administradores podem realizar esta ação.' });
+  }
   next();
 }
 

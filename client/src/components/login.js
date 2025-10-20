@@ -46,16 +46,6 @@ export default function Login() {
     setForm({ email: "", password: "" });
   }
 
-  const token = localStorage.getItem("token");
-  fetch("/rota-protegida", {
-    headers: { Authorization: `Bearer ${token}` },
-  }).then((response) => {
-    if (response.status === 401) {
-      localStorage.removeItem("token");
-      navigate("/"); // ou para a rota de login
-    }
-  });
-
   const tipo = localStorage.getItem("tipo");
   if (tipo === "admin") {
     /* mostra recursos de admin */

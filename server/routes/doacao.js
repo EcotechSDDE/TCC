@@ -3,7 +3,7 @@ const DoacaoRoutes = express.Router();
 const doacaoController = require("../controllers/doacaoController");
 const multer = require("multer");
 const path = require("path");
-const { autenticar } = require('../middleware/auth');
+const { autenticar, autorizarAdmin } = require('../middleware/auth');
 const crypto = require('crypto');
 
 const storage = multer.diskStorage({
@@ -29,5 +29,10 @@ DoacaoRoutes.get("/doacao/:id", doacaoController.buscarDoacaoPorId);
 
 // DELETE - Remover doação por ID
 DoacaoRoutes.delete("/doacao/:id", autenticar, doacaoController.deletarDoacao);
+
+// Rotas ADMIN - Gerenciar doações
+DoacaoRoutes.put('/doacao/:id', autenticar, autorizarAdmin, doacaoController.editarDoacao); // Editar doação
+DoacaoRoutes.delete('/doacao/:id/admin', autenticar, autorizarAdmin, doacaoController.removerDoacaoAdmin); // Remover doação (admin)
+DoacaoRoutes.put('/doacao/:id/status', autenticar, autorizarAdmin, doacaoController.alterarStatusDoacao); // Alterar status
 
 module.exports = DoacaoRoutes;

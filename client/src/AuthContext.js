@@ -7,27 +7,42 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    if (token) {
-      localStorage.setItem("token", token);
-    } else {
-      localStorage.removeItem("token");
-    }
-    if (token) {
-      fetch("http://localhost:5050/user/me", {
-        headers: { Authorization: `Bearer ${token}` }
-      })
-        .then(res => res.json())
-        .then(data => setUser(data))
-        .catch(() => setUser(null));
-    } else {
+    if (!token) {
       setUser(null);
+      return;
     }
+
+    localStorage.setItem("token", token);
+
+    const carregarUsuario = async () => {
+      try {
+        const res = await fetch("http://localhost:5050/user/me", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!res.ok) {
+          throw new Error("Token inválido");
+        }
+
+        const data = await res.json();
+        setUser(data);
+      } catch (err) {
+        console.error("Erro ao buscar usuário logado:", err);
+        localStorage.removeItem("token");
+        setUser(null);
+        setToken("");
+      }
+    };
+
+    carregarUsuario();
   }, [token]);
 
   function logout() {
+    localStorage.removeItem("token");
     setToken("");
     setUser(null);
-    localStorage.removeItem("token");
   }
 
   return (
