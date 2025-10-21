@@ -83,15 +83,17 @@ export default function Produtos() {
               >
                 Denúncias
               </button>
+
               <button
                 style={{
                   ...styles.aba,
                   ...(abaAtiva === "relatorios" ? styles.abaAtiva : {}),
                 }}
-                onClick={() => setAbaAtiva("relatorios")}
+                onClick={() => navigate("/relatorios")}
               >
                 Relatórios
               </button>
+
               <button
                 style={{
                   ...styles.aba,

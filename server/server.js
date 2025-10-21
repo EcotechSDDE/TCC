@@ -4,6 +4,7 @@ const cors = require("cors");
 const userRoutes = require("./routes/user"); // rotas de usuário
 const DoacaoRoutes = require("./routes/doacao"); // rotas de doação
 const DenunciaRoutes = require("./routes/denuncia"); // rotas de denúncia
+const RelatorioRoutes = require("./routes/relatorio"); // rotas de relatório
 
 const app = express();
 const port = 5050;
@@ -15,6 +16,7 @@ app.use("/uploads", express.static("uploads")); // servir arquivos estáticos
 app.use("/user", userRoutes); // rotas de usuário
 app.use("/doacao", DoacaoRoutes); // rotas de doação
 app.use("/denuncia", DenunciaRoutes); // rotas de denúncia
+app.use("/relatorio", RelatorioRoutes); // rotas de relatório
 
 // Rota de teste
 app.get("/", (req, res) => {

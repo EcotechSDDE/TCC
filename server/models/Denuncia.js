@@ -6,6 +6,6 @@ const DenunciaSchema = new mongoose.Schema({
     motivo: { type: String, required: true },
     status: { type: String, enum: ['pendente', 'resolvida'], default: 'pendente' },
     data: { type: Date, default: Date.now }
-});
+}, { timestamps: true });
 
 module.exports = mongoose.model('Denuncia', DenunciaSchema);

@@ -14,6 +14,7 @@ import Perfil from "./components/perfil";
 import Contato from "./components/contato";
 import DenunciasAdmin from "./components/denunciaAdmin";
 import { AuthContext } from "./AuthContext";
+import RelatorioAdmin from "./components/relatorioAdmin";
 
 const App = () => {
   const { user } = useContext(AuthContext);
@@ -39,6 +40,10 @@ const App = () => {
           <Route
             path="/denuncias"
             element={user?.tipo === "admin" ? <DenunciasAdmin /> : <Login />}
+          />
+          <Route
+            path="/relatorios"
+            element={user?.tipo === "admin" ? <RelatorioAdmin /> : <Login />}
           />
         </Routes>
       </main>
