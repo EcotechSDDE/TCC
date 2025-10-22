@@ -16,7 +16,7 @@ exports.criarDoacao = async (req, res) => {
     // Supondo que req.userId vem do middleware de autenticação
     const novaDoacao = new Doacao({
         ...dadosDaDoacao,
-        usuario: req.userId
+        usuario: req.usuario.id
     });
 
     try {
