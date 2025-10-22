@@ -6,6 +6,7 @@ const REACT_APP_YOUR_HOSTNAME = 'http://localhost:5050';
 export default function DetalhesProduto() {
     const { id } = useParams();
     const [doacao, setDoacao] = useState(null);
+    const [isDono, setIsDono] = useState(false);
     const [selectedImgIdx, setSelectedImgIdx] = useState(0);
     const [zoomed, setZoomed] = useState(false);
     const [showModal, setShowModal] = useState(false);
@@ -13,19 +14,93 @@ export default function DetalhesProduto() {
     const navigate = useNavigate();
 
     useEffect(() => {
-        async function fetchDoacao() {
-            const response = await fetch(`${REACT_APP_YOUR_HOSTNAME}/doacao`);
-            if (!response.ok) {
-                window.alert("Erro ao buscar doação");
-                return;
+      async function fetchDoacao() {
+        try {
+          const response = await fetch(`${REACT_APP_YOUR_HOSTNAME}/doacao`);
+          if (!response.ok) {
+            window.alert("Erro ao buscar doação");
+            return;
+          }
+          const data = await response.json();
+          const found = data.find((d) => d._id === id);
+          setDoacao(found);
+
+          // --- debug: ver o que veio ---
+          console.log("DETALHES: doacao encontrada:", found);
+          const rawUser = localStorage.getItem("user");
+          let user = null;
+          try {
+            user = rawUser ? JSON.parse(rawUser) : null;
+          } catch (e) {
+            user = null;
+          }
+          console.log("DETALHES: user do localStorage:", user);
+
+          // Extrair ownerId de várias formas possíveis
+          let ownerId = "";
+          if (found) {
+            if (found.usuario) {
+              // pode ser objeto populado { _id: "...", nome: ... } ou só id string
+              ownerId =
+                typeof found.usuario === "string"
+                  ? found.usuario
+                  : found.usuario._id || found.usuario.id || "";
+            } else if (found.userId) {
+              ownerId = found.userId;
+            } else if (found.usuarioId) {
+              ownerId = found.usuarioId;
+            } else if (found.owner) {
+              ownerId = found.owner;
             }
-            const data = await response.json();
-            // Busca a doação pelo id (ajuste conforme sua rota se necessário)
-            const found = data.find(d => d._id === id);
-            setDoacao(found);
+          }
+
+          // Extrair userId do localStorage por variantes
+          let currentUserId = "";
+          if (user) {
+            currentUserId = user._id || user.id || user.userId || "";
+          } else {
+            // fallback: tentar decodificar token (caso user não esteja no localStorage)
+            const token = localStorage.getItem("token");
+            if (token) {
+              try {
+                const payload = JSON.parse(atob(token.split(".")[1]));
+                currentUserId =
+                  payload.sub ||
+                  payload.id ||
+                  payload._id ||
+                  payload.userId ||
+                  "";
+              } catch (e) {
+                currentUserId = "";
+              }
+            }
+          }
+
+          console.log(
+            "DETALHES: ownerId =",
+            ownerId,
+            " | currentUserId =",
+            currentUserId
+          );
+
+          // comparar como strings — trata ObjectId vs string
+          if (
+            ownerId &&
+            currentUserId &&
+            String(ownerId) === String(currentUserId)
+          ) {
+            setIsDono(true);
+          } else {
+            setIsDono(false);
+          }
+        } catch (err) {
+          console.error("Erro ao buscar doação:", err);
+          window.alert("Erro ao buscar doação");
         }
-        fetchDoacao();
+      }
+      fetchDoacao();
     }, [id]);
+
 
     if (!doacao) {
         return <div style={{ color: "#3b5534", textAlign: "center", marginTop: "40px" }}>Carregando detalhes...</div>;
@@ -367,18 +442,22 @@ export default function DetalhesProduto() {
             <div style={styles.info}>
               <b>Endereço:</b> {doacao.endereco}
             </div>
-            <button
-              style={styles.button}
-              onClick={() => navigate(`/contato/${doacao._id}`)}
-            >
-              Ir para Contatos
-            </button>
-            <button
-              style={styles.reportButton}
-              onClick={() => setShowModal(true)}
-            >
-              🚨 Denunciar produto
-            </button>
+            {!isDono && (
+              <>
+                <button
+                  style={styles.button}
+                  onClick={() => navigate(`/contato/${doacao._id}`)}
+                >
+                  Ir para Contatos
+                </button>
+                <button
+                  style={styles.reportButton}
+                  onClick={() => setShowModal(true)}
+                >
+                  🚨 Denunciar produto
+                </button>
+              </>
+            )}
           </div>
         </div>
         {showModal && (
@@ -482,7 +561,7 @@ const styles = {
   reportButton: {
     marginTop: "10px",
     padding: "12px",
-    backgroundColor: "#d9534f",
+    backgroundColor: "#6f9064",
     color: "#fff",
     fontSize: "1.1rem",
     border: "none",

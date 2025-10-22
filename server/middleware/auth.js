@@ -14,6 +14,8 @@ function autenticar(req, res, next) {
       email: decoded.email,
       tipo: decoded.tipo,
     };
+    
+    req.userId = decoded.id;
 
     next();
   });
