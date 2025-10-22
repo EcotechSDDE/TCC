@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useContext } from "react";
 import Modal from "react-modal";
+import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../AuthContext";
 
 const REACT_APP_YOUR_HOSTNAME = "http://localhost:5050";
@@ -7,6 +8,7 @@ Modal.setAppElement("#root");
 
 export default function ControleUsuarios() {
   const { token, user } = useContext(AuthContext);
+  const navigate = useNavigate();
   const [usuarios, setUsuarios] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
@@ -15,7 +17,11 @@ export default function ControleUsuarios() {
   const [unidade, setUnidade] = useState("horas");
 
   useEffect(() => {
-    if (!token || user?.tipo !== "admin") return;
+    if (!token) return;
+    if (user?.tipo !== "admin") {
+      navigate("/produtos");
+      return;
+    }
 
     async function fetchUsuarios() {
       try {
@@ -26,16 +32,14 @@ export default function ControleUsuarios() {
         setUsuarios(data);
       } catch (err) {
         console.error("Erro ao buscar usuários:", err);
-        alert("Erro ao carregar usuários.");
       } finally {
         setCarregando(false);
       }
     }
 
     fetchUsuarios();
-  }, [token, user]);
+  }, [token, user, navigate]);
 
-  // 🔹 Deletar usuário
   async function handleDelete(id) {
     if (!window.confirm("Tem certeza que deseja excluir este usuário?")) return;
 
@@ -56,7 +60,6 @@ export default function ControleUsuarios() {
     }
   }
 
-  // 🔹 Abre modal de bloqueio
   function abrirModal(usuario) {
     setUsuarioSelecionado(usuario);
     setDuracao("");
@@ -64,13 +67,11 @@ export default function ControleUsuarios() {
     setModalOpen(true);
   }
 
-  // 🔹 Fecha modal
   function fecharModal() {
     setModalOpen(false);
     setUsuarioSelecionado(null);
   }
 
-  // 🔹 Confirmar bloqueio
   async function confirmarBloqueio() {
     if (unidade !== "indefinido" && (!duracao || isNaN(duracao) || duracao <= 0)) {
       alert("Digite uma duração válida.");
@@ -118,7 +119,6 @@ export default function ControleUsuarios() {
     }
   }
 
-  // 🔹 Desbloquear
   async function handleDesbloquear(id) {
     try {
       const res = await fetch(`${REACT_APP_YOUR_HOSTNAME}/user/${id}/bloquear`, {
@@ -142,170 +142,222 @@ export default function ControleUsuarios() {
     }
   }
 
-  if (carregando) return <p style={styles.texto}>Carregando usuários...</p>;
-  if (user?.tipo !== "admin") return <p style={styles.texto}>🚫 Acesso negado.</p>;
+  if (carregando) return <p style={styles.textoAdmin}>Carregando usuários...</p>;
+  if (user?.tipo !== "admin") return <p style={styles.textoAdmin}>🚫 Acesso negado.</p>;
 
   return (
     <div style={styles.container}>
-      <h2 style={styles.titulo}>Controle de Usuários 👤</h2>
-
-      {usuarios.length === 0 ? (
-        <p style={styles.texto}>Nenhum usuário encontrado.</p>
-      ) : (
-        <table style={styles.tabela}>
-          <thead>
-            <tr>
-              <th>Nome</th>
-              <th>Email</th>
-              <th>Tipo</th>
-              <th>Status</th>
-              <th>Bloqueado até</th>
-              <th>Ações</th>
-            </tr>
-          </thead>
-          <tbody>
-            {usuarios.map((u, index) => (
-              <tr
-                key={u._id}
-                style={{
-                  backgroundColor: index % 2 === 0 ? "#dfe6e1" : "#c6d2c8",
-                }}
-              >
-                <td>{u.nome}</td>
-                <td>{u.email}</td>
-                <td>{u.tipo}</td>
-                <td>
-                  {u.bloqueado ? (
-                    <span style={styles.statusBloqueado}>Bloqueado</span>
-                  ) : (
-                    <span style={styles.statusAtivo}>Ativo</span>
-                  )}
-                </td>
-                <td>
-                  {u.bloqueadoUntil
-                    ? new Date(u.bloqueadoUntil).toLocaleString("pt-BR")
-                    : "-"}
-                </td>
-                <td style={styles.acoes}>
-                  {u.tipo !== "admin" && (
-                    <>
-                      <button
-                        style={u.bloqueado ? styles.btnDesbloquear : styles.btnBloquear}
-                        onClick={() =>
-                          u.bloqueado ? handleDesbloquear(u._id) : abrirModal(u)
-                        }
-                      >
-                        {u.bloqueado ? "Desbloquear" : "Bloquear"}
-                      </button>
-
-                      <button
-                        style={styles.btnExcluir}
-                        onClick={() => handleDelete(u._id)}
-                      >
-                        Excluir
-                      </button>
-                    </>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
-
-      {/* 🔹 Modal */}
-      <Modal
-        isOpen={modalOpen}
-        onRequestClose={fecharModal}
-        style={modalStyle}
-        contentLabel="Bloquear Usuário"
-      >
-        <h2 style={styles.modalTitulo}>
-          Bloquear {usuarioSelecionado?.nome || ""}
-        </h2>
-        <p style={{ textAlign: "center", marginBottom: "10px" }}>
-          Escolha o tempo de bloqueio:
-        </p>
-
-        <div style={styles.modalInputs}>
-          {unidade !== "indefinido" && (
-            <input
-              type="number"
-              placeholder="0"
-              value={duracao}
-              onChange={(e) => setDuracao(e.target.value)}
-              style={styles.input}
-            />
-          )}
-
-          <select
-            value={unidade}
-            onChange={(e) => setUnidade(e.target.value)}
-            style={styles.select}
+      {/* 🔹 Abas superiores - mesmo padrão do denunciaAdmin.js */}
+      <div style={styles.abasContainer}>
+        <div style={styles.abasEsquerda}>
+          <button
+            style={styles.aba}
+            onClick={() => navigate("/aprodutos")}
           >
-            <option value="segundos">Segundos</option>
-            <option value="minutos">Minutos</option>
-            <option value="horas">Horas</option>
-            <option value="dias">Dias</option>
-            <option value="indefinido">Indefinido</option>
-          </select>
-        </div>
+            Produtos
+          </button>
 
-        <div style={styles.modalBotoes}>
-          <button style={styles.btnConfirmar} onClick={confirmarBloqueio}>
-            Confirmar
+          <button
+            style={styles.aba}
+            onClick={() => navigate("/denuncias")}
+          >
+            Denúncias
           </button>
-          <button style={styles.btnCancelar} onClick={fecharModal}>
-            Cancelar
+
+          <button
+            style={styles.aba}
+            onClick={() => navigate("/relatorios")}
+          >
+            Relatórios
+          </button>
+
+          <button style={{ ...styles.aba, ...styles.abaAtiva }}>
+            Controle de Usuários
           </button>
         </div>
-      </Modal>
+      </div>
+
+      {/* 🔹 Quadrado verde grande (padrão) */}
+      <div style={styles.quadradoGrande}>
+        <h2 style={styles.titulo}>Controle de Usuários 👤</h2>
+
+        {usuarios.length === 0 ? (
+          <div style={styles.textoAdmin}>Nenhum usuário encontrado.</div>
+        ) : (
+          <table style={styles.tabela}>
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>Email</th>
+                <th>Tipo</th>
+                <th>Status</th>
+                <th>Bloqueado até</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              {usuarios.map((u, index) => (
+                <tr
+                  key={u._id}
+                  style={{
+                    backgroundColor: index % 2 === 0 ? "#dfe6e1" : "#c6d2c8",
+                  }}
+                >
+                  <td>{u.nome}</td>
+                  <td>{u.email}</td>
+                  <td>{u.tipo}</td>
+                  <td>
+                    {u.bloqueado ? (
+                      <span style={styles.statusBloqueado}>Bloqueado</span>
+                    ) : (
+                      <span style={styles.statusAtivo}>Ativo</span>
+                    )}
+                  </td>
+                  <td>
+                    {u.bloqueadoUntil
+                      ? new Date(u.bloqueadoUntil).toLocaleString("pt-BR")
+                      : "-"}
+                  </td>
+                  <td style={styles.acoes}>
+                    {u.tipo !== "admin" && (
+                      <>
+                        <button
+                          style={u.bloqueado ? styles.btnDesbloquear : styles.btnBloquear}
+                          onClick={() =>
+                            u.bloqueado ? handleDesbloquear(u._id) : abrirModal(u)
+                          }
+                        >
+                          {u.bloqueado ? "Desbloquear" : "Bloquear"}
+                        </button>
+
+                        <button
+                          style={styles.btnExcluir}
+                          onClick={() => handleDelete(u._id)}
+                        >
+                          Excluir
+                        </button>
+                      </>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+
+        {/* 🔹 Modal */}
+        <Modal
+          isOpen={modalOpen}
+          onRequestClose={fecharModal}
+          style={modalStyle}
+          contentLabel="Bloquear Usuário"
+        >
+          <h2 style={styles.modalTitulo}>
+            Bloquear {usuarioSelecionado?.nome || ""}
+          </h2>
+          <p style={{ textAlign: "center", marginBottom: "10px" }}>
+            Escolha o tempo de bloqueio:
+          </p>
+
+          <div style={styles.modalInputs}>
+            {unidade !== "indefinido" && (
+              <input
+                type="number"
+                placeholder="0"
+                value={duracao}
+                onChange={(e) => setDuracao(e.target.value)}
+                style={styles.input}
+              />
+            )}
+
+            <select
+              value={unidade}
+              onChange={(e) => setUnidade(e.target.value)}
+              style={styles.select}
+            >
+              <option value="segundos">Segundos</option>
+              <option value="minutos">Minutos</option>
+              <option value="horas">Horas</option>
+              <option value="dias">Dias</option>
+              <option value="indefinido">Indefinido</option>
+            </select>
+          </div>
+
+          <div style={styles.modalBotoes}>
+            <button style={styles.btnConfirmar} onClick={confirmarBloqueio}>
+              Confirmar
+            </button>
+            <button style={styles.btnCancelar} onClick={fecharModal}>
+              Cancelar
+            </button>
+          </div>
+        </Modal>
+      </div>
     </div>
   );
 }
-
 const styles = {
   container: {
-    backgroundColor: "#6f9064", // verde-médio (igual login)
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    marginTop: "20px",
+  },
+  abasContainer: {
+    width: "1200px",
+    display: "flex",
+    justifyContent: "flex-start",
+    marginBottom: "0px",
+  },
+  abasEsquerda: {
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "flex-end",
+  },
+  aba: {
+    padding: "14px 38px 18px 38px",
+    backgroundColor: "#88bd8a",
+    border: "none",
+    borderTopLeftRadius: "16px",
+    borderTopRightRadius: "16px",
+    color: "#3b5534",
+    fontWeight: "bold",
+    cursor: "pointer",
+    fontSize: "1.1rem",
+    marginRight: "2px",
+  },
+  abaAtiva: {
+    backgroundColor: "#6f9064",
     color: "#fff",
-    borderRadius: "20px",
-    padding: "30px",
-    width: "90%",
-    margin: "40px auto",
-    maxWidth: "1000px",
+  },
+  quadradoGrande: {
+    backgroundColor: "#6f9064",
+    borderRadius: "0 24px 24px 24px",
+    padding: "40px",
+    display: "flex",
+    flexDirection: "column",
+    width: "1200px",
+    minHeight: "400px",
+    boxShadow: "0 2px 10px rgba(0,0,0,0.08)",
   },
   titulo: {
-    fontSize: "1.8rem",
+    color: "#fff",
+    textAlign: "center",
     marginBottom: "25px",
-    textAlign: "center",
-    color: "#fff",
+    fontSize: "1.8rem",
   },
-  texto: {
-    textAlign: "center",
-    fontSize: "1rem",
+  textoAdmin: {
     color: "#fff",
-    marginBottom: "20px",
+    textAlign: "center",
+    fontSize: "1.1rem",
   },
   tabela: {
     width: "100%",
     borderCollapse: "collapse",
-    backgroundColor: "#C8E6C9", // verde-claro
+    backgroundColor: "#C8E6C9",
     color: "#333",
     borderRadius: "12px",
     overflow: "hidden",
-  },
-  cabecalho: {
-    backgroundColor: "#3b5534", // verde escuro
-    color: "#fff",
-    textAlign: "left",
-    padding: "12px",
-  },
-  linha: {
-    borderBottom: "1px solid #ddd",
-  },
-  celula: {
-    padding: "10px 12px",
-    textAlign: "center",
   },
   acoes: {
     display: "flex",
@@ -321,24 +373,22 @@ const styles = {
     fontWeight: "bold",
   },
   btnBloquear: {
-    backgroundColor: "#3b5534", // verde escuro
+    backgroundColor: "#3b5534",
     color: "#fff",
     border: "none",
     padding: "8px 14px",
     borderRadius: "8px",
     cursor: "pointer",
     fontWeight: "bold",
-    transition: "0.2s",
   },
   btnDesbloquear: {
-    backgroundColor: "#C8E6C9", // verde claro
+    backgroundColor: "#C8E6C9",
     color: "#3b5534",
     border: "1px solid #3b5534",
     padding: "8px 14px",
     borderRadius: "8px",
     cursor: "pointer",
     fontWeight: "bold",
-    transition: "0.2s",
   },
   btnExcluir: {
     backgroundColor: "#fff",
@@ -348,7 +398,6 @@ const styles = {
     borderRadius: "8px",
     cursor: "pointer",
     fontWeight: "bold",
-    transition: "0.2s",
   },
   modalTitulo: {
     textAlign: "center",
@@ -386,7 +435,6 @@ const styles = {
     padding: "10px 20px",
     borderRadius: "8px",
     cursor: "pointer",
-    transition: "0.2s",
   },
   btnCancelar: {
     backgroundColor: "#fff",
@@ -395,17 +443,15 @@ const styles = {
     padding: "10px 20px",
     borderRadius: "8px",
     cursor: "pointer",
-    transition: "0.2s",
   },
 };
 
-// Estilo do modal
 const modalStyle = {
   content: {
     top: "50%",
     left: "50%",
     transform: "translate(-50%, -50%)",
-    backgroundColor: "#C8E6C9", // verde claro (igual formulário login)
+    backgroundColor: "#C8E6C9",
     padding: "30px",
     borderRadius: "16px",
     width: "400px",

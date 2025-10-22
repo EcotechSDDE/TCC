@@ -1,24 +1,33 @@
 import React, { useEffect, useState, useContext } from "react";
+import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../AuthContext";
 
+const REACT_APP_YOUR_HOSTNAME = "http://localhost:5050";
+
 export default function DenunciasAdmin() {
-  const { token } = useContext(AuthContext);
+  const { token, user } = useContext(AuthContext);
   const [denuncias, setDenuncias] = useState([]);
+  const [abaAtiva, setAbaAtiva] = useState("denuncias");
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!token) return;
+    if (user?.tipo !== "admin") {
+      navigate("/produtos");
+      return;
+    }
 
-    fetch("http://localhost:5050/denuncia", {
+    fetch(`${REACT_APP_YOUR_HOSTNAME}/denuncia`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => res.json())
       .then((data) => setDenuncias(data))
       .catch((err) => console.error(err));
-  }, [token]);
+  }, [token, user, navigate]);
 
   async function resolverDenuncia(id) {
     try {
-      const res = await fetch(`http://localhost:5050/denuncia/${id}/resolver`, {
+      const res = await fetch(`${REACT_APP_YOUR_HOSTNAME}/denuncia/${id}/resolver`, {
         method: "PUT",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -35,62 +44,91 @@ export default function DenunciasAdmin() {
 
   return (
     <div style={styles.container}>
-      <div style={styles.headerBox}>
-        <h1 style={styles.title}>📣 Gerenciamento de Denúncias</h1>
-        <p style={styles.subtitle}>
-          Veja todas as denúncias feitas pelos usuários e marque como resolvidas.
-        </p>
+      {/* Abas superiores - mesmo padrão do produtos.js */}
+      <div style={styles.abasContainer}>
+        <div style={styles.abasEsquerda}>
+          <button
+            style={{
+              ...styles.aba,
+              ...(abaAtiva === "receber" ? styles.abaAtiva : {}),
+            }}
+            onClick={() => navigate("/produtos")}
+          >
+            Receber
+          </button>
+
+          <button
+            style={{
+              ...styles.aba,
+              ...(abaAtiva === "denuncias" ? styles.abaAtiva : {}),
+            }}
+            onClick={() => setAbaAtiva("denuncias")}
+          >
+            Denúncias
+          </button>
+
+          <button
+            style={{
+              ...styles.aba,
+              ...(abaAtiva === "relatorios" ? styles.abaAtiva : {}),
+            }}
+            onClick={() => navigate("/relatorios")}
+          >
+            Relatórios
+          </button>
+
+          <button
+            style={{
+              ...styles.aba,
+              ...(abaAtiva === "controle" ? styles.abaAtiva : {}),
+            }}
+            onClick={() => navigate("/controleUsuarios")}
+          >
+            Controle de Usuários
+          </button>
+        </div>
       </div>
 
-      <div style={styles.contentBox}>
+      {/* Quadrado verde grande (igual produtos.js) */}
+      <div style={styles.quadradoGrande}>
         {denuncias.length === 0 ? (
-          <p style={styles.emptyText}>Nenhuma denúncia encontrada.</p>
+          <div style={styles.textoAdmin}>Nenhuma denúncia encontrada.</div>
         ) : (
-          <ul style={styles.list}>
-            {denuncias.map((d) => (
-              <li key={d._id} style={styles.card}>
-                <div style={styles.cardContent}>
-                  <p>
-                    <strong>Usuário:</strong> {d.usuario?.nome || "Desconhecido"}
-                  </p>
-                  {d.doacao && (
-                    <p>
-                      <strong>Doação:</strong> {d.doacao.nome}
-                    </p>
-                  )}
-                  <p>
-                    <strong>Motivo:</strong> {d.motivo}
-                  </p>
-                  <p>
-                    <strong>Status:</strong>{" "}
-                    <span
-                      style={{
-                        color: d.status === "resolvida" ? "#2e7d32" : "#c62828",
-                        fontWeight: "bold",
-                      }}
-                    >
-                      {d.status}
-                    </span>
-                  </p>
-                </div>
+          denuncias.map((d) => (
+            <div key={d._id} style={styles.quadradoPequeno}>
+              <div style={styles.nome}>
+                {d.doacao?.nome || "Doação não encontrada"}
+              </div>
+              <div style={styles.detalhes}>
+                <p><strong>Usuário:</strong> {d.usuario?.nome || "Desconhecido"}</p>
+                <p><strong>Motivo:</strong> {d.motivo}</p>
+                <p>
+                  <strong>Status:</strong>{" "}
+                  <span
+                    style={{
+                      color: d.status === "resolvida" ? "#2e7d32" : "#c62828",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    {d.status}
+                  </span>
+                </p>
+              </div>
 
-                <button
-                  disabled={d.status === "resolvida"}
-                  onClick={() => resolverDenuncia(d._id)}
-                  style={{
-                    ...styles.button,
-                    backgroundColor:
-                      d.status === "resolvida" ? "#9e9e9e" : "#3b5534",
-                    cursor: d.status === "resolvida" ? "default" : "pointer",
-                  }}
-                >
-                  {d.status === "resolvida"
-                    ? "✅ Resolvida"
-                    : "Marcar como resolvida"}
-                </button>
-              </li>
-            ))}
-          </ul>
+              <button
+                style={{
+                  ...styles.contato,
+                  backgroundColor:
+                    d.status === "resolvida" ? "#9e9e9e" : "#3b5534",
+                  cursor: d.status === "resolvida" ? "default" : "pointer",
+                }}
+                disabled={d.status === "resolvida"}
+                onClick={() => resolverDenuncia(d._id)}
+              >
+                {d.status === "resolvida" ? "✅ Resolvida" : "Marcar como resolvida"}
+              </button>
+            </div>
+          ))
         )}
       </div>
     </div>
@@ -102,68 +140,98 @@ const styles = {
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
-    width: "100%",
-    minHeight: "80vh",
-  },
-  headerBox: {
-    textAlign: "center",
-    marginBottom: "30px",
-    color: "#3b5534",
-  },
-  title: {
-    fontSize: "2rem",
-    marginBottom: "10px",
     marginTop: "20px",
   },
-  subtitle: {
-    fontSize: "1.1rem",
-    color: "#555",
-  },
-  contentBox: {
-    backgroundColor: "#6f9064",
-    borderRadius: "24px",
-    padding: "40px",
-    width: "100%",
-    maxWidth: "1200px",
-    minHeight: "300px",
-    boxShadow: "0 4px 10px rgba(0,0,0,0.15)",
+  abasContainer: {
+    width: "1200px",
     display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
+    justifyContent: "flex-start",
+    marginBottom: "0px",
   },
-  list: {
-    listStyle: "none",
-    padding: 0,
-    width: "100%",
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-    gap: "20px",
+  abasEsquerda: {
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "flex-end",
+    gap: "0px",
   },
-  card: {
+  aba: {
+    padding: "14px 38px 18px 38px",
+    backgroundColor: "#88bd8a",
+    border: "none",
+    borderTopLeftRadius: "16px",
+    borderTopRightRadius: "16px",
+    borderBottom: "none",
+    color: "#3b5534",
+    fontWeight: "bold",
+    cursor: "pointer",
+    fontSize: "1.1rem",
+    marginRight: "2px",
+    zIndex: 2,
+  },
+  abaAtiva: {
+    backgroundColor: "#6f9064",
+    color: "#fff",
+    borderTopLeftRadius: "16px",
+    borderTopRightRadius: "16px",
+    borderBottom: "none",
+  },
+  quadradoGrande: {
+    backgroundColor: "#6f9064",
+    borderRadius: "0 24px 24px 24px",
+    padding: "50px 40px 40px 40px",
+    display: "flex",
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: "40px",
+    width: "1200px",
+    minHeight: "320px",
+    justifyContent: "flex-start",
+    alignItems: "flex-start",
+    boxShadow: "0 2px 10px rgba(0,0,0,0.08)",
+    marginTop: "0px",
+  },
+  quadradoPequeno: {
     backgroundColor: "#C8E6C9",
     borderRadius: "12px",
-    padding: "20px",
-    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+    width: "230px",
+    height: "270px",
     display: "flex",
     flexDirection: "column",
     justifyContent: "space-between",
+    alignItems: "center",
+    padding: "20px 15px",
+    boxShadow: "0 1px 5px rgba(0,0,0,0.07)",
+    position: "relative",
   },
-  cardContent: {
+  nome: {
+    fontWeight: "bold",
+    color: "#3b5534",
+    fontSize: "1.1rem",
+    textAlign: "center",
     marginBottom: "10px",
-    color: "#2e3b2d",
   },
-  button: {
+  detalhes: {
+    color: "#2e3b2d",
+    fontSize: "0.95rem",
+    textAlign: "left",
+    width: "100%",
+  },
+  contato: {
     backgroundColor: "#3b5534",
     color: "#fff",
     border: "none",
-    borderRadius: "8px",
+    borderRadius: "6px",
     padding: "10px 0",
+    cursor: "pointer",
     fontSize: "1rem",
+    width: "100%",
+    marginTop: "auto",
     fontWeight: "bold",
-    transition: "background 0.2s ease",
   },
-  emptyText: {
+  textoAdmin: {
     color: "#fff",
     fontSize: "1.2rem",
+    textAlign: "center",
+    width: "100%",
   },
 };

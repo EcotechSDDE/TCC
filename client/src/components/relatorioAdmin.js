@@ -11,6 +11,7 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
+import { useNavigate } from "react-router-dom";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
@@ -19,6 +20,8 @@ const RelatoriosAdmin = () => {
   const [relatorio, setRelatorio] = useState(null);
   const [loading, setLoading] = useState(true);
   const [periodo, setPeriodo] = useState("todos");
+  const [abaAtiva, setAbaAtiva] = useState("relatorios");
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchRelatorio = async () => {
@@ -40,16 +43,20 @@ const RelatoriosAdmin = () => {
 
   if (loading) {
     return (
-      <div style={styles.pageContainer}>
-        <p style={styles.loading}>Carregando relatórios...</p>
+      <div style={styles.container}>
+        <div style={styles.quadradoGrande}>
+          <p style={styles.textoAdmin}>Carregando relatórios...</p>
+        </div>
       </div>
     );
   }
 
   if (!relatorio) {
     return (
-      <div style={styles.pageContainer}>
-        <p style={styles.loading}>Nenhum dado disponível.</p>
+      <div style={styles.container}>
+        <div style={styles.quadradoGrande}>
+          <p style={styles.textoAdmin}>Nenhum dado disponível.</p>
+        </div>
       </div>
     );
   }
@@ -73,62 +80,108 @@ const RelatoriosAdmin = () => {
       legend: { position: "top" },
       title: {
         display: true,
-        text: "Categorias Mais Doações",
-        color: "#2ecc71",
+        text: "Categorias com Mais Doações",
+        color: "#2e7d32",
         font: { size: 16, weight: "bold" },
       },
     },
   };
 
   return (
-    <div style={styles.pageContainer}>
-      <div style={styles.header}>
-        <h2 style={styles.title}>📊 Painel de Relatórios</h2>
-        <p style={styles.subtitle}>
+    <div style={styles.container}>
+      {/* Abas superiores */}
+      <div style={styles.abasContainer}>
+        <div style={styles.abasEsquerda}>
+          <button
+            style={{
+              ...styles.aba,
+              ...(abaAtiva === "receber" ? styles.abaAtiva : {}),
+            }}
+            onClick={() => navigate("/produtos")}
+          >
+            Receber
+          </button>
+
+          <button
+            style={{
+              ...styles.aba,
+              ...(abaAtiva === "denuncias" ? styles.abaAtiva : {}),
+            }}
+            onClick={() => navigate("/denuncias")}
+          >
+            Denúncias
+          </button>
+
+          <button
+            style={{
+              ...styles.aba,
+              ...(abaAtiva === "relatorios" ? styles.abaAtiva : {}),
+            }}
+            onClick={() => setAbaAtiva("relatorios")}
+          >
+            Relatórios
+          </button>
+
+          <button
+            style={{
+              ...styles.aba,
+              ...(abaAtiva === "controle" ? styles.abaAtiva : {}),
+            }}
+            onClick={() => navigate("/controleUsuarios")}
+          >
+            Controle de Usuários
+          </button>
+        </div>
+      </div>
+
+      {/* Quadrado verde grande */}
+      <div style={styles.quadradoGrande}>
+        <h2 style={styles.tituloSecao}>📊 Painel de Relatórios</h2>
+        <p style={styles.subtitulo}>
           Bem-vindo, <b>{user?.nome || "Administrador"}</b>
         </p>
-      </div>
 
-      {/* Filtro de período */}
-      <div style={styles.filterContainer}>
-        <label style={styles.label}>Filtrar por período:</label>
-        <select
-          value={periodo}
-          onChange={(e) => setPeriodo(e.target.value)}
-          style={styles.select}
-        >
-          <option value="todos">Todos</option>
-          <option value="semana">Última semana</option>
-          <option value="mes">Último mês</option>
-        </select>
-      </div>
-
-      {/* Cards de estatísticas */}
-      <div style={styles.cardsContainer}>
-        <div style={styles.card}>
-          <h3 style={styles.cardTitle}>Usuários Cadastrados</h3>
-          <p style={styles.cardValue}>{relatorio.totalUsuarios}</p>
+        {/* Filtro */}
+        <div style={styles.filtroContainer}>
+          <label style={styles.label}>Filtrar por período:</label>
+          <select
+            value={periodo}
+            onChange={(e) => setPeriodo(e.target.value)}
+            style={styles.select}
+          >
+            <option value="todos">Todos</option>
+            <option value="semana">Última semana</option>
+            <option value="mes">Último mês</option>
+          </select>
         </div>
 
-        <div style={styles.card}>
-          <h3 style={styles.cardTitle}>Doações Ativas</h3>
-          <p style={styles.cardValue}>{relatorio.totalDoacoes}</p>
+        {/* Cards de estatísticas */}
+        <div style={styles.cardsContainer}>
+          <div style={styles.card}>
+            <h3 style={styles.cardTitle}>Usuários Cadastrados</h3>
+            <p style={styles.cardValue}>{relatorio.totalUsuarios}</p>
+          </div>
+
+          <div style={styles.card}>
+            <h3 style={styles.cardTitle}>Doações Ativas</h3>
+            <p style={styles.cardValue}>{relatorio.totalDoacoes}</p>
+          </div>
+
+          <div style={styles.card}>
+            <h3 style={styles.cardTitle}>Doações Excluídas</h3>
+            <p style={styles.cardValue}>{relatorio.totalDoacoesExcluidas}</p>
+          </div>
+
+          <div style={styles.card}>
+            <h3 style={styles.cardTitle}>Denúncias Recebidas</h3>
+            <p style={styles.cardValue}>{relatorio.totalDenuncias}</p>
+          </div>
         </div>
 
-        <div style={styles.card}>
-          <h3 style={styles.cardTitle}>Doações Excluídas</h3>
-          <p style={styles.cardValue}>{relatorio.totalDoacoesExcluidas}</p>
+        {/* Gráfico */}
+        <div style={styles.chartContainer}>
+          <Bar data={dataCategorias} options={options} />
         </div>
-
-        <div style={styles.card}>
-          <h3 style={styles.cardTitle}>Denúncias Recebidas</h3>
-          <p style={styles.cardValue}>{relatorio.totalDenuncias}</p>
-        </div>
-      </div>
-
-      {/* Gráfico */}
-      <div style={styles.chartContainer}>
-        <Bar data={dataCategorias} options={options} />
       </div>
     </div>
   );
@@ -137,79 +190,122 @@ const RelatoriosAdmin = () => {
 export default RelatoriosAdmin;
 
 const styles = {
-  pageContainer: {
-    backgroundColor: "#f4f6f8",
-    minHeight: "100vh",
-    padding: "40px 60px",
-    fontFamily: "'Poppins', sans-serif",
-    marginTop: "32px",
-    borderRadius: "12px",
-  },
-  header: {
+  container: {
     display: "flex",
-    justifyContent: "space-between",
-    alignItems: "baseline",
-    marginBottom: "30px",
+    flexDirection: "column",
+    alignItems: "center",
+    marginTop: "20px",
   },
-  title: {
+  abasContainer: {
+    width: "1200px",
+    display: "flex",
+    justifyContent: "flex-start",
+    marginBottom: "0px",
+  },
+  abasEsquerda: {
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "flex-end",
+    gap: "0px",
+  },
+  aba: {
+    padding: "14px 38px 18px 38px",
+    backgroundColor: "#88bd8a",
+    border: "none",
+    borderTopLeftRadius: "16px",
+    borderTopRightRadius: "16px",
+    borderBottom: "none",
+    color: "#3b5534",
+    fontWeight: "bold",
+    cursor: "pointer",
+    fontSize: "1.1rem",
+    marginRight: "2px",
+    zIndex: 2,
+  },
+  abaAtiva: {
+    backgroundColor: "#6f9064",
+    color: "#fff",
+    borderTopLeftRadius: "16px",
+    borderTopRightRadius: "16px",
+    borderBottom: "none",
+  },
+  quadradoGrande: {
+    backgroundColor: "#6f9064",
+    borderRadius: "0 24px 24px 24px",
+    padding: "40px 50px",
+    display: "flex",
+    flexDirection: "column",
+    width: "1200px",
+    minHeight: "400px",
+    boxShadow: "0 2px 10px rgba(0,0,0,0.08)",
+    marginTop: "0px",
+    color: "#fff",
+  },
+  tituloSecao: {
     fontSize: "28px",
     fontWeight: "bold",
-    color: "#2ecc71",
+    marginBottom: "10px",
   },
-  subtitle: {
-    color: "#555",
+  subtitulo: {
     fontSize: "16px",
+    marginBottom: "30px",
   },
-  filterContainer: {
+  filtroContainer: {
     display: "flex",
     alignItems: "center",
     gap: "10px",
-    marginBottom: "30px",
+    marginBottom: "25px",
   },
   label: {
     fontWeight: "bold",
-    color: "#333",
   },
   select: {
-    padding: "6px 12px",
+    padding: "8px 14px",
     borderRadius: "8px",
-    border: "1px solid #ccc",
-    backgroundColor: "#fff",
+    border: "none",
+    backgroundColor: "#C8E6C9",
+    color: "#2e3b2d",
+    fontWeight: "bold",
   },
   cardsContainer: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(230px, 1fr))",
+    display: "flex",
+    flexWrap: "wrap",
     gap: "25px",
     marginBottom: "40px",
+    justifyContent: "space-between",
   },
   card: {
-    backgroundColor: "#fff",
-    borderRadius: "15px",
-    boxShadow: "0 4px 10px rgba(0, 0, 0, 0.1)",
-    padding: "25px 20px",
-    textAlign: "center",
-    transition: "all 0.3s ease",
+    backgroundColor: "#C8E6C9",
+    borderRadius: "12px",
+    width: "250px",
+    height: "140px",
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
+    boxShadow: "0 1px 5px rgba(0,0,0,0.07)",
   },
   cardTitle: {
-    color: "#2ecc71",
-    fontSize: "16px",
-    marginBottom: "8px",
+    color: "#3b5534",
+    fontSize: "1rem",
+    marginBottom: "5px",
+    fontWeight: "bold",
   },
   cardValue: {
-    fontSize: "28px",
+    fontSize: "1.8rem",
+    color: "#2e3b2d",
     fontWeight: "bold",
-    color: "#333",
   },
   chartContainer: {
-    backgroundColor: "#fff",
-    borderRadius: "15px",
-    padding: "25px",
-    boxShadow: "0 4px 10px rgba(0, 0, 0, 0.1)",
+    backgroundColor: "#C8E6C9",
+    borderRadius: "12px",
+    padding: "20px",
+    boxShadow: "0 1px 5px rgba(0,0,0,0.07)",
   },
-  loading: {
+  textoAdmin: {
+    color: "#fff",
+    fontSize: "1.2rem",
     textAlign: "center",
-    fontSize: "18px",
-    color: "#666",
-    marginTop: "60px",
+    width: "100%",
   },
 };

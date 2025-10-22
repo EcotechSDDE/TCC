@@ -52,28 +52,67 @@ export default function Produtos() {
       {/* Abas superiores */}
       <div style={styles.abasContainer}>
         <div style={styles.abasEsquerda}>
-          <button
-            style={{
-              ...styles.aba,
-              ...(abaAtiva === "receber" ? styles.abaAtiva : {}),
-            }}
-            onClick={() => setAbaAtiva("receber")}
-          >
-            Receber
-          </button>
+          {/* Se for usuário comum */}
+          {user?.tipo !== "admin" && (
+            <>
+              <button
+                style={{
+                  ...styles.aba,
+                  ...(abaAtiva === "receber" ? styles.abaAtiva : {}),
+                }}
+                onClick={() => setAbaAtiva("receber")}
+              >
+                Receber
+              </button>
 
-          <button
-            style={{
-              ...styles.aba,
-              ...(abaAtiva === "doar" ? styles.abaAtiva : {}),
-            }}
-            onClick={() => navigate("/cadastroProduto")}
-          >
-            Doar
-          </button>
+              <button
+                style={{
+                  ...styles.aba,
+                  ...(abaAtiva === "doar" ? styles.abaAtiva : {}),
+                }}
+                onClick={() => navigate("/cadastroProduto")}
+              >
+                Doar
+              </button>
 
+              {/* Barra de pesquisa e filtro — só para usuários comuns */}
+              <div style={styles.abaPesquisaFiltro}>
+                <input
+                  type="text"
+                  placeholder="Pesquisar..."
+                  value={pesquisa}
+                  onChange={(e) => setPesquisa(e.target.value)}
+                  style={styles.pesquisa}
+                />
+                <select
+                  value={filtro}
+                  onChange={(e) => setFiltro(e.target.value)}
+                  style={styles.filtro}
+                >
+                  <option value="">Sem filtro</option>
+                  <option value="notebook">Notebook</option>
+                  <option value="celular">Celular</option>
+                  <option value="monitor">Monitor</option>
+                  <option value="impressora">Impressora</option>
+                  <option value="tablet">Tablet</option>
+                </select>
+              </div>
+            </>
+          )}
+
+          {/* Se for ADMIN */}
           {user?.tipo === "admin" && (
             <>
+              <button
+                style={{
+                  ...styles.aba,
+                  ...(abaAtiva === "receber" ? styles.abaAtiva : {}),
+                }}
+                onClick={() => navigate("/produtos")}
+              >
+                Receber
+              </button>
+
               <button
                 style={{
                   ...styles.aba,
@@ -97,7 +136,7 @@ export default function Produtos() {
               <button
                 style={{
                   ...styles.aba,
-                  ...(abaAtiva === "suporte" ? styles.abaAtiva : {}),
+                  ...(abaAtiva === "controle" ? styles.abaAtiva : {}),
                 }}
                 onClick={() => navigate("/controleUsuarios")}
               >
@@ -105,28 +144,6 @@ export default function Produtos() {
               </button>
             </>
           )}
-
-          <div style={styles.abaPesquisaFiltro}>
-            <input
-              type="text"
-              placeholder="Pesquisar..."
-              value={pesquisa}
-              onChange={(e) => setPesquisa(e.target.value)}
-              style={styles.pesquisa}
-            />
-            <select
-              value={filtro}
-              onChange={(e) => setFiltro(e.target.value)}
-              style={styles.filtro}
-            >
-              <option value="">Sem filtro</option>
-              <option value="notebook">Notebook</option>
-              <option value="celular">Celular</option>
-              <option value="monitor">Monitor</option>
-              <option value="impressora">Impressora</option>
-              <option value="tablet">Tablet</option>
-            </select>
-          </div>
         </div>
       </div>
 
