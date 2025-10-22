@@ -99,9 +99,9 @@ export default function Produtos() {
                   ...styles.aba,
                   ...(abaAtiva === "suporte" ? styles.abaAtiva : {}),
                 }}
-                onClick={() => setAbaAtiva("suporte")}
+                onClick={() => navigate("/controleUsuarios")}
               >
-                Suporte
+                Controle de Usuários
               </button>
             </>
           )}

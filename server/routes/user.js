@@ -1,33 +1,33 @@
 const express = require("express");
 const userRoutes = express.Router();
 const usuarioController = require("../controllers/usuarioController");
+const { autenticar, autorizarAdmin } = require("../middleware/auth");
 const multer = require("multer");
 const path = require("path");
-const { body, validationResult } = require('express-validator');
-const { autenticar, autorizarAdmin } = require('../middleware/auth');
 
+// Configuração do multer
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, "uploads/"),
-  filename: (req, file, cb) => cb(null, Date.now() + path.extname(file.originalname))
+  filename: (req, file, cb) => cb(null, Date.now() + path.extname(file.originalname)),
 });
 const upload = multer({ storage });
 
-// ✅ ROTAS SEM DUPLICAÇÃO DO PREFIXO
-userRoutes.get('/me', autenticar, usuarioController.buscarUsuarioLogado); // /user/me
-userRoutes.post("/login", usuarioController.login);                         // /user/login
-userRoutes.post("/add", upload.single('imagem'), usuarioController.criarUsuario); // /user/add
+// 🔹 Rotas públicas
+userRoutes.post("/login", usuarioController.login);
+userRoutes.post("/add", upload.single("imagem"), usuarioController.criarUsuario);
 
-// Outras rotas mantidas, mas sem repetir /user no caminho
-userRoutes.get("/", usuarioController.listarUsuarios); // /user/
-userRoutes.get("/:id", usuarioController.buscarUsuarioPorId); // /user/:id
-userRoutes.post("/update/:id", upload.single('imagem'), usuarioController.atualizarUsuario);
-userRoutes.delete("/:id", usuarioController.deletarUsuario);
+// 🔹 Rotas do usuário autenticado
+userRoutes.get("/me", autenticar, usuarioController.buscarUsuarioLogado);
+userRoutes.get("/:id", autenticar, usuarioController.buscarUsuarioPorId);
+userRoutes.post("/update/:id", autenticar, upload.single("imagem"), usuarioController.atualizarUsuario);
+userRoutes.delete("/:id", autenticar, usuarioController.deletarUsuario);
 
-// Admin
-userRoutes.get('/admin/usuarios', autenticar, autorizarAdmin, usuarioController.listarUsuarios);
-userRoutes.put('/:id', autenticar, autorizarAdmin, usuarioController.editarUsuario);
-userRoutes.put('/:id/bloquear', autenticar, autorizarAdmin, usuarioController.bloquearUsuario);
-userRoutes.delete('/:id', autenticar, autorizarAdmin, usuarioController.excluirUsuario);
-userRoutes.put('/:id/admin', autenticar, autorizarAdmin, usuarioController.atribuirAdmin);
+// 🔹 Rotas de administrador
+userRoutes.get("/", autenticar, autorizarAdmin, usuarioController.listarUsuarios);
+userRoutes.put("/:id", autenticar, autorizarAdmin, upload.single("imagem"), usuarioController.editarUsuario);
+userRoutes.put("/:id/bloquear", autenticar, autorizarAdmin, usuarioController.bloquearUsuario);
+userRoutes.put("/:id/tempo", autenticar, autorizarAdmin, usuarioController.bloquearPorTempo);
+userRoutes.put("/:id/admin", autenticar, autorizarAdmin, usuarioController.atribuirAdmin);
+userRoutes.delete("/:id/admin", autenticar, autorizarAdmin, usuarioController.deletarUsuario);
 
 module.exports = userRoutes;
