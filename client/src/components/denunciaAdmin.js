@@ -8,6 +8,7 @@ export default function DenunciasAdmin() {
   const { token, user } = useContext(AuthContext);
   const [denuncias, setDenuncias] = useState([]);
   const [abaAtiva, setAbaAtiva] = useState("denuncias");
+  const [denunciaSelecionada, setDenunciaSelecionada] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -21,30 +22,74 @@ export default function DenunciasAdmin() {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => res.json())
-      .then((data) => setDenuncias(data))
+      .then((data) =>
+        setDenuncias(data.filter((d) => d.status !== "resolvida"))
+      )
       .catch((err) => console.error(err));
   }, [token, user, navigate]);
 
   async function resolverDenuncia(id) {
     try {
-      const res = await fetch(`${REACT_APP_YOUR_HOSTNAME}/denuncia/${id}/resolver`, {
-        method: "PUT",
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
+      const res = await fetch(
+        `${REACT_APP_YOUR_HOSTNAME}/denuncia/${id}/resolver`,
+        {
+          method: "PUT",
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       if (res.ok) {
-        setDenuncias((prev) =>
-          prev.map((d) => (d._id === id ? { ...d, status: "resolvida" } : d))
-        );
+        setDenuncias((prev) => prev.filter((d) => d._id !== id));
+        setDenunciaSelecionada((prev) => {
+          if (!prev) return null;
+          const novas = prev.denuncias.filter((x) => x._id !== id);
+          if (novas.length === 0) return null;
+          return { ...prev, denuncias: novas };
+        });
       }
     } catch (err) {
       console.error(err);
     }
   }
 
+  async function resolverTodas(idDoacao) {
+    const confirmar = window.confirm(
+      "Tem certeza que deseja resolver todas as denúncias desta doação?"
+    );
+    if (!confirmar) return;
+
+    try {
+      const res = await fetch(
+        `${REACT_APP_YOUR_HOSTNAME}/denuncia/resolverDoacao/${idDoacao}`,
+        {
+          method: "PUT",
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      if (res.ok) {
+        setDenuncias((prev) =>
+          prev.filter((d) => d.doacao?._id !== idDoacao)
+        );
+        setDenunciaSelecionada(null);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  const denunciasAgrupadas = denuncias.reduce((acc, denuncia) => {
+    const id = denuncia.doacao?._id || "sem-doacao";
+    if (!acc[id]) acc[id] = { doacao: denuncia.doacao, denuncias: [] };
+    acc[id].denuncias.push(denuncia);
+    return acc;
+  }, {});
+
+  useEffect(() => {
+    document.body.style.overflow = denunciaSelecionada ? "hidden" : "auto";
+  }, [denunciaSelecionada]);
+
   return (
     <div style={styles.container}>
-      {/* Abas superiores - mesmo padrão do produtos.js */}
+      {/* Abas */}
       <div style={styles.abasContainer}>
         <div style={styles.abasEsquerda}>
           <button
@@ -56,7 +101,6 @@ export default function DenunciasAdmin() {
           >
             Receber
           </button>
-
           <button
             style={{
               ...styles.aba,
@@ -66,7 +110,6 @@ export default function DenunciasAdmin() {
           >
             Denúncias
           </button>
-
           <button
             style={{
               ...styles.aba,
@@ -76,7 +119,6 @@ export default function DenunciasAdmin() {
           >
             Relatórios
           </button>
-
           <button
             style={{
               ...styles.aba,
@@ -89,52 +131,96 @@ export default function DenunciasAdmin() {
         </div>
       </div>
 
-      {/* Quadrado verde grande (igual produtos.js) */}
+      {/* Quadrado verde grande */}
       <div style={styles.quadradoGrande}>
-        {denuncias.length === 0 ? (
+        {Object.keys(denunciasAgrupadas).length === 0 ? (
           <div style={styles.textoAdmin}>Nenhuma denúncia encontrada.</div>
         ) : (
-          denuncias.map((d) => (
-            <div key={d._id} style={styles.quadradoPequeno}>
+          Object.values(denunciasAgrupadas).map((grupo) => (
+            <div
+              key={grupo.doacao?._id || Math.random()}
+              style={styles.quadradoPequeno}
+              onClick={() => setDenunciaSelecionada(grupo)}
+            >
               <div style={styles.nome}>
-                {d.doacao?.nome || "Doação não encontrada"}
-              </div>
-              <div style={styles.detalhes}>
-                <p><strong>Usuário:</strong> {d.usuario?.nome || "Desconhecido"}</p>
-                <p><strong>Motivo:</strong> {d.motivo}</p>
-                <p>
-                  <strong>Status:</strong>{" "}
-                  <span
-                    style={{
-                      color: d.status === "resolvida" ? "#2e7d32" : "#c62828",
-                      fontWeight: "bold",
-                    }}
-                  >
-                    {d.status}
-                  </span>
-                </p>
+                {grupo.doacao?.nome || "Doação não encontrada"}
               </div>
 
+              {grupo.denuncias.length > 1 && (
+                <div style={styles.badge}>{grupo.denuncias.length}</div>
+              )}
+
               <button
-                style={{
-                  ...styles.contato,
-                  backgroundColor:
-                    d.status === "resolvida" ? "#9e9e9e" : "#3b5534",
-                  cursor: d.status === "resolvida" ? "default" : "pointer",
+                style={styles.botaoResolver}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  resolverTodas(grupo.doacao?._id);
                 }}
-                disabled={d.status === "resolvida"}
-                onClick={() => resolverDenuncia(d._id)}
               >
-                {d.status === "resolvida" ? "✅ Resolvida" : "Marcar como resolvida"}
+                Resolver todos
               </button>
             </div>
           ))
         )}
       </div>
+
+      {/* Modal */}
+      {denunciaSelecionada && (
+        <div
+          style={styles.modalOverlay}
+          onClick={() => setDenunciaSelecionada(null)}
+        >
+          <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
+            <h2 style={styles.modalTitulo}>
+              {denunciaSelecionada.doacao?.nome || "Doação não encontrada"}
+            </h2>
+
+            <div style={styles.modalConteudo}>
+              {denunciaSelecionada.denuncias.map((d) => (
+                <div key={d._id} style={styles.caixaDenuncia}>
+                  <p style={styles.texto}>
+                    <strong>Usuário:</strong> {d.usuario?.nome || "Desconhecido"}
+                  </p>
+                  <p style={styles.texto}>
+                    <strong>Motivo:</strong> {d.motivo}
+                  </p>
+                  <p style={styles.texto}>
+                    <strong>Status:</strong>{" "}
+                    <span
+                      style={{
+                        color: d.status === "resolvida" ? "#2e7d32" : "#c62828",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      {d.status}
+                    </span>
+                  </p>
+                  {d.status !== "resolvida" && (
+                    <button
+                      style={styles.botaoIndividual}
+                      onClick={() => resolverDenuncia(d._id)}
+                    >
+                      Resolver
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            <button
+              style={styles.botaoResolverModal}
+              onClick={() => resolverTodas(denunciaSelecionada.doacao?._id)}
+            >
+              Resolver todos
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
+// ------------------- ESTILOS -------------------
 const styles = {
   container: {
     display: "flex",
@@ -146,92 +232,146 @@ const styles = {
     width: "1200px",
     display: "flex",
     justifyContent: "flex-start",
-    marginBottom: "0px",
   },
-  abasEsquerda: {
-    display: "flex",
-    flexDirection: "row",
-    alignItems: "flex-end",
-    gap: "0px",
-  },
+  abasEsquerda: { display: "flex", flexDirection: "row" },
   aba: {
-    padding: "14px 38px 18px 38px",
+    padding: "12px 30px",
     backgroundColor: "#88bd8a",
     border: "none",
     borderTopLeftRadius: "16px",
     borderTopRightRadius: "16px",
-    borderBottom: "none",
     color: "#3b5534",
     fontWeight: "bold",
     cursor: "pointer",
     fontSize: "1.1rem",
     marginRight: "2px",
-    zIndex: 2,
   },
-  abaAtiva: {
-    backgroundColor: "#6f9064",
-    color: "#fff",
-    borderTopLeftRadius: "16px",
-    borderTopRightRadius: "16px",
-    borderBottom: "none",
-  },
+  abaAtiva: { backgroundColor: "#6f9064", color: "#fff" },
   quadradoGrande: {
-    backgroundColor: "#6f9064",
-    borderRadius: "0 24px 24px 24px",
-    padding: "50px 40px 40px 40px",
-    display: "flex",
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: "40px",
-    width: "1200px",
-    minHeight: "320px",
-    justifyContent: "flex-start",
-    alignItems: "flex-start",
-    boxShadow: "0 2px 10px rgba(0,0,0,0.08)",
-    marginTop: "0px",
-  },
+  backgroundColor: "#6f9064",
+  borderRadius: "0 24px 24px 24px",
+  padding: "30px 20px",
+  display: "grid",
+  gridTemplateColumns: "repeat(4, 1fr)", // 4 colunas
+  columnGap: "4px", // espaço horizontal menor
+  rowGap: "20px",   // espaço vertical um pouco maior
+  width: "1200px",
+  justifyItems: "center", // centraliza cada card na coluna
+},
   quadradoPequeno: {
     backgroundColor: "#C8E6C9",
     borderRadius: "12px",
     width: "230px",
-    height: "270px",
     display: "flex",
     flexDirection: "column",
-    justifyContent: "space-between",
+    justifyContent: "flex-start",
     alignItems: "center",
-    padding: "20px 15px",
+    padding: "15px 10px",
     boxShadow: "0 1px 5px rgba(0,0,0,0.07)",
+    cursor: "pointer",
     position: "relative",
+    gap: "10px", // espaço entre título e botão
   },
   nome: {
     fontWeight: "bold",
     color: "#3b5534",
-    fontSize: "1.1rem",
+    fontSize: "1.05rem",
     textAlign: "center",
-    marginBottom: "10px",
+    wordBreak: "break-word",
+    margin: 0,
   },
-  detalhes: {
-    color: "#2e3b2d",
-    fontSize: "0.95rem",
-    textAlign: "left",
-    width: "100%",
+  badge: {
+    position: "absolute",
+    top: "-12px",
+    right: "-12px",
+    backgroundColor: "#2e7d32",
+    color: "#fff",
+    borderRadius: "50%",
+    width: "28px",
+    height: "28px",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    fontWeight: "bold",
+    fontSize: "0.9rem",
+    boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
   },
-  contato: {
+  botaoResolver: {
+    marginTop: "auto", // empurra para baixo e alinha
     backgroundColor: "#3b5534",
     color: "#fff",
     border: "none",
     borderRadius: "6px",
-    padding: "10px 0",
+    padding: "8px 20px",
+    fontSize: "0.95rem",
     cursor: "pointer",
-    fontSize: "1rem",
-    width: "100%",
-    marginTop: "auto",
     fontWeight: "bold",
+    width: "100%",
+    textAlign: "center",
   },
   textoAdmin: {
     color: "#fff",
     fontSize: "1.2rem",
     textAlign: "center",
+    width: "100%",
+  },
+  modalOverlay: {
+    position: "fixed",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0,0,0,0.6)",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 10,
+  },
+  modal: {
+    backgroundColor: "#C8E6C9",
+    borderRadius: "16px",
+    padding: "20px",
+    width: "720px",
+    maxHeight: "80vh",
+    overflowY: "auto",
+    boxShadow: "0 4px 10px rgba(0,0,0,0.3)",
+  },
+  modalTitulo: {
+    color: "#3b5534",
+    fontWeight: "bold",
+    fontSize: "1.4rem",
+    textAlign: "center",
+    marginBottom: "10px",
+    wordBreak: "break-word",
+  },
+  modalConteudo: { display: "flex", flexDirection: "column", gap: "10px" },
+  caixaDenuncia: {
+    border: "2px solid #88bd8a",
+    borderRadius: "10px",
+    padding: "12px 15px",
+    backgroundColor: "#E8F5E9",
+    wordBreak: "break-word",
+  },
+  texto: { margin: "3px 0", overflowWrap: "break-word" },
+  botaoIndividual: {
+    marginTop: "6px",
+    backgroundColor: "#3b5534",
+    color: "#fff",
+    border: "none",
+    borderRadius: "6px",
+    padding: "6px 12px",
+    cursor: "pointer",
+    fontWeight: "bold",
+  },
+  botaoResolverModal: {
+    marginTop: "10px",
+    backgroundColor: "#3b5534",
+    color: "#fff",
+    border: "none",
+    borderRadius: "6px",
+    padding: "10px 20px",
+    cursor: "pointer",
+    fontWeight: "bold",
     width: "100%",
   },
 };

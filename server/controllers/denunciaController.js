@@ -53,3 +53,21 @@ exports.resolverDenuncia = async (req, res) => {
     res.status(400).json({ message: error.message });
   }
 };
+
+// Resolver todas as denúncias de uma doação (admin)
+exports.resolverDenunciasDaDoacao = async (req, res) => {
+  try {
+    const idDoacao = req.params.idDoacao;
+
+    // Atualiza todas as denúncias da doação para "resolvida"
+    const result = await Denuncia.updateMany(
+      { doacao: idDoacao, status: { $ne: "resolvida" } },
+      { $set: { status: "resolvida" } }
+    );
+
+    res.status(200).json({ message: `Denúncias resolvidas: ${result.modifiedCount}` });
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({ message: error.message });
+  }
+};
