@@ -59,16 +59,20 @@ export default function Login() {
     <div style={styles.container}>
       <h1 style={styles.title}>EcoTech</h1>
       <h2 style={styles.subtitle}>
-        Sistema de Doações de Equipamentos Eletrônicos
+        Sistema de Gerenciamento de Doação e Reaproveitamento de Equipamentos
+        Eletrônicos
       </h2>
 
       <div style={styles.content}>
         <div style={styles.textContainer}>
           <p style={styles.text}>
-            O sistema foi desenvolvido para gerenciar a doação de equipamentos
-            eletrônicos, proporcionando um local adequado para o descarte
-            responsável, assegurando a destinação correta e incentivando a
-            conscientização ambiental.
+            Somos um sistema dedicado a incentivar e facilitar a doação e o
+            reaproveitamento de equipamentos eletrônicos. Nossa plataforma
+            conecta você a um processo simples e seguro para redistribuir seus
+            aparelhos.<br /> Ao promover a doação, buscamos não apenas prolongar a
+            vida útil da tecnologia, mas também reduzir significativamente o
+            descarte irregular e contribuir ativamente para a preservação
+            do meio ambiente.
           </p>
         </div>
 
@@ -176,10 +180,15 @@ const styles = {
   textContainer: {
     maxWidth: "350px",
     textAlign: "justify",
-    padding: "8px",
+    padding: "10px",
+    margin: "10px",
     backgroundColor: "#C8E6C9",
     borderRadius: "12px",
     color: "#333",
   },
-  text: { fontSize: "0.95rem", lineHeight: "1.4" },
+  text: { 
+    fontSize: "0.95rem",
+    lineHeight: "1.4",
+    margin: "10px",
+   },
 };
