@@ -10,7 +10,8 @@ const UsuarioSchema = new mongoose.Schema({
     senha: { type: String, required: true },
     tipo: { type: String, enum: ['admin', 'comum'], default: 'comum' },
     bloqueado: { type: Boolean, default: false },
-    bloqueadoUntil: { type: Date, default: null }
+    bloqueadoUntil: { type: Date, default: null },
+    motivoBloqueio: { type: String, default: null } 
 }, { timestamps: true });
 
 module.exports = mongoose.model('Usuario', UsuarioSchema);

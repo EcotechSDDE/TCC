@@ -15,7 +15,42 @@ export default function ControleUsuarios() {
   const [usuarioSelecionado, setUsuarioSelecionado] = useState(null);
   const [duracao, setDuracao] = useState("");
   const [unidade, setUnidade] = useState("horas");
+  const [motivo, setMotivo] = useState("");
 
+  // 🔄 Função de busca dos usuários com atualização automática de bloqueio expirado
+  async function fetchUsuarios() {
+    try {
+      const res = await fetch(`${REACT_APP_YOUR_HOSTNAME}/user`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      let data = await res.json();
+
+      const agora = new Date();
+      data = data.map((u) => {
+        if (u.bloqueado && u.bloqueadoUntil) {
+          const bloqueadoData = new Date(u.bloqueadoUntil);
+          if (bloqueadoData <= agora) {
+            // Bloqueio expirou → atualiza estado do usuário
+            return {
+              ...u,
+              bloqueado: false,
+              bloqueadoUntil: null,
+              motivoBloqueio: null,
+            };
+          }
+        }
+        return u;
+      });
+
+      setUsuarios(data);
+    } catch (err) {
+      console.error("Erro ao buscar usuários:", err);
+    } finally {
+      setCarregando(false);
+    }
+  }
+
+  //  Busca inicial e atualização automática a cada 30s
   useEffect(() => {
     if (!token) return;
     if (user?.tipo !== "admin") {
@@ -23,21 +58,13 @@ export default function ControleUsuarios() {
       return;
     }
 
-    async function fetchUsuarios() {
-      try {
-        const res = await fetch(`${REACT_APP_YOUR_HOSTNAME}/user`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const data = await res.json();
-        setUsuarios(data);
-      } catch (err) {
-        console.error("Erro ao buscar usuários:", err);
-      } finally {
-        setCarregando(false);
-      }
-    }
-
     fetchUsuarios();
+
+    const interval = setInterval(() => {
+      fetchUsuarios();
+    }, 30000);
+
+    return () => clearInterval(interval);
   }, [token, user, navigate]);
 
   async function handleDelete(id) {
@@ -64,6 +91,7 @@ export default function ControleUsuarios() {
     setUsuarioSelecionado(usuario);
     setDuracao("");
     setUnidade("horas");
+    setMotivo("");
     setModalOpen(true);
   }
 
@@ -73,16 +101,24 @@ export default function ControleUsuarios() {
   }
 
   async function confirmarBloqueio() {
-    if (unidade !== "indefinido" && (!duracao || isNaN(duracao) || duracao <= 0)) {
+    if (
+      unidade !== "indefinido" &&
+      (!duracao || isNaN(duracao) || duracao <= 0)
+    ) {
       alert("Digite uma duração válida.");
+      return;
+    }
+
+    if (!motivo || motivo.trim() === "") {
+      alert("Informe o motivo do bloqueio.");
       return;
     }
 
     try {
       const body =
         unidade === "indefinido"
-          ? { duracaoHoras: null, indefinido: true }
-          : { duracao, unidade };
+          ? { duracaoHoras: null, indefinido: true, motivoBloqueio: motivo }
+          : { duracao, unidade, motivoBloqueio: motivo };
 
       const res = await fetch(
         `${REACT_APP_YOUR_HOSTNAME}/user/${usuarioSelecionado._id}/tempo`,
@@ -101,16 +137,17 @@ export default function ControleUsuarios() {
         setUsuarios(
           usuarios.map((u) =>
             u._id === usuarioSelecionado._id
-              ? { ...u, bloqueado: true, bloqueadoUntil: data.bloqueadoUntil }
+              ? {
+                  ...u,
+                  bloqueado: true,
+                  bloqueadoUntil: data.bloqueadoUntil,
+                  motivoBloqueio: motivo,
+                }
               : u
           )
         );
         fecharModal();
-        alert(
-          unidade === "indefinido"
-            ? "Usuário bloqueado indefinidamente."
-            : `Usuário bloqueado por ${duracao} ${unidade}.`
-        );
+        alert("Usuário bloqueado com sucesso!");
       } else {
         alert("Erro ao bloquear usuário.");
       }
@@ -121,16 +158,25 @@ export default function ControleUsuarios() {
 
   async function handleDesbloquear(id) {
     try {
-      const res = await fetch(`${REACT_APP_YOUR_HOSTNAME}/user/${id}/bloquear`, {
-        method: "PUT",
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await fetch(
+        `${REACT_APP_YOUR_HOSTNAME}/user/${id}/bloquear`,
+        {
+          method: "PUT",
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
       if (res.ok) {
-        const data = await res.json();
         setUsuarios(
           usuarios.map((u) =>
-            u._id === id ? { ...u, bloqueado: false, bloqueadoUntil: null } : u
+            u._id === id
+              ? {
+                  ...u,
+                  bloqueado: false,
+                  bloqueadoUntil: null,
+                  motivoBloqueio: null,
+                }
+              : u
           )
         );
         alert("Usuário desbloqueado!");
@@ -142,110 +188,114 @@ export default function ControleUsuarios() {
     }
   }
 
-  if (carregando) return <p style={styles.textoAdmin}>Carregando usuários...</p>;
-  if (user?.tipo !== "admin") return <p style={styles.textoAdmin}>🚫 Acesso negado.</p>;
+  if (carregando)
+    return <p style={styles.textoAdmin}>Carregando usuários...</p>;
+  if (user?.tipo !== "admin")
+    return <p style={styles.textoAdmin}>🚫 Acesso negado.</p>;
 
   return (
     <div style={styles.container}>
-      {/* 🔹 Abas superiores - mesmo padrão do denunciaAdmin.js */}
+      {/* Abas */}
       <div style={styles.abasContainer}>
-        <div style={styles.abasEsquerda}>
-          <button
-            style={styles.aba}
-            onClick={() => navigate("/aprodutos")}
-          >
-            Produtos
-          </button>
-
-          <button
-            style={styles.aba}
-            onClick={() => navigate("/denuncias")}
-          >
-            Denúncias
-          </button>
-
-          <button
-            style={styles.aba}
-            onClick={() => navigate("/relatorios")}
-          >
-            Relatórios
-          </button>
-
-          <button style={{ ...styles.aba, ...styles.abaAtiva }}>
-            Controle de Usuários
-          </button>
-        </div>
+        <button style={styles.aba} onClick={() => navigate("/aprodutos")}>
+          Produtos
+        </button>
+        <button style={styles.aba} onClick={() => navigate("/denuncias")}>
+          Denúncias
+        </button>
+        <button style={styles.aba} onClick={() => navigate("/relatorios")}>
+          Relatórios
+        </button>
+        <button style={{ ...styles.aba, ...styles.abaAtiva }}>
+          Controle de Usuários
+        </button>
       </div>
 
-      {/* 🔹 Quadrado verde grande (padrão) */}
       <div style={styles.quadradoGrande}>
-        <h2 style={styles.titulo}>Controle de Usuários 👤</h2>
-
         {usuarios.length === 0 ? (
           <div style={styles.textoAdmin}>Nenhum usuário encontrado.</div>
         ) : (
           <table style={styles.tabela}>
             <thead>
               <tr>
-                <th>Nome</th>
-                <th>Email</th>
-                <th>Tipo</th>
-                <th>Status</th>
-                <th>Bloqueado até</th>
-                <th>Ações</th>
+                <th style={styles.thCentralizado}>Nome</th>
+                <th style={styles.thCentralizado}>Email</th>
+                <th style={styles.thCentralizado}>Tipo</th>
+                <th style={styles.thCentralizado}>Status</th>
+                <th style={styles.thCentralizado}>Bloqueado até</th>
+                <th style={styles.thCentralizado}>Motivo</th>
+                <th style={styles.thCentralizado}>Ações</th>
               </tr>
             </thead>
             <tbody>
-              {usuarios.map((u, index) => (
-                <tr
-                  key={u._id}
-                  style={{
-                    backgroundColor: index % 2 === 0 ? "#dfe6e1" : "#c6d2c8",
-                  }}
-                >
-                  <td>{u.nome}</td>
-                  <td>{u.email}</td>
-                  <td>{u.tipo}</td>
-                  <td>
-                    {u.bloqueado ? (
-                      <span style={styles.statusBloqueado}>Bloqueado</span>
-                    ) : (
-                      <span style={styles.statusAtivo}>Ativo</span>
-                    )}
-                  </td>
-                  <td>
-                    {u.bloqueadoUntil
-                      ? new Date(u.bloqueadoUntil).toLocaleString("pt-BR")
-                      : "-"}
-                  </td>
-                  <td style={styles.acoes}>
-                    {u.tipo !== "admin" && (
-                      <>
-                        <button
-                          style={u.bloqueado ? styles.btnDesbloquear : styles.btnBloquear}
-                          onClick={() =>
-                            u.bloqueado ? handleDesbloquear(u._id) : abrirModal(u)
-                          }
-                        >
-                          {u.bloqueado ? "Desbloquear" : "Bloquear"}
-                        </button>
-
-                        <button
-                          style={styles.btnExcluir}
-                          onClick={() => handleDelete(u._id)}
-                        >
-                          Excluir
-                        </button>
-                      </>
-                    )}
-                  </td>
-                </tr>
-              ))}
+              {usuarios.map((u, index) => {
+                const bloqueadoData = u.bloqueadoUntil
+                  ? new Date(u.bloqueadoUntil)
+                  : null;
+                return (
+                  <tr
+                    key={u._id}
+                    style={{
+                      backgroundColor: index % 2 === 0 ? "#e8f0eb" : "#d9e4dc",
+                    }}
+                  >
+                    <td style={styles.tdCentralizado}>{u.nome}</td>
+                    <td style={styles.tdCentralizado}>{u.email}</td>
+                    <td style={styles.tdCentralizado}>{u.tipo}</td>
+                    <td style={styles.tdCentralizado}>
+                      {u.bloqueado ? (
+                        <span style={styles.statusBloqueado}>Bloqueado</span>
+                      ) : (
+                        <span style={styles.statusAtivo}>Ativo</span>
+                      )}
+                    </td>
+                    <td style={styles.tdCentralizado}>
+                      {bloqueadoData ? (
+                        <>
+                          <div>{bloqueadoData.toLocaleDateString("pt-BR")}</div>
+                          <div style={{ fontSize: "0.9em" }}>
+                            {bloqueadoData.toLocaleTimeString("pt-BR")}
+                          </div>
+                        </>
+                      ) : (
+                        "-"
+                      )}
+                    </td>
+                    <td style={styles.tdCentralizado}>
+                      {u.motivoBloqueio || "-"}
+                    </td>
+                    <td style={styles.acoes}>
+                      {u.tipo !== "admin" ? (
+                        <div style={styles.colunaBotoes}>
+                          <button
+                            style={styles.btnAcao}
+                            onClick={() =>
+                              u.bloqueado
+                                ? handleDesbloquear(u._id)
+                                : abrirModal(u)
+                            }
+                          >
+                            {u.bloqueado ? "Desbloquear" : "Bloquear"}
+                          </button>
+                          <button
+                            style={styles.btnAcao}
+                            onClick={() => handleDelete(u._id)}
+                          >
+                            Excluir
+                          </button>
+                        </div>
+                      ) : (
+                        "-"
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         )}
 
-        {/* 🔹 Modal */}
+        {/* Modal */}
         <Modal
           isOpen={modalOpen}
           onRequestClose={fecharModal}
@@ -255,7 +305,7 @@ export default function ControleUsuarios() {
           <h2 style={styles.modalTitulo}>
             Bloquear {usuarioSelecionado?.nome || ""}
           </h2>
-          <p style={{ textAlign: "center", marginBottom: "10px" }}>
+          <p style={{ textAlign: "center", marginBottom: "15px" }}>
             Escolha o tempo de bloqueio:
           </p>
 
@@ -269,19 +319,24 @@ export default function ControleUsuarios() {
                 style={styles.input}
               />
             )}
-
             <select
               value={unidade}
               onChange={(e) => setUnidade(e.target.value)}
               style={styles.select}
             >
-              <option value="segundos">Segundos</option>
-              <option value="minutos">Minutos</option>
               <option value="horas">Horas</option>
               <option value="dias">Dias</option>
               <option value="indefinido">Indefinido</option>
             </select>
           </div>
+
+          <input
+            type="text"
+            placeholder="Motivo do bloqueio"
+            value={motivo}
+            onChange={(e) => setMotivo(e.target.value)}
+            style={styles.inputMotivoQuadrado}
+          />
 
           <div style={styles.modalBotoes}>
             <button style={styles.btnConfirmar} onClick={confirmarBloqueio}>
@@ -296,26 +351,17 @@ export default function ControleUsuarios() {
     </div>
   );
 }
+
 const styles = {
   container: {
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
-    marginTop: "20px",
+    marginTop: "40px",
   },
-  abasContainer: {
-    width: "1200px",
-    display: "flex",
-    justifyContent: "flex-start",
-    marginBottom: "0px",
-  },
-  abasEsquerda: {
-    display: "flex",
-    flexDirection: "row",
-    alignItems: "flex-end",
-  },
+  abasContainer: { display: "flex", width: "1200px", marginBottom: "0" },
   aba: {
-    padding: "14px 38px 18px 38px",
+    padding: "14px 38px",
     backgroundColor: "#88bd8a",
     border: "none",
     borderTopLeftRadius: "16px",
@@ -326,136 +372,117 @@ const styles = {
     fontSize: "1.1rem",
     marginRight: "2px",
   },
-  abaAtiva: {
-    backgroundColor: "#6f9064",
-    color: "#fff",
-  },
+  abaAtiva: { backgroundColor: "#6f9064", color: "#fff" },
   quadradoGrande: {
     backgroundColor: "#6f9064",
     borderRadius: "0 24px 24px 24px",
-    padding: "40px",
-    display: "flex",
-    flexDirection: "column",
+    padding: "60px",
     width: "1200px",
-    minHeight: "400px",
-    boxShadow: "0 2px 10px rgba(0,0,0,0.08)",
+    minHeight: "450px",
+    boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
   },
-  titulo: {
-    color: "#fff",
-    textAlign: "center",
-    marginBottom: "25px",
-    fontSize: "1.8rem",
-  },
-  textoAdmin: {
-    color: "#fff",
-    textAlign: "center",
-    fontSize: "1.1rem",
-  },
+  textoAdmin: { color: "#fff", textAlign: "center", fontSize: "1.1rem" },
   tabela: {
     width: "100%",
-    borderCollapse: "collapse",
+    borderCollapse: "separate",
+    borderSpacing: "0 15px",
     backgroundColor: "#C8E6C9",
-    color: "#333",
-    borderRadius: "12px",
+    borderRadius: "10px",
     overflow: "hidden",
   },
-  acoes: {
-    display: "flex",
-    gap: "8px",
-    justifyContent: "center",
-  },
-  statusAtivo: {
+  thCentralizado: {
+    textAlign: "center",
+    padding: "15px 10px",
+    fontSize: "1.05rem",
     color: "#2e7d32",
-    fontWeight: "bold",
   },
-  statusBloqueado: {
-    color: "#b71c1c",
-    fontWeight: "bold",
+  tdCentralizado: { textAlign: "center", padding: "12px 10px" },
+  acoes: { textAlign: "center", padding: "18px 12px" },
+  colunaBotoes: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "10px",
+    alignItems: "center",
   },
-  btnBloquear: {
-    backgroundColor: "#3b5534",
+  statusAtivo: { color: "#2e7d32", fontWeight: "bold" },
+  statusBloqueado: { color: "#b71c1c", fontWeight: "bold" },
+  btnAcao: {
+    backgroundColor: "#4a7c4a",
     color: "#fff",
     border: "none",
-    padding: "8px 14px",
+    padding: "10px 0",
     borderRadius: "8px",
-    cursor: "pointer",
+    width: "120px",
+    height: "40px",
     fontWeight: "bold",
-  },
-  btnDesbloquear: {
-    backgroundColor: "#C8E6C9",
-    color: "#3b5534",
-    border: "1px solid #3b5534",
-    padding: "8px 14px",
-    borderRadius: "8px",
     cursor: "pointer",
-    fontWeight: "bold",
-  },
-  btnExcluir: {
-    backgroundColor: "#fff",
-    border: "2px solid #6f9064",
-    color: "#3b5534",
-    padding: "8px 14px",
-    borderRadius: "8px",
-    cursor: "pointer",
-    fontWeight: "bold",
-  },
-  modalTitulo: {
     textAlign: "center",
-    color: "#3b5534",
-    marginBottom: "15px",
   },
+  modalTitulo: { textAlign: "center", color: "#3b5534", marginBottom: "15px" },
   modalInputs: {
     display: "flex",
     justifyContent: "center",
     gap: "10px",
-    alignItems: "center",
     marginBottom: "20px",
   },
   input: {
-    padding: "8px",
-    width: "60px",
-    borderRadius: "6px",
+    padding: "10px",
+    width: "80px",
+    borderRadius: "8px",
     border: "1px solid #ccc",
     textAlign: "center",
   },
-  select: {
-    padding: "8px",
-    borderRadius: "6px",
+  select: { padding: "10px", borderRadius: "8px", border: "1px solid #ccc" },
+  inputMotivoQuadrado: {
+    width: "100%",
+    height: "80px",
+    borderRadius: "10px",
     border: "1px solid #ccc",
+    padding: "10px",
+    fontSize: "1rem",
+    marginBottom: "20px",
   },
   modalBotoes: {
     display: "flex",
     justifyContent: "center",
     gap: "15px",
+    marginTop: "25px",
   },
   btnConfirmar: {
-    backgroundColor: "#3b5534",
+    backgroundColor: "#4a7c4a",
     color: "#fff",
     border: "none",
-    padding: "10px 20px",
-    borderRadius: "8px",
+    padding: "12px 25px",
+    borderRadius: "10px",
     cursor: "pointer",
+    fontWeight: "bold",
+    fontSize: "1rem",
   },
   btnCancelar: {
-    backgroundColor: "#fff",
-    color: "#3b5534",
-    border: "2px solid #6f9064",
-    padding: "10px 20px",
-    borderRadius: "8px",
+    backgroundColor: "#6ca86c",
+    color: "#fff",
+    border: "none",
+    padding: "12px 25px",
+    borderRadius: "10px",
     cursor: "pointer",
+    fontWeight: "bold",
+    fontSize: "1rem",
   },
 };
 
 const modalStyle = {
   content: {
+    position: "absolute",
     top: "50%",
     left: "50%",
     transform: "translate(-50%, -50%)",
     backgroundColor: "#C8E6C9",
-    padding: "30px",
-    borderRadius: "16px",
-    width: "400px",
-    boxShadow: "0 4px 20px rgba(0,0,0,0.2)",
+    padding: "35px",
+    paddingBottom: "80px",
+    borderRadius: "20px",
+    width: "600px",
+    height: "fit-content",
+    boxShadow: "0 6px 25px rgba(0,0,0,0.25)",
     border: "none",
   },
 };
