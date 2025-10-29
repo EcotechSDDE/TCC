@@ -27,10 +27,17 @@ export default function Cadastro() {
     setForm((prev) => ({ ...prev, ...value }));
   }
 
+  // 🔹 Função para validar senha forte
+  function validateSenhaForte(senha) {
+    const regex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_\-+=<>?{}[\]~]).{8,}$/;
+    return regex.test(senha);
+  }
+
   async function onSubmit(e) {
     e.preventDefault();
 
-    // 🔹 Validações
+    // 🔹 Validação de senha
     if (form.senha !== form.confirmarSenha) {
       alert("Senhas não coincidem. Tente novamente.");
       return;
@@ -48,6 +55,7 @@ export default function Cadastro() {
       return;
     }
 
+    // 🔹 Validações individuais
     const validateEmail = (email) => /\S+@\S+\.\S+/.test(email);
     const validateTelefone = (telefone) =>
       telefone.replace(/\D/g, "").length === 11;
@@ -56,6 +64,14 @@ export default function Cadastro() {
     if (!validateEmail(form.email)) return alert("Email inválido!");
     if (!validateTelefone(form.telefone)) return alert("Telefone inválido!");
     if (!validateNome(form.nome)) return alert("Digite o nome completo!");
+
+    // 🔹 Nova validação de senha forte
+    if (!validateSenhaForte(form.senha)) {
+      alert(
+        "A senha deve ter no mínimo 8 caracteres e conter letras maiúsculas, minúsculas, números e símbolos."
+      );
+      return;
+    }
 
     try {
       // 🔹 Monta o corpo da requisição
@@ -80,13 +96,13 @@ export default function Cadastro() {
         return;
       }
 
-      // 🔹 Login automático
+      // 🔹 Login automático após cadastro
       const loginResponse = await fetch(`${REACT_APP_YOUR_HOSTNAME}/user/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email: form.email,
-          password: form.senha, // ⚠️ mantém "password" para o backend
+          password: form.senha,
         }),
       });
 
@@ -305,6 +321,8 @@ const styles = {
     height: "20px",
     cursor: "pointer",
     opacity: 0.7,
+    border: "none",
+    background: "transparent",
   },
   passwordContainer: {
     position: "relative",

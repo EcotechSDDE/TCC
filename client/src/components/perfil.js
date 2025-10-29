@@ -8,19 +8,42 @@ export default function Perfil() {
   const { token } = useContext(AuthContext);
   const [user, setUser] = useState(null);
   const [editMode, setEditMode] = useState(false);
-  const [form, setForm] = useState({ nome: "", email: "", telefone: "", senha: "", imagem: null });
+  const [showPassword, setShowPassword] = useState(false);
+  const [form, setForm] = useState({
+    nome: "",
+    email: "",
+    telefone: "",
+    senha: "",
+    confirmarSenha: "",
+    imagem: null,
+  });
   const [preview, setPreview] = useState(null);
 
   useEffect(() => {
     async function fetchUser() {
-      const response = await fetch(`${REACT_APP_YOUR_HOSTNAME}/user/me`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setUser(data);
-        setForm({ nome: data.nome, email: data.email, telefone: data.telefone, senha: "", imagem: null });
-        setPreview(data.imagem ? `${REACT_APP_YOUR_HOSTNAME}/uploads/${data.imagem}` : "/Logo.png");
+      try {
+        const response = await fetch(`${REACT_APP_YOUR_HOSTNAME}/user/me`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setUser(data);
+          setForm({
+            nome: data.nome,
+            email: data.email,
+            telefone: data.telefone,
+            senha: "",
+            confirmarSenha: "",
+            imagem: null,
+          });
+          setPreview(
+            data.imagem
+              ? `${REACT_APP_YOUR_HOSTNAME}/uploads/${data.imagem}`
+              : "/Logo.png"
+          );
+        }
+      } catch (error) {
+        console.error("Erro ao carregar perfil:", error);
       }
     }
     fetchUser();
@@ -32,85 +55,200 @@ export default function Perfil() {
 
   function handleCancel() {
     setEditMode(false);
-    setForm({ nome: user.nome, email: user.email, telefone: user.telefone, senha: "", imagem: null });
-    setPreview(user.imagem ? `${REACT_APP_YOUR_HOSTNAME}/uploads/${user.imagem}` : "/Logo.png");
+    setForm({
+      nome: user.nome,
+      email: user.email,
+      telefone: user.telefone,
+      senha: "",
+      confirmarSenha: "",
+      imagem: null,
+    });
+    setPreview(
+      user.imagem
+        ? `${REACT_APP_YOUR_HOSTNAME}/uploads/${user.imagem}`
+        : "/Logo.png"
+    );
+    setShowPassword(false);
   }
 
   function handleChange(e) {
     const { name, value, files } = e.target;
     if (name === "imagem" && files && files[0]) {
-      setForm(f => ({ ...f, imagem: files[0] }));
+      setForm((f) => ({ ...f, imagem: files[0] }));
       setPreview(URL.createObjectURL(files[0]));
     } else {
-      setForm(f => ({ ...f, [name]: value }));
+      setForm((f) => ({ ...f, [name]: value }));
     }
   }
 
+  const validateSenhaForte = (senha) => {
+    const regex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_\-+=<>?{}[\]~]).{8,}$/;
+    return regex.test(senha);
+  };
+
   async function handleSave(e) {
     e.preventDefault();
-    if (!window.confirm("Tem certeza que deseja salvar as alterações do perfil?")) return;
-    // Validação básica
-    if (!form.nome.trim()) return window.alert("Nome é obrigatório!");
-    if (!form.email.match(/^[^@\s]+@[^@\s]+\.[^@\s]+$/)) return window.alert("Email inválido!");
-    if (!form.telefone.match(/^\(\d{2}\) \d{5}-\d{4}$/)) return window.alert("Telefone inválido!");
-    if (form.senha && form.senha.length < 6) return window.alert("A senha deve ter pelo menos 6 caracteres!");
-    const formData = new FormData();
-    formData.append("nome", form.nome);
-    formData.append("email", form.email);
-    formData.append("telefone", form.telefone);
-    if (form.senha) formData.append("senha", form.senha);
-    if (form.imagem) formData.append("imagem", form.imagem);
-    const response = await fetch(`${REACT_APP_YOUR_HOSTNAME}/update/${user._id}`, {
-      method: "POST",
-      body: formData,
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    if (response.ok) {
-      const updated = await response.json();
-      setUser(updated);
-      setEditMode(false);
-      // Força recarregar a imagem para evitar cache
-      setPreview(updated.imagem ? `${REACT_APP_YOUR_HOSTNAME}/uploads/${updated.imagem}?t=${Date.now()}` : "/Logo.png");
-      window.alert("Perfil atualizado com sucesso!");
-    } else {
-      window.alert("Erro ao atualizar perfil");
+
+    if (!window.confirm("Tem certeza que deseja salvar as alterações do perfil?"))
+      return;
+
+    if (!form.nome.trim()) return alert("Nome é obrigatório!");
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(form.email))
+      return alert("Email inválido!");
+    if (!/^\(\d{2}\) \d{5}-\d{4}$/.test(form.telefone))
+      return alert("Telefone inválido!");
+
+    if (form.senha) {
+      if (!validateSenhaForte(form.senha)) {
+        return alert(
+          "A nova senha deve ter no mínimo 8 caracteres, incluindo letras maiúsculas, minúsculas, números e símbolos."
+        );
+      }
+      if (form.senha !== form.confirmarSenha) {
+        return alert("As senhas não coincidem!");
+      }
+    }
+
+    try {
+      const formData = new FormData();
+      formData.append("nome", form.nome);
+      formData.append("email", form.email);
+      formData.append("telefone", form.telefone);
+      if (form.senha) formData.append("senha", form.senha);
+      if (form.imagem) formData.append("imagem", form.imagem);
+
+      const response = await fetch(
+        `${REACT_APP_YOUR_HOSTNAME}/user/update/${user._id}`,
+        {
+          method: "POST",
+          body: formData,
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      if (response.ok) {
+        const updated = await response.json();
+        setUser(updated);
+        setEditMode(false);
+        setPreview(
+          updated.imagem
+            ? `${REACT_APP_YOUR_HOSTNAME}/uploads/${updated.imagem}?t=${Date.now()}`
+            : "/Logo.png"
+        );
+        alert("Perfil atualizado com sucesso!");
+      } else {
+        alert("Erro ao atualizar perfil.");
+      }
+    } catch (error) {
+      console.error("Erro ao salvar perfil:", error);
+      alert("Erro ao salvar perfil. Tente novamente.");
     }
   }
 
   async function handleDelete() {
-    if (!window.confirm("Tem certeza que deseja deletar sua conta? Essa ação não pode ser desfeita.")) return;
-    const response = await fetch(`${REACT_APP_YOUR_HOSTNAME}/${user._id}`, {
-      method: "DELETE",
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    if (response.ok) {
-      window.alert("Conta deletada com sucesso!");
-      window.location.href = "/";
-    } else {
-      window.alert("Erro ao deletar conta");
+    if (
+      !window.confirm(
+        "Tem certeza que deseja deletar sua conta? Essa ação não pode ser desfeita."
+      )
+    )
+      return;
+
+    try {
+      const response = await fetch(`${REACT_APP_YOUR_HOSTNAME}/${user._id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (response.ok) {
+        alert("Conta deletada com sucesso!");
+        window.location.href = "/";
+      } else {
+        alert("Erro ao deletar conta.");
+      }
+    } catch (error) {
+      console.error("Erro ao deletar conta:", error);
+      alert("Erro ao deletar conta. Tente novamente.");
     }
   }
 
-  if (!user) return <div style={{ color: "#3b5534", textAlign: "center", marginTop: 40 }}>Carregando perfil...</div>;
+  if (!user)
+    return (
+      <div style={{ color: "#3b5534", textAlign: "center", marginTop: 40 }}>
+        Carregando perfil...
+      </div>
+    );
 
   return (
-    <div style={{ maxWidth: 420, margin: "40px auto", position: "relative", background: "#f6fff6", borderRadius: 24, boxShadow: "0 2px 10px #0002", padding: 32 }}>
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 18 }}>
+    <div
+      style={{
+        maxWidth: 420,
+        margin: "40px auto",
+        position: "relative",
+        background: "#f6fff6",
+        borderRadius: 24,
+        boxShadow: "0 2px 10px #0002",
+        padding: 32,
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: 18,
+        }}
+      >
         <img
           src={preview}
           alt="Foto de perfil"
-          style={{ width: 140, height: 140, borderRadius: "50%", objectFit: "cover", boxShadow: "0 2px 10px #0002", border: "4px solid #88bd8a" }}
+          style={{
+            width: 140,
+            height: 140,
+            borderRadius: "50%",
+            objectFit: "cover",
+            boxShadow: "0 2px 10px #0002",
+            border: "4px solid #88bd8a",
+          }}
         />
+
         {!editMode ? (
           <>
-            <div style={{ fontSize: "1.3rem", fontWeight: "bold", color: "#3b5534" }}>{user.nome}</div>
+            <div
+              style={{ fontSize: "1.3rem", fontWeight: "bold", color: "#3b5534" }}
+            >
+              {user.nome}
+            </div>
             <div style={{ color: "#3b5534" }}>{user.email}</div>
             <div style={{ color: "#3b5534" }}>{user.telefone}</div>
           </>
         ) : (
-          <form onSubmit={handleSave} style={{ width: "100%", display: "flex", flexDirection: "column", gap: 12 }}>
-            <input name="nome" value={form.nome} onChange={handleChange} style={inputStyle} placeholder="Nome" required />
-            <input name="email" value={form.email} onChange={handleChange} style={inputStyle} placeholder="Email" required />
+          <form
+            onSubmit={handleSave}
+            style={{
+              width: "100%",
+              display: "flex",
+              flexDirection: "column",
+              gap: 12,
+              alignItems: "center",
+            }}
+          >
+            <input
+              name="nome"
+              value={form.nome}
+              onChange={handleChange}
+              style={inputStyle}
+              placeholder="Nome"
+              required
+            />
+            <input
+              name="email"
+              value={form.email}
+              onChange={handleChange}
+              style={inputStyle}
+              placeholder="Email"
+              required
+            />
             <InputMask
               mask="(99) 99999-9999"
               name="telefone"
@@ -120,30 +258,98 @@ export default function Perfil() {
               placeholder="Telefone"
               required
             />
-            <input name="senha" type="password" value={form.senha} onChange={handleChange} style={inputStyle} placeholder="Nova senha (mín. 6)" />
-            <input name="imagem" type="file" accept="image/*" onChange={handleChange} style={{ marginTop: 8 }} />
-            <div style={{ display: "flex", gap: 12, marginTop: 8 }}>
-              <button type="submit" style={buttonStyle}>Salvar</button>
-              <button type="button" style={{ ...buttonStyle, background: "#ccc", color: "#333" }} onClick={handleCancel}>Cancelar</button>
+            <div style={{ width: "100%", position: "relative" }}>
+              <input
+                name="senha"
+                type={showPassword ? "text" : "password"}
+                value={form.senha}
+                onChange={handleChange}
+                style={inputStyle}
+                placeholder="Digite sua nova senha"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((prev) => !prev)}
+                style={eyeButtonStyle}
+              >
+                {showPassword ? "🔓" : "🔒"}
+              </button>
+            </div>
+            <input
+              name="confirmarSenha"
+              type="password"
+              value={form.confirmarSenha}
+              onChange={handleChange}
+              style={inputStyle}
+              placeholder="Confirme a nova senha"
+            />
+            <input
+              name="imagem"
+              type="file"
+              accept="image/*"
+              onChange={handleChange}
+              style={{ marginTop: 8 }}
+            />
+            <div style={{ display: "flex", gap: 12, marginTop: 16, justifyContent: "center", width: "100%" }}>
+              <button type="submit" style={buttonStyle}>
+                Salvar
+              </button>
+              <button
+                type="button"
+                style={buttonStyle}
+                onClick={handleCancel}
+              >
+                Cancelar
+              </button>
             </div>
           </form>
         )}
       </div>
-      {/* Botão editar flutuante */}
+
       {!editMode && (
         <button
           onClick={handleEdit}
-          style={{ position: "absolute", bottom: 24, right: 24, background: "#6f9064", color: "#fff", border: "none", borderRadius: "50%", width: 56, height: 56, fontSize: 28, boxShadow: "0 2px 10px #0002", cursor: "pointer" }}
+          style={{
+            position: "absolute",
+            bottom: 24,
+            right: 24,
+            background: "#6f9064",
+            color: "#fff",
+            border: "none",
+            borderRadius: "50%",
+            width: 56,
+            height: 56,
+            fontSize: 28,
+            boxShadow: "0 2px 10px #0002",
+            cursor: "pointer",
+          }}
           title="Editar perfil"
-        >✎</button>
+        >
+          ✎
+        </button>
       )}
-      {/* Botão deletar conta */}
+
       {!editMode && (
         <button
           onClick={handleDelete}
-          style={{ position: "absolute", bottom: 24, left: 24, background: "#c62828", color: "#fff", border: "none", borderRadius: "50%", width: 56, height: 56, fontSize: 22, boxShadow: "0 2px 10px #0002", cursor: "pointer" }}
+          style={{
+            position: "absolute",
+            bottom: 24,
+            left: 24,
+            background: "#c62828",
+            color: "#fff",
+            border: "none",
+            borderRadius: "50%",
+            width: 56,
+            height: 56,
+            fontSize: 22,
+            boxShadow: "0 2px 10px #0002",
+            cursor: "pointer",
+          }}
           title="Deletar conta"
-        >&#128465;</button>
+        >
+          🗑️
+        </button>
       )}
     </div>
   );
@@ -154,8 +360,10 @@ const inputStyle = {
   fontSize: "1rem",
   borderRadius: "8px",
   border: "1px solid #ccc",
-  width: "100%"
+  width: "100%",
+  boxSizing: "border-box",
 };
+
 const buttonStyle = {
   padding: "10px 18px",
   background: "#6f9064",
@@ -163,5 +371,19 @@ const buttonStyle = {
   fontSize: "1.1rem",
   border: "none",
   borderRadius: "8px",
-  cursor: "pointer"
+  cursor: "pointer",
+};
+
+const eyeButtonStyle = {
+  position: "absolute",
+  right: 10,
+  top: "50%",
+  transform: "translateY(-50%)",
+  width: 24,
+  height: 24,
+  border: "none",
+  background: "transparent",
+  cursor: "pointer",
+  fontSize: 16,
+  opacity: 0.7,
 };
