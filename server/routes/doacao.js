@@ -15,9 +15,9 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-// ✅ ROTAS SEM DUPLICAÇÃO
 DoacaoRoutes.post("/add", autenticar, upload.array('fotos', 5), doacaoController.criarDoacao); // /doacao/add
 DoacaoRoutes.get("/", doacaoController.listarDoacoes); // /doacao
+DoacaoRoutes.get("/minhas", autenticar, doacaoController.minhasDoacoes); // Rota para listar as doações do usuário logado
 DoacaoRoutes.get("/:id", doacaoController.buscarDoacaoPorId); // /doacao/:id
 DoacaoRoutes.delete("/:id", autenticar, doacaoController.deletarDoacao);
 DoacaoRoutes.put('/:id', autenticar, autorizarAdmin, doacaoController.editarDoacao);

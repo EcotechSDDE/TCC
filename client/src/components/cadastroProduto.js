@@ -41,18 +41,17 @@ export default function CadastroProduto() {
       }
     });
 
-    const token = localStorage.getItem("token"); // pega o token salvo
+    const token = localStorage.getItem("token");
     if (!token) {
       window.alert("Você precisa estar logado para cadastrar uma doação.");
       navigate("/");
       return;
     }
-    const response = await fetch(`${REACT_APP_YOUR_HOSTNAME}/doacao/add`, { 
+
+    const response = await fetch(`${REACT_APP_YOUR_HOSTNAME}/doacao/add`, {
       method: "POST",
       body: formData,
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { Authorization: `Bearer ${token}` },
     });
 
     if (!response.ok) {
@@ -61,12 +60,12 @@ export default function CadastroProduto() {
       return;
     }
 
-    navigate("/produtos");
+    navigate("/minhasDoacoes");
   }
 
   return (
     <div style={styles.container}>
-      {/* Abas superiores conectadas */}
+      {/* Abas superiores */}
       <div style={styles.abasContainer}>
         <div style={styles.abasEsquerda}>
           <button style={styles.aba} onClick={() => navigate("/produtos")}>
@@ -75,18 +74,19 @@ export default function CadastroProduto() {
           <button style={{ ...styles.aba, ...styles.abaAtiva }} disabled>
             Doar
           </button>
+          <button style={styles.aba} onClick={() => navigate("/minhasDoacoes")}>
+            Minhas Doações
+          </button>
         </div>
       </div>
 
       <div style={styles.quadradoGrande}>
-        <div
-          style={{ display: "flex", flexDirection: "column", width: "100%" }}
-        >
+        <div style={{ display: "flex", flexDirection: "column", width: "100%" }}>
           <form
-            onSubmit={e => {
+            onSubmit={(e) => {
               e.preventDefault();
               if (!form.fotos || form.fotos.length < 3) {
-                window.alert('Selecione pelo menos 3 fotos da doação.');
+                window.alert("Selecione pelo menos 3 fotos da doação.");
                 return;
               }
               onSubmit(e);
@@ -229,7 +229,9 @@ export default function CadastroProduto() {
                 <label style={styles.label}>Tipo Material</label>
                 <select
                   value={form.tipoMaterial}
-                  onChange={(e) => updateForm({ tipoMaterial: e.target.value })}
+                  onChange={(e) =>
+                    updateForm({ tipoMaterial: e.target.value })
+                  }
                   style={styles.input}
                   required
                 >
@@ -272,19 +274,37 @@ export default function CadastroProduto() {
                   type="file"
                   multiple
                   accept="image/*"
-                  onChange={e => updateForm({ fotos: Array.from(e.target.files) })}
+                  onChange={(e) =>
+                    updateForm({ fotos: Array.from(e.target.files) })
+                  }
                   style={styles.input}
                 />
                 {form.fotos && form.fotos.length > 0 && (
-                  <div style={{ color: form.fotos.length < 3 ? 'red' : '#3b5534', fontSize: '0.95rem', marginTop: 4 }}>
-                    {form.fotos.length} foto(s) selecionada(s). {form.fotos.length < 3 ? 'Selecione pelo menos 3 fotos.' : 'OK!'}
+                  <div
+                    style={{
+                      color:
+                        form.fotos.length < 3 ? "red" : "#3b5534",
+                      fontSize: "0.95rem",
+                      marginTop: 4,
+                    }}
+                  >
+                    {form.fotos.length} foto(s) selecionada(s).{" "}
+                    {form.fotos.length < 3
+                      ? "Selecione pelo menos 3 fotos."
+                      : "OK!"}
                   </div>
                 )}
               </div>
             </div>
 
-            {/* Mapa centralizado, maior, abaixo das colunas */}
-            <div style={{ display: "flex", justifyContent: "center", margin: "20px 0 10px 0" }}>
+            {/* Mapa */}
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                margin: "20px 0 10px 0",
+              }}
+            >
               <div style={{ width: "1000px", height: "400px" }}>
                 <MapaGoogle
                   onPick={(coords) =>
@@ -294,7 +314,7 @@ export default function CadastroProduto() {
               </div>
             </div>
 
-            {/* Botão centralizado abaixo do mapa, com menos espaço acima */}
+            {/* Botão */}
             <div
               style={{
                 display: "flex",
@@ -338,31 +358,15 @@ const styles = {
     border: "none",
     borderTopLeftRadius: "16px",
     borderTopRightRadius: "16px",
-    borderBottom: "none",
     color: "#3b5534",
     fontWeight: "bold",
     cursor: "pointer",
     fontSize: "1.1rem",
     marginRight: "2px",
-    zIndex: 2,
   },
   abaAtiva: {
     backgroundColor: "#88bd8a",
     color: "#3b5534",
-    borderTopLeftRadius: "16px",
-    borderTopRightRadius: "16px",
-    borderBottom: "none",
-  },
-  abaPesquisaFiltro: {
-    display: "flex",
-    alignItems: "center",
-    backgroundColor: "#C8E6C9",
-    borderTopRightRadius: "16px",
-    borderTopLeftRadius: "16px",
-    padding: "0 18px",
-    height: "54px",
-    marginLeft: "2px",
-    zIndex: 2,
   },
   quadradoGrande: {
     backgroundColor: "#88bd8a",
@@ -375,18 +379,6 @@ const styles = {
     minHeight: "320px",
     justifyContent: "center",
     alignItems: "center",
-    boxShadow: "0 2px 10px rgba(0,0,0,0.08)",
-    marginTop: "0px",
-  },
-  form: {
-    backgroundColor: "#6f9064",
-    padding: "30px",
-    borderRadius: "12px",
-    display: "flex",
-    flexDirection: "column",
-    gap: "15px",
-    width: "400px",
-    marginBottom: "35px",
   },
   label: {
     fontSize: "1rem",

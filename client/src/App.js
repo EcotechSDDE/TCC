@@ -16,6 +16,7 @@ import DenunciasAdmin from "./components/denunciaAdmin";
 import { AuthContext } from "./AuthContext";
 import RelatorioAdmin from "./components/relatorioAdmin";
 import ControleUsuarios from "./components/controleUsuarios";
+import MinhasDoacoes from "./components/minhasDoacoes";
 
 const App = () => {
   const { user } = useContext(AuthContext);
@@ -50,6 +51,7 @@ const App = () => {
             path="/controleUsuarios"
             element={user?.tipo === "admin" ? <ControleUsuarios /> : <Login />}
           />
+          <Route path="/minhasDoacoes" element={<MinhasDoacoes />} />
         </Routes>
       </main>
       <Footer />

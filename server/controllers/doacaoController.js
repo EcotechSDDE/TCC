@@ -101,3 +101,23 @@ exports.alterarStatusDoacao = async (req, res) => {
         res.status(400).json({ message: error.message });
     }
 };
+
+exports.minhasDoacoes = async (req, res) => {
+  try {
+    if (!req.usuario || !req.usuario._id) {
+      return res.status(401).json({ message: "Usuário não autenticado" });
+    }
+
+    const usuarioId = req.usuario._id;
+
+    const doacoes = await Doacao.find({ usuario: usuarioId }).sort({ createdAt: -1 });
+
+    res.status(200).json(doacoes);
+  } catch (error) {
+    console.error("Erro ao buscar doações do usuário:", error);
+    res.status(500).json({
+      message: "Erro interno ao buscar suas doações",
+      erro: error.message,
+    });
+  }
+};

@@ -75,7 +75,17 @@ export default function Produtos() {
                 Doar
               </button>
 
-              {/* Barra de pesquisa e filtro — só para usuários comuns */}
+              <button
+                style={{
+                  ...styles.aba,
+                  ...(abaAtiva === "minhas" ? styles.abaAtiva : {}),
+                }}
+                onClick={() => navigate("/minhasDoacoes")}
+              >
+                Minhas Doações
+              </button>
+
+              {/* Barra de pesquisa e filtro */}
               <div style={styles.abaPesquisaFiltro}>
                 <input
                   type="text"
@@ -191,18 +201,6 @@ export default function Produtos() {
               </div>
             ))}
           </>
-        )}
-
-        {abaAtiva === "denuncias" && (
-          <p style={styles.textoAdmin}>📣 Gerencie as denúncias aqui.</p>
-        )}
-        {abaAtiva === "relatorios" && (
-          <p style={styles.textoAdmin}>📊 Visualize relatórios do sistema.</p>
-        )}
-        {abaAtiva === "suporte" && (
-          <p style={styles.textoAdmin}>
-            💬 Veja e responda mensagens de suporte.
-          </p>
         )}
       </div>
     </div>
