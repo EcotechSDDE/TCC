@@ -96,7 +96,9 @@ export default function MinhasDoacoes() {
                 alt={item.nome}
                 style={styles.imagem}
               />
-              <div style={styles.nome}>{item.nome}</div>
+              <div style={styles.nome}>
+                {item.nome.length > 80 ? item.nome.slice(0, 80) + "..." : item.nome}
+              </div>
               <button
                 style={styles.contato}
                 onClick={() => navigate(`/detalhesProduto/${item._id}`)}
@@ -117,7 +119,7 @@ export default function MinhasDoacoes() {
   );
 }
 
-// === ESTILOS (mesmos do Produtos.js) ===
+// === ESTILOS ===
 const styles = {
   container: {
     display: "flex",
@@ -197,19 +199,16 @@ const styles = {
     color: "#3b5534",
     fontSize: "1rem",
     textAlign: "center",
-    marginBottom: "10px",
-    minHeight: "40px",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    textOverflow: "ellipsis",
+    marginBottom: "12px",
+    maxWidth: "160px",
+    display: "-webkit-box",
+    WebkitLineClamp: 2, // até 2 linhas
+    WebkitBoxOrient: "vertical",
     overflow: "hidden",
-    wordWrap: "break-word",
-  },
-  status: {
-    color: "#3b5534",
-    fontSize: "0.9rem",
-    marginBottom: "8px",
+    textOverflow: "ellipsis",
+    wordBreak: "break-word",
+    lineHeight: "1.2rem",
+    minHeight: "2.4rem",
   },
   contato: {
     backgroundColor: "#3b5534",

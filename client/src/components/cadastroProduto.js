@@ -108,7 +108,12 @@ export default function CadastroProduto() {
                   type="text"
                   placeholder="Digite o nome do dispositivo"
                   value={form.nome}
-                  onChange={(e) => updateForm({ nome: e.target.value })}
+                  onChange={(e) => {
+                    if (e.target.value.length <= 80) {
+                      updateForm({ nome: e.target.value });
+                    }
+                  }}
+                  maxLength={80}
                   style={styles.input}
                   required
                 />
@@ -160,9 +165,7 @@ export default function CadastroProduto() {
                   type="text"
                   placeholder="Digite as especificações técnicas"
                   value={form.especificacao}
-                  onChange={(e) =>
-                    updateForm({ especificacao: e.target.value })
-                  }
+                  onChange={(e) => updateForm({ especificacao: e.target.value })}
                   style={styles.input}
                 />
 
@@ -229,9 +232,7 @@ export default function CadastroProduto() {
                 <label style={styles.label}>Tipo Material</label>
                 <select
                   value={form.tipoMaterial}
-                  onChange={(e) =>
-                    updateForm({ tipoMaterial: e.target.value })
-                  }
+                  onChange={(e) => updateForm({ tipoMaterial: e.target.value })}
                   style={styles.input}
                   required
                 >
@@ -282,8 +283,7 @@ export default function CadastroProduto() {
                 {form.fotos && form.fotos.length > 0 && (
                   <div
                     style={{
-                      color:
-                        form.fotos.length < 3 ? "red" : "#3b5534",
+                      color: form.fotos.length < 3 ? "red" : "#3b5534",
                       fontSize: "0.95rem",
                       marginTop: 4,
                     }}
