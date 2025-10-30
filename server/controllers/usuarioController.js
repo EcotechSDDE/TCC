@@ -145,11 +145,20 @@ exports.atualizarUsuario = async (req, res) => {
   }
 };
 
-// Deletar usuário
+// Deletar usuário com todas as suas doações
 exports.deletarUsuario = async (req, res) => {
   try {
-    await Usuario.findByIdAndDelete(req.params.id);
-    res.status(200).json({ message: "Usuário deletado com sucesso" });
+    const userId = req.params.id;
+
+    // Deletar todas as doações do usuário
+    const Doacao = require("../models/Doacao");
+    await Doacao.deleteMany({ usuario: userId });
+
+    // Deletar o usuário
+    const usuario = await Usuario.findByIdAndDelete(userId);
+    if (!usuario) return res.status(404).json({ message: "Usuário não encontrado" });
+
+    res.status(200).json({ message: "Usuário e todas as suas doações foram deletados com sucesso" });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

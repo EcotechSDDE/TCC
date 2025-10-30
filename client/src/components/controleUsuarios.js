@@ -194,7 +194,7 @@ export default function ControleUsuarios() {
   return (
     <div style={styles.container}>
       <div style={styles.abasContainer}>
-        <button style={styles.aba} onClick={() => navigate("/aprodutos")}>
+        <button style={styles.aba} onClick={() => navigate("/produtos")}>
           Produtos
         </button>
         <button style={styles.aba} onClick={() => navigate("/denuncias")}>

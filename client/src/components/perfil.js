@@ -155,16 +155,20 @@ export default function Perfil() {
       return;
 
     try {
-      const response = await fetch(`${REACT_APP_YOUR_HOSTNAME}/${user._id}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await fetch(
+        `${REACT_APP_YOUR_HOSTNAME}/user/${user._id}`,
+        {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
       if (response.ok) {
         alert("Conta deletada com sucesso!");
         window.location.href = "/";
       } else {
-        alert("Erro ao deletar conta.");
+        const errorData = await response.json();
+        alert(`Erro ao deletar conta: ${errorData.message}`);
       }
     } catch (error) {
       console.error("Erro ao deletar conta:", error);
