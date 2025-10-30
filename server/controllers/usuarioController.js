@@ -79,22 +79,26 @@ exports.login = async (req, res) => {
 
     // Bloqueio de conta
     if (usuario.bloqueado) {
-      // Se bloqueio temporário
-      if (usuario.bloqueadoUntil) {
-        if (usuario.bloqueadoUntil > Date.now()) {
-          return res.status(403).json({
-            message: `Usuário bloqueado até ${usuario.bloqueadoUntil}`,
-          });
-        } else {
-          // Bloqueio temporário expirou
-          usuario.bloqueado = false;
-          usuario.bloqueadoUntil = null;
-          usuario.motivoBloqueio = null;
-          await usuario.save();
-        }
-      } else {
+      if (usuario.bloqueadoUntil && usuario.bloqueadoUntil > Date.now()) {
+        return res.status(403).json({
+          bloqueado: true,
+          motivoBloqueio: usuario.motivoBloqueio || "Não informado",
+          bloqueadoUntil: usuario.bloqueadoUntil,
+          message: `Usuário bloqueado até ${usuario.bloqueadoUntil}`,
+        });
+      } else if (!usuario.bloqueadoUntil) {
         // Bloqueio permanente
-        return res.status(403).json({ message: "Usuário bloqueado" });
+        return res.status(403).json({
+          bloqueado: true,
+          motivoBloqueio: usuario.motivoBloqueio || "Não informado",
+          message: "Usuário bloqueado permanentemente",
+        });
+      } else {
+        // Bloqueio expirou
+        usuario.bloqueado = false;
+        usuario.bloqueadoUntil = null;
+        usuario.motivoBloqueio = null;
+        await usuario.save();
       }
     }
 
@@ -206,32 +210,30 @@ exports.bloquearPorTempo = async (req, res) => {
   try {
     const { duracao, unidade, motivo } = req.body; 
     const usuario = await Usuario.findById(req.params.id);
-    if (!usuario)
-      return res.status(404).json({ message: "Usuário não encontrado" });
 
+    if (!usuario) {
+      return res.status(404).json({ message: "Usuário não encontrado" });
+    }
+
+    // Calcular duração em horas
     let duracaoHoras = null;
     if (unidade !== "indefinido" && duracao && !isNaN(duracao)) {
+      const dur = Number(duracao);
       switch (unidade) {
-        case "segundos":
-          duracaoHoras = duracao / 3600;
-          break;
-        case "minutos":
-          duracaoHoras = duracao / 60;
-          break;
-        case "horas":
-          duracaoHoras = duracao;
-          break;
-        case "dias":
-          duracaoHoras = duracao * 24;
-          break;
+        case "segundos": duracaoHoras = dur / 3600; break;
+        case "minutos": duracaoHoras = dur / 60; break;
+        case "horas": duracaoHoras = dur; break;
+        case "dias": duracaoHoras = dur * 24; break;
+        default: duracaoHoras = null;
       }
     }
 
+    // Definir bloqueio
     usuario.bloqueado = true;
     usuario.bloqueadoUntil = duracaoHoras
       ? new Date(Date.now() + duracaoHoras * 3600 * 1000)
       : null;
-    usuario.motivoBloqueio = motivo || "Não informado"; // salvar motivo
+    usuario.motivoBloqueio = motivo?.trim() || "Não informado";
 
     await usuario.save();
 
@@ -239,9 +241,12 @@ exports.bloquearPorTempo = async (req, res) => {
       bloqueado: usuario.bloqueado,
       bloqueadoUntil: usuario.bloqueadoUntil,
       motivoBloqueio: usuario.motivoBloqueio,
-      message: "Usuário bloqueado temporariamente",
+      message: usuario.bloqueadoUntil
+        ? `Usuário bloqueado até ${usuario.bloqueadoUntil.toLocaleString("pt-BR")}`
+        : "Usuário bloqueado permanentemente",
     });
   } catch (error) {
+    console.error("Erro ao bloquear usuário:", error);
     res.status(400).json({ message: error.message });
   }
 };

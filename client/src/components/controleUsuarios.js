@@ -17,7 +17,6 @@ export default function ControleUsuarios() {
   const [unidade, setUnidade] = useState("horas");
   const [motivo, setMotivo] = useState("");
 
-  // 🔄 Função de busca dos usuários com atualização automática de bloqueio expirado
   async function fetchUsuarios() {
     try {
       const res = await fetch(`${REACT_APP_YOUR_HOSTNAME}/user`, {
@@ -30,7 +29,6 @@ export default function ControleUsuarios() {
         if (u.bloqueado && u.bloqueadoUntil) {
           const bloqueadoData = new Date(u.bloqueadoUntil);
           if (bloqueadoData <= agora) {
-            // Bloqueio expirou → atualiza estado do usuário
             return {
               ...u,
               bloqueado: false,
@@ -50,7 +48,6 @@ export default function ControleUsuarios() {
     }
   }
 
-  //  Busca inicial e atualização automática a cada 30s
   useEffect(() => {
     if (!token) return;
     if (user?.tipo !== "admin") {
@@ -115,10 +112,11 @@ export default function ControleUsuarios() {
     }
 
     try {
+      // ✅ Alteração principal: enviar "motivo" em vez de "motivoBloqueio"
       const body =
         unidade === "indefinido"
-          ? { duracaoHoras: null, indefinido: true, motivoBloqueio: motivo }
-          : { duracao, unidade, motivoBloqueio: motivo };
+          ? { duracaoHoras: null, indefinido: true, motivo: motivo }
+          : { duracao, unidade, motivo: motivo };
 
       const res = await fetch(
         `${REACT_APP_YOUR_HOSTNAME}/user/${usuarioSelecionado._id}/tempo`,
@@ -195,7 +193,6 @@ export default function ControleUsuarios() {
 
   return (
     <div style={styles.container}>
-      {/* Abas */}
       <div style={styles.abasContainer}>
         <button style={styles.aba} onClick={() => navigate("/aprodutos")}>
           Produtos
@@ -295,7 +292,6 @@ export default function ControleUsuarios() {
           </table>
         )}
 
-        {/* Modal */}
         <Modal
           isOpen={modalOpen}
           onRequestClose={fecharModal}

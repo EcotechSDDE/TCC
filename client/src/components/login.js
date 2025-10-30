@@ -25,11 +25,19 @@ export default function Login() {
       });
 
       if (!response.ok) {
-        const text = await response.text(); // pega a resposta completa
-        console.error("Erro no login:", text);
-        window.alert(
-          `Erro ao fazer login: ${response.status} ${response.statusText}`
-        );
+        const result = await response.json();
+        console.error("Erro no login:", result);
+
+        if (response.status === 403 && result.bloqueado) {
+          const dataLiberacao = result.bloqueadoUntil
+            ? new Date(result.bloqueadoUntil).toLocaleString()
+            : "Indefinido";
+          window.alert(
+            `Você foi bloqueado!\nMotivo: ${result.motivoBloqueio}\nAté: ${dataLiberacao}`
+          );
+        } else {
+          window.alert(result.message || "Erro ao fazer login.");
+        }
         return;
       }
 
