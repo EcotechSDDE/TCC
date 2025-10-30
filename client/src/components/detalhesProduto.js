@@ -511,7 +511,7 @@ const styles = {
   },
   quadradoGrande: {
     backgroundColor: "#C8E6C9",
-    borderRadius: "0 0 24px 24px",
+    borderRadius: "0 24px 24px 24px",
     padding: "40px",
     display: "flex",
     flexDirection: "row",
@@ -542,10 +542,15 @@ const styles = {
     flexDirection: "column",
     gap: "10px",
     flex: 1,
+    minWidth: 0,
   },
   info: {
     fontSize: "1.05rem",
     color: "#3b5534",
+    wordWrap: "break-word", 
+    overflowWrap: "break-word",
+    whiteSpace: "pre-wrap",
+    minWidth: 0,
   },
   button: {
     marginTop: "30px",
