@@ -103,7 +103,7 @@ export default function CadastroProduto() {
       </div>
 
       {/* Formulário */}
-      <div style={styles.quadradoGrande}>
+      <div style={{ ...styles.quadradoGrande, paddingBottom: "80px" }}>
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -320,28 +320,39 @@ export default function CadastroProduto() {
                   }}
                 >
                   {form.fotos.length} foto(s) selecionada(s).{" "}
-                  {form.fotos.length < 3
-                    ? "Selecione pelo menos 3 fotos."
-                    : "OK!"}
+                  {form.fotos.length < 3 ? "Selecione pelo menos 3 fotos." : "OK!"}
                 </div>
               )}
             </div>
           </div>
 
-          {/* Mapa */}
+          {/* Mapa — contêiner isolado sem padding externo */}
           <div
             style={{
               display: "flex",
               justifyContent: "center",
-              margin: "20px 0 10px 0",
+              marginTop: "30px",
+              width: "100%",
             }}
           >
-            <div style={{ width: "1000px", height: "400px" }}>
-              <MapaGoogle
-                onPick={(coords) =>
-                  updateForm({ endereco: `${coords.lat},${coords.lng}` })
-                }
-              />
+            <div
+              style={{
+                width: "1000px",
+                maxWidth: "100%",
+                boxSizing: "border-box",
+                borderRadius: 20,
+                overflow: "hidden",
+                position: "relative",
+                border: "3px solid rgb(169, 214, 177)",
+              }}
+            >
+              <div style={{ width: "100%", height: 400 }}>
+                <MapaGoogle
+                  onPick={(coords) =>
+                    updateForm({ endereco: `${coords.lat},${coords.lng}` })
+                  }
+                />
+              </div>
             </div>
           </div>
 
@@ -350,7 +361,7 @@ export default function CadastroProduto() {
             style={{
               display: "flex",
               justifyContent: "center",
-              marginTop: "-80px",
+              marginTop: "24px",
             }}
           >
             <button type="submit" style={styles.button}>
@@ -426,10 +437,10 @@ const styles = {
     border: "1px solid #ccc",
   },
   button: {
-    padding: "10px",
+    padding: "10px 24px",
     backgroundColor: "#C8E6C9",
     color: "#3b5534",
-    fontSize: "1.3rem",
+    fontSize: "1.1rem",
     border: "none",
     borderRadius: "6px",
     cursor: "pointer",
