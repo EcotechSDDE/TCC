@@ -22,6 +22,7 @@ export default function CadastroProduto() {
     endereco: "",
   });
 
+  const [abaAtiva, setAbaAtiva] = useState("doar");
   const navigate = useNavigate();
 
   function updateForm(value) {
@@ -33,9 +34,7 @@ export default function CadastroProduto() {
     const formData = new FormData();
     Object.entries(form).forEach(([key, value]) => {
       if (key === "fotos") {
-        for (let i = 0; i < value.length; i++) {
-          formData.append("fotos", value[i]);
-        }
+        value.forEach((file) => formData.append("fotos", file));
       } else {
         formData.append(key, value);
       }
@@ -55,8 +54,7 @@ export default function CadastroProduto() {
     });
 
     if (!response.ok) {
-      const message = `Erro ao cadastrar: ${response.statusText}`;
-      window.alert(message);
+      window.alert(`Erro ao cadastrar: ${response.statusText}`);
       return;
     }
 
@@ -68,266 +66,298 @@ export default function CadastroProduto() {
       {/* Abas superiores */}
       <div style={styles.abasContainer}>
         <div style={styles.abasEsquerda}>
-          <button style={styles.aba} onClick={() => navigate("/produtos")}>
+          <button
+            style={{
+              ...styles.aba,
+              ...(abaAtiva === "receber" ? styles.abaAtiva : {}),
+            }}
+            onClick={() => {
+              setAbaAtiva("receber");
+              navigate("/produtos");
+            }}
+          >
             Receber
           </button>
-          <button style={{ ...styles.aba, ...styles.abaAtiva }} disabled>
+          <button
+            style={{
+              ...styles.aba,
+              ...(abaAtiva === "doar" ? styles.abaAtiva : {}),
+            }}
+            disabled
+          >
             Doar
           </button>
-          <button style={styles.aba} onClick={() => navigate("/minhasDoacoes")}>
+          <button
+            style={{
+              ...styles.aba,
+              ...(abaAtiva === "minhas" ? styles.abaAtiva : {}),
+            }}
+            onClick={() => {
+              setAbaAtiva("minhas");
+              navigate("/minhasDoacoes");
+            }}
+          >
             Minhas Doações
           </button>
         </div>
       </div>
 
+      {/* Formulário */}
       <div style={styles.quadradoGrande}>
-        <div style={{ display: "flex", flexDirection: "column", width: "100%" }}>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (!form.fotos || form.fotos.length < 3) {
-                window.alert("Selecione pelo menos 3 fotos da doação.");
-                return;
-              }
-              onSubmit(e);
-            }}
-            style={{
-              ...styles.form,
-              background: "none",
-              boxShadow: "none",
-              width: "100%",
-              marginBottom: 0,
-            }}
-            encType="multipart/form-data"
-          >
-            <div style={styles.formContainer}>
-              {/* Coluna Esquerda */}
-              <div style={styles.formColumn}>
-                <label style={styles.label}>Nome</label>
-                <input
-                  type="text"
-                  placeholder="Digite o nome do dispositivo"
-                  value={form.nome}
-                  onChange={(e) => {
-                    if (e.target.value.length <= 80) {
-                      updateForm({ nome: e.target.value });
-                    }
-                  }}
-                  maxLength={80}
-                  style={styles.input}
-                  required
-                />
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (!form.fotos || form.fotos.length < 3) {
+              window.alert("Selecione pelo menos 3 fotos da doação.");
+              return;
+            }
+            onSubmit(e);
+          }}
+          encType="multipart/form-data"
+          style={{ width: "100%" }}
+        >
+          <div style={styles.formContainer}>
+            {/* Coluna esquerda */}
+            <div style={styles.formColumn}>
+              <label style={styles.label}>Nome</label>
+              <input
+                type="text"
+                placeholder="Digite o nome do dispositivo"
+                value={form.nome}
+                onChange={(e) => {
+                  if (e.target.value.length <= 80)
+                    updateForm({ nome: e.target.value });
+                }}
+                maxLength={80}
+                style={styles.input}
+                required
+              />
 
-                <label style={styles.label}>Modelo</label>
-                <input
-                  type="text"
-                  placeholder="Digite o modelo do dispositivo"
-                  value={form.modelo}
-                  onChange={(e) => updateForm({ modelo: e.target.value })}
-                  style={styles.input}
-                />
+              <label style={styles.label}>Modelo</label>
+              <input
+                type="text"
+                placeholder="Digite o modelo do dispositivo"
+                value={form.modelo}
+                onChange={(e) => updateForm({ modelo: e.target.value })}
+                style={styles.input}
+              />
 
-                <label style={styles.label}>Marca</label>
-                <select
-                  value={form.marca}
-                  onChange={(e) => updateForm({ marca: e.target.value })}
-                  style={styles.input}
-                  required
-                >
-                  <option value="">Selecione a marca</option>
-                  <option>Samsung</option>
-                  <option>LG</option>
-                  <option>Dell</option>
-                  <option>HP</option>
-                  <option>Lenovo</option>
-                  <option>Apple</option>
-                  <option>Asus</option>
-                  <option>Acer</option>
-                  <option>Motorola</option>
-                  <option>Positivo</option>
-                  <option>Multilaser</option>
-                  <option>Philips</option>
-                  <option>Sony</option>
-                  <option>Outro</option>
-                </select>
+              <label style={styles.label}>Marca</label>
+              <select
+                value={form.marca}
+                onChange={(e) => updateForm({ marca: e.target.value })}
+                style={styles.input}
+                required
+              >
+                <option value="">Selecione a marca</option>
+                {[
+                  "Samsung",
+                  "LG",
+                  "Dell",
+                  "HP",
+                  "Lenovo",
+                  "Apple",
+                  "Asus",
+                  "Acer",
+                  "Motorola",
+                  "Positivo",
+                  "Multilaser",
+                  "Philips",
+                  "Sony",
+                  "Outro",
+                ].map((marca) => (
+                  <option key={marca}>{marca}</option>
+                ))}
+              </select>
 
-                <label style={styles.label}>Descrição</label>
-                <input
-                  type="text"
-                  placeholder="Descreva o dispositivo"
-                  value={form.descricao}
-                  onChange={(e) => updateForm({ descricao: e.target.value })}
-                  style={styles.input}
-                />
+              <label style={styles.label}>Descrição</label>
+              <input
+                type="text"
+                placeholder="Descreva o dispositivo"
+                value={form.descricao}
+                onChange={(e) => updateForm({ descricao: e.target.value })}
+                style={styles.input}
+              />
 
-                <label style={styles.label}>Especificação</label>
-                <input
-                  type="text"
-                  placeholder="Digite as especificações técnicas"
-                  value={form.especificacao}
-                  onChange={(e) => updateForm({ especificacao: e.target.value })}
-                  style={styles.input}
-                />
+              <label style={styles.label}>Especificação</label>
+              <input
+                type="text"
+                placeholder="Digite as especificações técnicas"
+                value={form.especificacao}
+                onChange={(e) => updateForm({ especificacao: e.target.value })}
+                style={styles.input}
+              />
 
-                <label style={styles.label}>Potência</label>
-                <select
-                  value={form.potencia}
-                  onChange={(e) => updateForm({ potencia: e.target.value })}
-                  style={styles.input}
-                  required
-                >
-                  <option value="">Selecione a faixa de potência</option>
-                  <option>Até 50W</option>
-                  <option>50–200W</option>
-                  <option>200–500W</option>
-                  <option>500–1000W</option>
-                  <option>1000W+</option>
-                </select>
-
-                <label style={styles.label}>Tamanho</label>
-                <input
-                  type="text"
-                  placeholder="Digite o tamanho do dispositivo"
-                  value={form.tamanho}
-                  onChange={(e) => updateForm({ tamanho: e.target.value })}
-                  style={styles.input}
-                />
-
-                <label style={styles.label}>Localização</label>
-              </div>
-
-              {/* Coluna Direita */}
-              <div style={styles.formColumn}>
-                <label style={styles.label}>Observação</label>
-                <input
-                  type="text"
-                  placeholder="Digite alguma observação se tiver"
-                  value={form.observacao}
-                  onChange={(e) => updateForm({ observacao: e.target.value })}
-                  style={styles.input}
-                />
-
-                <label style={styles.label}>Tipo</label>
-                <select
-                  value={form.tipo}
-                  onChange={(e) => updateForm({ tipo: e.target.value })}
-                  style={styles.input}
-                  required
-                >
-                  <option value="">Selecione o tipo</option>
-                  <option>Computador</option>
-                  <option>Notebook</option>
-                  <option>Smartphone</option>
-                  <option>Tablet</option>
-                  <option>Impressora</option>
-                  <option>Monitor</option>
-                  <option>Televisão</option>
-                  <option>Caixa de Som</option>
-                  <option>Roteador</option>
-                  <option>Consoles</option>
-                  <option>Peças/Componentes</option>
-                  <option>Outro</option>
-                </select>
-
-                <label style={styles.label}>Tipo Material</label>
-                <select
-                  value={form.tipoMaterial}
-                  onChange={(e) => updateForm({ tipoMaterial: e.target.value })}
-                  style={styles.input}
-                  required
-                >
-                  <option value="">Selecione o tipo de material</option>
-                  <option>Plástico</option>
-                  <option>Metal</option>
-                  <option>Vidro</option>
-                  <option>Madeira</option>
-                  <option>Composto</option>
-                  <option>Borracha</option>
-                  <option>Misto</option>
-                  <option>Outro</option>
-                </select>
-
-                <label style={styles.label}>Status</label>
-                <select
-                  value={form.status}
-                  onChange={(e) => updateForm({ status: e.target.value })}
-                  style={styles.input}
-                  required
-                >
-                  <option value="">Selecione o status</option>
-                  <option>Novo</option>
-                  <option>Usado mas em bom estado</option>
-                  <option>Usado mas com defeito</option>
-                  <option>Quebrado (para descarte/peças)</option>
-                </select>
-
-                <label style={styles.label}>Cor</label>
-                <input
-                  type="text"
-                  placeholder="Digite a cor do dispositivo"
-                  value={form.cor}
-                  onChange={(e) => updateForm({ cor: e.target.value })}
-                  style={styles.input}
-                />
-
-                <label style={styles.label}>Fotos</label>
-                <input
-                  type="file"
-                  multiple
-                  accept="image/*"
-                  onChange={(e) =>
-                    updateForm({ fotos: Array.from(e.target.files) })
-                  }
-                  style={styles.input}
-                />
-                {form.fotos && form.fotos.length > 0 && (
-                  <div
-                    style={{
-                      color: form.fotos.length < 3 ? "red" : "#3b5534",
-                      fontSize: "0.95rem",
-                      marginTop: 4,
-                    }}
-                  >
-                    {form.fotos.length} foto(s) selecionada(s).{" "}
-                    {form.fotos.length < 3
-                      ? "Selecione pelo menos 3 fotos."
-                      : "OK!"}
-                  </div>
+              <label style={styles.label}>Potência</label>
+              <select
+                value={form.potencia}
+                onChange={(e) => updateForm({ potencia: e.target.value })}
+                style={styles.input}
+                required
+              >
+                <option value="">Selecione a faixa de potência</option>
+                {["Até 50W", "50–200W", "200–500W", "500–1000W", "1000W+"].map(
+                  (p) => (
+                    <option key={p}>{p}</option>
+                  )
                 )}
-              </div>
+              </select>
+
+              <label style={styles.label}>Tamanho</label>
+              <input
+                type="text"
+                placeholder="Digite o tamanho do dispositivo"
+                value={form.tamanho}
+                onChange={(e) => updateForm({ tamanho: e.target.value })}
+                style={styles.input}
+              />
+
+              <label style={styles.label}>Localização</label>
             </div>
 
-            {/* Mapa */}
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                margin: "20px 0 10px 0",
-              }}
-            >
-              <div style={{ width: "1000px", height: "400px" }}>
-                <MapaGoogle
-                  onPick={(coords) =>
-                    updateForm({ endereco: `${coords.lat},${coords.lng}` })
-                  }
-                />
-              </div>
-            </div>
+            {/* Coluna direita */}
+            <div style={styles.formColumn}>
+              <label style={styles.label}>Observação</label>
+              <input
+                type="text"
+                placeholder="Digite alguma observação se tiver"
+                value={form.observacao}
+                onChange={(e) => updateForm({ observacao: e.target.value })}
+                style={styles.input}
+              />
 
-            {/* Botão */}
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                marginTop: "-80px",
-              }}
-            >
-              <button type="submit" style={styles.button}>
-                Cadastrar Doação
-              </button>
+              <label style={styles.label}>Tipo</label>
+              <select
+                value={form.tipo}
+                onChange={(e) => updateForm({ tipo: e.target.value })}
+                style={styles.input}
+                required
+              >
+                <option value="">Selecione o tipo</option>
+                {[
+                  "Computador",
+                  "Notebook",
+                  "Smartphone",
+                  "Tablet",
+                  "Impressora",
+                  "Monitor",
+                  "Televisão",
+                  "Caixa de Som",
+                  "Roteador",
+                  "Consoles",
+                  "Peças/Componentes",
+                  "Outro",
+                ].map((tipo) => (
+                  <option key={tipo}>{tipo}</option>
+                ))}
+              </select>
+
+              <label style={styles.label}>Tipo Material</label>
+              <select
+                value={form.tipoMaterial}
+                onChange={(e) => updateForm({ tipoMaterial: e.target.value })}
+                style={styles.input}
+                required
+              >
+                <option value="">Selecione o tipo de material</option>
+                {[
+                  "Plástico",
+                  "Metal",
+                  "Vidro",
+                  "Madeira",
+                  "Composto",
+                  "Borracha",
+                  "Misto",
+                  "Outro",
+                ].map((m) => (
+                  <option key={m}>{m}</option>
+                ))}
+              </select>
+
+              <label style={styles.label}>Status</label>
+              <select
+                value={form.status}
+                onChange={(e) => updateForm({ status: e.target.value })}
+                style={styles.input}
+                required
+              >
+                <option value="">Selecione o status</option>
+                {[
+                  "Novo",
+                  "Usado mas em bom estado",
+                  "Usado mas com defeito",
+                  "Quebrado (para descarte/peças)",
+                ].map((s) => (
+                  <option key={s}>{s}</option>
+                ))}
+              </select>
+
+              <label style={styles.label}>Cor</label>
+              <input
+                type="text"
+                placeholder="Digite a cor do dispositivo"
+                value={form.cor}
+                onChange={(e) => updateForm({ cor: e.target.value })}
+                style={styles.input}
+              />
+
+              <label style={styles.label}>Fotos</label>
+              <input
+                type="file"
+                multiple
+                accept="image/*"
+                onChange={(e) =>
+                  updateForm({ fotos: Array.from(e.target.files) })
+                }
+                style={styles.input}
+              />
+              {form.fotos.length > 0 && (
+                <div
+                  style={{
+                    color: form.fotos.length < 3 ? "red" : "#3b5534",
+                    fontSize: "0.95rem",
+                    marginTop: 4,
+                  }}
+                >
+                  {form.fotos.length} foto(s) selecionada(s).{" "}
+                  {form.fotos.length < 3
+                    ? "Selecione pelo menos 3 fotos."
+                    : "OK!"}
+                </div>
+              )}
             </div>
-          </form>
-        </div>
+          </div>
+
+          {/* Mapa */}
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              margin: "20px 0 10px 0",
+            }}
+          >
+            <div style={{ width: "1000px", height: "400px" }}>
+              <MapaGoogle
+                onPick={(coords) =>
+                  updateForm({ endereco: `${coords.lat},${coords.lng}` })
+                }
+              />
+            </div>
+          </div>
+
+          {/* Botão */}
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              marginTop: "-80px",
+            }}
+          >
+            <button type="submit" style={styles.button}>
+              Cadastrar Doação
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );
@@ -354,7 +384,7 @@ const styles = {
   },
   aba: {
     padding: "14px 38px 18px 38px",
-    backgroundColor: "#6f9064",
+    backgroundColor: "#88bd8a",
     border: "none",
     borderTopLeftRadius: "16px",
     borderTopRightRadius: "16px",
@@ -364,12 +394,9 @@ const styles = {
     fontSize: "1.1rem",
     marginRight: "2px",
   },
-  abaAtiva: {
-    backgroundColor: "#88bd8a",
-    color: "#3b5534",
-  },
+  abaAtiva: { backgroundColor: "#6f9064", color: "#fff" },
   quadradoGrande: {
-    backgroundColor: "#88bd8a",
+    backgroundColor: "#6f9064",
     borderRadius: "0 24px 24px 24px",
     padding: "50px 40px 40px 40px",
     display: "flex",
@@ -380,10 +407,18 @@ const styles = {
     justifyContent: "center",
     alignItems: "center",
   },
-  label: {
-    fontSize: "1rem",
-    color: "#333",
+  formContainer: {
+    display: "flex",
+    gap: "40px",
+    justifyContent: "space-between",
   },
+  formColumn: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "15px",
+    flex: 1,
+  },
+  label: { fontSize: "1rem", color: "#333" },
   input: {
     padding: "10px",
     fontSize: "1rem",
@@ -398,16 +433,5 @@ const styles = {
     border: "none",
     borderRadius: "6px",
     cursor: "pointer",
-  },
-  formContainer: {
-    display: "flex",
-    gap: "40px",
-    justifyContent: "space-between",
-  },
-  formColumn: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "15px",
-    flex: 1,
   },
 };
