@@ -25,20 +25,6 @@ export default function Produtos() {
     fetchDoacoes();
   }, []);
 
-  async function handleDelete(id) {
-    if (!window.confirm("Tem certeza que deseja deletar esta doação?")) return;
-    const response = await fetch(`${REACT_APP_YOUR_HOSTNAME}/doacao/${id}`, {
-      method: "DELETE",
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    if (response.ok) {
-      setDoacoes(doacoes.filter((d) => d._id !== id));
-      window.alert("Doação deletada com sucesso!");
-    } else {
-      window.alert("Erro ao deletar doação.");
-    }
-  }
-
   const doacoesFiltradas = doacoes.filter((item) => {
     const nomeMatch = item.nome.toLowerCase().includes(pesquisa.toLowerCase());
     const filtroMatch = filtro
@@ -52,7 +38,7 @@ export default function Produtos() {
       {/* Abas superiores */}
       <div style={styles.abasContainer}>
         <div style={styles.abasEsquerda}>
-          {/* Se for usuário comum */}
+          {/* Usuário comum */}
           {user?.tipo !== "admin" && (
             <>
               <button
@@ -110,7 +96,7 @@ export default function Produtos() {
             </>
           )}
 
-          {/* Se for ADMIN */}
+          {/* Admin */}
           {user?.tipo === "admin" && (
             <>
               <button
@@ -122,7 +108,6 @@ export default function Produtos() {
               >
                 Receber
               </button>
-
               <button
                 style={{
                   ...styles.aba,
@@ -132,7 +117,6 @@ export default function Produtos() {
               >
                 Denúncias
               </button>
-
               <button
                 style={{
                   ...styles.aba,
@@ -142,7 +126,6 @@ export default function Produtos() {
               >
                 Relatórios
               </button>
-
               <button
                 style={{
                   ...styles.aba,
@@ -163,11 +146,7 @@ export default function Produtos() {
           <>
             {doacoesFiltradas.length === 0 && (
               <div
-                style={{
-                  color: "#333",
-                  textAlign: "center",
-                  width: "100%",
-                }}
+                style={{ color: "#333", textAlign: "center", width: "100%" }}
               >
                 Nenhuma doação encontrada.
               </div>
@@ -190,22 +169,49 @@ export default function Produtos() {
                 >
                   Mostrar Mais
                 </button>
-                {user && item.usuario && item.usuario._id === user._id && (
-                  <>
-                    <button
-                      style={styles.deleteButton}
-                      onClick={() => handleDelete(item._id)}
-                    >
-                      🗑️
-                    </button>
-                    <button
-                      style={{ ...styles.iconButton, left: 42, top: 8 }}
-                      onClick={() => navigate(`/editarDoacao/${item._id}`)}
-                      title="Editar doação"
-                    >
-                      ✏️
-                    </button>
-                  </>
+
+                {/* Botão delete: dono ou admin */}
+                {(user?.tipo === "admin" ||
+                  (item.usuario && item.usuario._id === user?._id)) && (
+                  <button
+                    style={styles.deleteButton}
+                    onClick={async () => {
+                      if (
+                        !window.confirm(
+                          "Tem certeza que deseja deletar esta doação?"
+                        )
+                      )
+                        return;
+                      const url =
+                        user?.tipo === "admin"
+                          ? `${REACT_APP_YOUR_HOSTNAME}/doacao/${item._id}/admin`
+                          : `${REACT_APP_YOUR_HOSTNAME}/doacao/${item._id}`;
+                      const response = await fetch(url, {
+                        method: "DELETE",
+                        headers: { Authorization: `Bearer ${token}` },
+                      });
+                      if (response.ok) {
+                        setDoacoes(doacoes.filter((d) => d._id !== item._id));
+                        window.alert("Doação deletada com sucesso!");
+                      } else {
+                        const data = await response.json();
+                        window.alert(data.message || "Erro ao deletar doação.");
+                      }
+                    }}
+                  >
+                    🗑️
+                  </button>
+                )}
+
+                {/* Botão editar (somente dono) */}
+                {item.usuario && item.usuario._id === user?._id && (
+                  <button
+                    style={{ ...styles.iconButton, left: 42, top: 8 }}
+                    onClick={() => navigate(`/editarDoacao/${item._id}`)}
+                    title="Editar doação"
+                  >
+                    ✏️
+                  </button>
                 )}
               </div>
             ))}
@@ -356,12 +362,6 @@ const styles = {
     padding: "4px 8px",
     cursor: "pointer",
     zIndex: 10,
-  },
-  textoAdmin: {
-    color: "#fff",
-    fontSize: "1.2rem",
-    textAlign: "center",
-    width: "100%",
   },
   iconButton: {
     position: "absolute",
