@@ -23,8 +23,24 @@ exports.criarUsuario = async (req, res) => {
     });
 
     const savedUser = await novoUsuario.save();
-    res.status(201).json(savedUser);
+
+    const token = jwt.sign(
+      { id: savedUser._id, email: savedUser.email, tipo: savedUser.tipo },
+      SECRET,
+      { expiresIn: "30m" }
+    );
+
+    res.status(201).json({
+      token,
+      usuario: {
+        id: savedUser._id,
+        nome: savedUser.nome,
+        tipo: savedUser.tipo,
+        email: savedUser.email,
+      },
+    });
   } catch (error) {
+    console.error("Erro ao criar usuário:", error);
     res.status(400).json({ message: error.message });
   }
 };

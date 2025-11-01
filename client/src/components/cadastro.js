@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import InputMask from "react-input-mask";
 import { AuthContext } from "../AuthContext";
 
-const REACT_APP_YOUR_HOSTNAME = "http://localhost:5050"; // Seu back-end
+const REACT_APP_YOUR_HOSTNAME = "http://localhost:5050";
 
 export default function Cadastro() {
   const [showPassword, setShowPassword] = useState(false);
@@ -21,7 +21,7 @@ export default function Cadastro() {
   });
 
   const navigate = useNavigate();
-  const { setToken } = useContext(AuthContext);
+  const { login } = useContext(AuthContext);
 
   function updateForm(value) {
     setForm((prev) => ({ ...prev, ...value }));
@@ -96,23 +96,16 @@ export default function Cadastro() {
         return;
       }
 
+      const result = await response.json();
+
       // 🔹 Login automático após cadastro
-      const loginResponse = await fetch(`${REACT_APP_YOUR_HOSTNAME}/user/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: form.email,
-          password: form.senha,
-        }),
-      });
-
-      const loginResult = await loginResponse.json();
-
-      if (loginResult.token) {
-        setToken(loginResult.token);
-        navigate("/produtos");
+      if (result.token) {
+        login(result.token, result.usuario); // salva token e usuário no contexto
+        navigate("/produtos"); // redireciona para produtos
       } else {
-        alert("Cadastro realizado, mas não foi possível logar automaticamente.");
+        alert(
+          "Cadastro realizado, mas não foi possível logar automaticamente."
+        );
         navigate("/login");
       }
     } catch (error) {
@@ -129,7 +122,11 @@ export default function Cadastro() {
       </h2>
 
       <div style={styles.formContainer}>
-        <form onSubmit={onSubmit} style={styles.form} encType="multipart/form-data">
+        <form
+          onSubmit={onSubmit}
+          style={styles.form}
+          encType="multipart/form-data"
+        >
           <div style={{ display: "flex", gap: "40px", width: "100%" }}>
             <div style={styles.formColumn}>
               <label style={styles.label}>Nome</label>
@@ -212,7 +209,9 @@ export default function Cadastro() {
                   type={showConfirmPassword ? "text" : "password"}
                   placeholder="Confirme sua senha"
                   value={form.confirmarSenha}
-                  onChange={(e) => updateForm({ confirmarSenha: e.target.value })}
+                  onChange={(e) =>
+                    updateForm({ confirmarSenha: e.target.value })
+                  }
                   style={styles.input}
                   required
                 />
@@ -259,10 +258,7 @@ const styles = {
     overflow: "hidden",
     borderRadius: "12px",
   },
-  title: {
-    fontSize: "2rem",
-    marginBottom: "5px",
-  },
+  title: { fontSize: "2rem", marginBottom: "5px" },
   subtitle: {
     fontSize: "1rem",
     marginBottom: "20px",
@@ -280,10 +276,7 @@ const styles = {
     width: "580px",
     transform: "scale(0.9)",
   },
-  label: {
-    fontSize: "1rem",
-    color: "#333",
-  },
+  label: { fontSize: "1rem", color: "#333" },
   input: {
     padding: "8px 40px 8px 10px",
     fontSize: "0.95rem",
@@ -301,11 +294,7 @@ const styles = {
     borderRadius: "6px",
     cursor: "pointer",
   },
-  formContainer: {
-    display: "flex",
-    justifyContent: "center",
-    width: "100%",
-  },
+  formContainer: { display: "flex", justifyContent: "center", width: "100%" },
   formColumn: {
     display: "flex",
     flexDirection: "column",
@@ -324,8 +313,5 @@ const styles = {
     border: "none",
     background: "transparent",
   },
-  passwordContainer: {
-    position: "relative",
-    width: "100%",
-  },
+  passwordContainer: { position: "relative", width: "100%" },
 };
