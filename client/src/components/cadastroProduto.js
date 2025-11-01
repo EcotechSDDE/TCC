@@ -341,12 +341,12 @@ export default function CadastroProduto() {
                 maxWidth: "100%",
                 boxSizing: "border-box",
                 borderRadius: 20,
-                overflow: "hidden",
+                overflow: "clip",
                 position: "relative",
                 border: "3px solid rgb(169, 214, 177)",
               }}
             >
-              <div style={{ width: "100%", height: 400 }}>
+              <div style={{ width: "100%", height: 300 }}>
                 <MapaGoogle
                   onPick={(coords) =>
                     updateForm({ endereco: `${coords.lat},${coords.lng}` })
