@@ -151,18 +151,24 @@ export default function CadastroProduto() {
               >
                 <option value="">Selecione a marca</option>
                 {[
-                  "Samsung",
-                  "LG",
-                  "Dell",
-                  "HP",
-                  "Lenovo",
+                  "Acer",
+                  "AMD",
                   "Apple",
                   "Asus",
-                  "Acer",
+                  "Dell",
+                  "HP",
+                  "Intel",
+                  "Lenovo",
+                  "LG",
+                  "Logitech",
+                  "Microsoft",
                   "Motorola",
-                  "Positivo",
                   "Multilaser",
+                  "Nvidia",
                   "Philips",
+                  "Positivo",
+                  "Redragon",
+                  "Samsung",
                   "Sony",
                   "Outro",
                 ].map((marca) => (
@@ -196,11 +202,17 @@ export default function CadastroProduto() {
                 required
               >
                 <option value="">Selecione a faixa de potência</option>
-                {["Até 50W", "50–200W", "200–500W", "500–1000W", "1000W+"].map(
-                  (p) => (
-                    <option key={p}>{p}</option>
-                  )
-                )}
+                {[
+                  "Até 5W",
+                  "5–20W",
+                  "20–50W",
+                  "50–200W",
+                  "200–500W",
+                  "500–1000W",
+                  "1000W+",
+                ].map((p) => (
+                  <option key={p}>{p}</option>
+                ))}
               </select>
 
               <label style={styles.label}>Tamanho</label>
@@ -235,16 +247,17 @@ export default function CadastroProduto() {
               >
                 <option value="">Selecione o tipo</option>
                 {[
+                  "Caixa De Som",
+                  "Camera",
                   "Computador",
+                  "Consoles",
+                  "Fone De Ouvido",
+                  "Impressora",
+                  "Monitor",
                   "Notebook",
                   "Smartphone",
                   "Tablet",
-                  "Impressora",
-                  "Monitor",
                   "Televisão",
-                  "Caixa de Som",
-                  "Roteador",
-                  "Consoles",
                   "Peças/Componentes",
                   "Outro",
                 ].map((tipo) => (
@@ -260,18 +273,11 @@ export default function CadastroProduto() {
                 required
               >
                 <option value="">Selecione o tipo de material</option>
-                {[
-                  "Plástico",
-                  "Metal",
-                  "Vidro",
-                  "Madeira",
-                  "Composto",
-                  "Borracha",
-                  "Misto",
-                  "Outro",
-                ].map((m) => (
-                  <option key={m}>{m}</option>
-                ))}
+                {["Plástico", "Metal", "Borracha", "Misto", "Outro"].map(
+                  (m) => (
+                    <option key={m}>{m}</option>
+                  )
+                )}
               </select>
 
               <label style={styles.label}>Status</label>
@@ -320,7 +326,9 @@ export default function CadastroProduto() {
                   }}
                 >
                   {form.fotos.length} foto(s) selecionada(s).{" "}
-                  {form.fotos.length < 3 ? "Selecione pelo menos 3 fotos." : "OK!"}
+                  {form.fotos.length < 3
+                    ? "Selecione pelo menos 3 fotos."
+                    : "OK!"}
                 </div>
               )}
             </div>
@@ -343,7 +351,7 @@ export default function CadastroProduto() {
                 borderRadius: 20,
                 overflow: "clip",
                 position: "relative",
-                border: "3px solid rgb(169, 214, 177)",
+                border: "2px solid rgb(116, 158, 117)",
               }}
             >
               <div style={{ width: "100%", height: 300 }}>
@@ -429,7 +437,7 @@ const styles = {
     gap: "15px",
     flex: 1,
   },
-  label: { fontSize: "1rem", color: "#333" },
+  label: { fontSize: "1.1rem", color: "#000000" },
   input: {
     padding: "10px",
     fontSize: "1rem",
