@@ -8,7 +8,7 @@ const DoacaoSchema = new mongoose.Schema({
     especificacao: String,
     potencia: String,
     tamanho: String,
-    fotos: [String], // array de nomes de arquivos
+    fotos: [String],
     observacao: String,
     tipo: String,
     tipoMaterial: String,
@@ -16,6 +16,6 @@ const DoacaoSchema = new mongoose.Schema({
     cor: String,
     endereco: String,
     usuario: { type: mongoose.Schema.Types.ObjectId, ref: 'Usuario', required: true }
-});
+}, { timestamps: true });
 
 module.exports = mongoose.model('Doacao', DoacaoSchema);
