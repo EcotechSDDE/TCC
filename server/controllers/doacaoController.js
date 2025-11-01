@@ -68,14 +68,46 @@ exports.buscarDoacaoPorId = async (req, res) => {
     }
 };
 
-// Editar doação (admin)
+// Editar doação (dono da doação ou admin)
 exports.editarDoacao = async (req, res) => {
-    try {
-        const doacaoAtualizada = await Doacao.findByIdAndUpdate(req.params.id, req.body, { new: true });
-        res.status(200).json(doacaoAtualizada);
-    } catch (error) {
-        res.status(400).json({ message: error.message });
+  try {
+    const doacaoId = req.params.id;
+    const doacao = await Doacao.findById(doacaoId);
+    if (!doacao) {
+      return res.status(404).json({ message: "Doação não encontrada" });
     }
+
+    // req.usuario deve ser preenchido pelo middleware autenticar
+    const usuarioLogadoId = req.usuario && (req.usuario._id || req.usuario.id);
+    const usuarioEhAdmin = req.usuario && req.usuario.tipo === 'admin';
+
+    // Verifica se é dono ou admin
+    if (!usuarioEhAdmin && doacao.usuario.toString() !== usuarioLogadoId.toString()) {
+      return res.status(403).json({ message: "Você não tem permissão para editar esta doação" });
+    }
+
+    // Monta objeto de atualização apenas com os campos enviados
+    const campos = [
+      'nome','modelo','marca','descricao','especificacao','potencia','tamanho',
+      'observacao','tipo','tipoMaterial','status','cor','endereco'
+    ];
+    const update = {};
+    campos.forEach(c => {
+      if (req.body[c] !== undefined) update[c] = req.body[c];
+    });
+
+    // Tratamento de fotos: se vierem arquivos, substitui o array de fotos.
+    if (req.files && req.files.length > 0) {
+      update.fotos = Array.from(new Set(req.files.map(f => f.filename)));
+    }
+
+    const doacaoAtualizada = await Doacao.findByIdAndUpdate(doacaoId, update, { new: true });
+
+    res.status(200).json(doacaoAtualizada);
+  } catch (error) {
+    console.error("Erro editarDoacao:", error);
+    res.status(400).json({ message: error.message });
+  }
 };
 
 // Remover doação (admin)

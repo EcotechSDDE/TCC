@@ -191,12 +191,21 @@ export default function Produtos() {
                   Mostrar Mais
                 </button>
                 {user && item.usuario && item.usuario._id === user._id && (
-                  <button
-                    style={styles.deleteButton}
-                    onClick={() => handleDelete(item._id)}
-                  >
-                    🗑️
-                  </button>
+                  <>
+                    <button
+                      style={styles.deleteButton}
+                      onClick={() => handleDelete(item._id)}
+                    >
+                      🗑️
+                    </button>
+                    <button
+                      style={{ ...styles.iconButton, left: 42, top: 8 }}
+                      onClick={() => navigate(`/editarDoacao/${item._id}`)}
+                      title="Editar doação"
+                    >
+                      ✏️
+                    </button>
+                  </>
                 )}
               </div>
             ))}
@@ -316,13 +325,13 @@ const styles = {
     marginBottom: "12px",
     maxWidth: "160px",
     display: "-webkit-box",
-    WebkitLineClamp: 2, 
+    WebkitLineClamp: 2,
     WebkitBoxOrient: "vertical",
     overflow: "hidden",
     textOverflow: "ellipsis",
     wordBreak: "break-word",
-    lineHeight: "1.2rem", 
-    minHeight: "2.4rem", 
+    lineHeight: "1.2rem",
+    minHeight: "2.4rem",
   },
   contato: {
     backgroundColor: "#3b5534",
@@ -353,5 +362,18 @@ const styles = {
     fontSize: "1.2rem",
     textAlign: "center",
     width: "100%",
+  },
+  iconButton: {
+    position: "absolute",
+    top: 8,
+    left: 42,
+    background: "#eee",
+    color: "#3b5534",
+    border: "none",
+    borderRadius: "50%",
+    fontSize: "1rem",
+    padding: "4px 8px",
+    cursor: "pointer",
+    zIndex: 11,
   },
 };

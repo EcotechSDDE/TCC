@@ -97,7 +97,9 @@ export default function MinhasDoacoes() {
                 style={styles.imagem}
               />
               <div style={styles.nome}>
-                {item.nome.length > 80 ? item.nome.slice(0, 80) + "..." : item.nome}
+                {item.nome.length > 80
+                  ? item.nome.slice(0, 80) + "..."
+                  : item.nome}
               </div>
               <button
                 style={styles.contato}
@@ -110,6 +112,13 @@ export default function MinhasDoacoes() {
                 onClick={() => handleDelete(item._id)}
               >
                 🗑️
+              </button>
+              <button
+                style={{ ...styles.iconButton, left: 42, top: 8 }}
+                onClick={() => navigate(`/editarDoacao/${item._id}`)}
+                title="Editar doação"
+              >
+                ✏️
               </button>
             </div>
           ))
@@ -233,5 +242,18 @@ const styles = {
     padding: "4px 8px",
     cursor: "pointer",
     zIndex: 10,
+  },
+  iconButton: {
+    position: "absolute",
+    top: 8,
+    left: 42,
+    background: "#eee",
+    color: "#3b5534",
+    border: "none",
+    borderRadius: "50%",
+    fontSize: "1rem",
+    padding: "4px 8px",
+    cursor: "pointer",
+    zIndex: 11,
   },
 };
