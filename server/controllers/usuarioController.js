@@ -4,7 +4,7 @@ const jwt = require("jsonwebtoken");
 
 const SECRET = process.env.JWT_SECRET || "seusegredoaqui";
 
-// Criar novo usuário
+// 🔹 Criar novo usuário
 exports.criarUsuario = async (req, res) => {
   try {
     const { nome, email, telefone, cpfCnpj, senha, tipo, dataNascimento } = req.body;
@@ -16,7 +16,7 @@ exports.criarUsuario = async (req, res) => {
       email,
       telefone,
       cpfCnpj,
-      dataNascimento: new Date(dataNascimento),
+      dataNascimento: dataNascimento ? new Date(dataNascimento) : null,
       imagem,
       senha: senhaHash,
       tipo: tipo || "comum",
@@ -27,7 +27,7 @@ exports.criarUsuario = async (req, res) => {
     const token = jwt.sign(
       { id: savedUser._id, email: savedUser.email, tipo: savedUser.tipo },
       SECRET,
-      { expiresIn: "30m" }
+      { expiresIn: "30m" } 
     );
 
     res.status(201).json({
@@ -45,55 +45,15 @@ exports.criarUsuario = async (req, res) => {
   }
 };
 
-// Listar todos os usuários (sem senha)
-exports.listarUsuarios = async (req, res) => {
-  try {
-    const users = await Usuario.find().select("-senha");
-    res.status(200).json(users);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-// Buscar usuário por ID ou token
-exports.buscarUsuarioPorId = async (req, res) => {
-  try {
-    const id = req.usuario?.id || req.params.id;
-    if (!id) return res.status(400).json({ message: "ID do usuário não fornecido" });
-
-    const user = await Usuario.findById(id).select("-senha");
-    if (!user) return res.status(404).json({ message: "Usuário não encontrado" });
-
-    res.status(200).json(user);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-// Buscar usuário logado
-exports.buscarUsuarioLogado = async (req, res) => {
-  try {
-    const id = req.usuario?._id || req.usuario?.id;
-    if (!id) return res.status(400).json({ message: "ID do usuário não fornecido" });
-
-    const user = await Usuario.findById(id).select("-senha");
-    if (!user) return res.status(404).json({ message: "Usuário não encontrado" });
-
-    res.status(200).json(user);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-// Login
+// 🔹 Login
 exports.login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, senha } = req.body;
     const usuario = await Usuario.findOne({ email });
     if (!usuario)
       return res.status(401).json({ message: "Usuário não encontrado" });
 
-    // Bloqueio de conta
+    // Verifica bloqueio
     if (usuario.bloqueado) {
       if (usuario.bloqueadoUntil && usuario.bloqueadoUntil > Date.now()) {
         return res.status(403).json({
@@ -103,14 +63,13 @@ exports.login = async (req, res) => {
           message: `Usuário bloqueado até ${usuario.bloqueadoUntil}`,
         });
       } else if (!usuario.bloqueadoUntil) {
-        // Bloqueio permanente
         return res.status(403).json({
           bloqueado: true,
           motivoBloqueio: usuario.motivoBloqueio || "Não informado",
           message: "Usuário bloqueado permanentemente",
         });
       } else {
-        // Bloqueio expirou
+        // desbloqueia automaticamente se expirou
         usuario.bloqueado = false;
         usuario.bloqueadoUntil = null;
         usuario.motivoBloqueio = null;
@@ -118,7 +77,7 @@ exports.login = async (req, res) => {
       }
     }
 
-    const senhaValida = await bcrypt.compare(password, usuario.senha);
+    const senhaValida = await bcrypt.compare(senha, usuario.senha);
     if (!senhaValida)
       return res.status(401).json({ message: "Senha inválida" });
 
@@ -138,11 +97,37 @@ exports.login = async (req, res) => {
       },
     });
   } catch (error) {
+    console.error("Erro no login:", error);
     res.status(500).json({ message: "Erro ao fazer login" });
   }
 };
 
-// Atualizar usuário
+// 🔹 Buscar usuário logado
+exports.buscarUsuarioLogado = async (req, res) => {
+  try {
+    const id = req.usuario?._id || req.usuario?.id;
+    if (!id) return res.status(400).json({ message: "ID do usuário não fornecido" });
+
+    const user = await Usuario.findById(id).select("-senha");
+    if (!user) return res.status(404).json({ message: "Usuário não encontrado" });
+
+    res.status(200).json(user);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// 🔹 Listar todos os usuários (admin)
+exports.listarUsuarios = async (req, res) => {
+  try {
+    const users = await Usuario.find().select("-senha");
+    res.status(200).json(users);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// 🔹 Atualizar usuário (usuario logado)
 exports.atualizarUsuario = async (req, res) => {
   try {
     const update = {};
@@ -161,16 +146,13 @@ exports.atualizarUsuario = async (req, res) => {
   }
 };
 
-// Deletar usuário com todas as suas doações
+// 🔹 Deletar usuário (admin)
 exports.deletarUsuario = async (req, res) => {
   try {
     const userId = req.params.id;
-
-    // Deletar todas as doações do usuário
     const Doacao = require("../models/Doacao");
     await Doacao.deleteMany({ usuario: userId });
 
-    // Deletar o usuário
     const usuario = await Usuario.findByIdAndDelete(userId);
     if (!usuario) return res.status(404).json({ message: "Usuário não encontrado" });
 
@@ -180,7 +162,7 @@ exports.deletarUsuario = async (req, res) => {
   }
 };
 
-// Editar usuário (admin)
+// 🔹 Editar usuário (admin)
 exports.editarUsuario = async (req, res) => {
   try {
     const update = {};
@@ -201,65 +183,47 @@ exports.editarUsuario = async (req, res) => {
   }
 };
 
-// Bloquear/desbloquear usuário (admin)
+// 🔹 Bloquear/desbloquear usuário (admin)
 exports.bloquearUsuario = async (req, res) => {
   try {
     const usuario = await Usuario.findById(req.params.id);
     if (!usuario) return res.status(404).json({ message: "Usuário não encontrado" });
 
-    if (usuario.bloqueado) {
-      // 🔹 Desbloqueando
-      usuario.bloqueado = false;
-      usuario.bloqueadoUntil = null;
-      usuario.motivoBloqueio = null; 
-    } else {
-      // 🔹 Bloqueando
-      usuario.bloqueado = true;
-      usuario.bloqueadoUntil = null;
-      usuario.motivoBloqueio = req.body?.motivo || null; 
-    }
+    usuario.bloqueado = !usuario.bloqueado;
+    usuario.bloqueadoUntil = usuario.bloqueado ? null : usuario.bloqueadoUntil;
+    usuario.motivoBloqueio = usuario.bloqueado ? req.body?.motivo || "Não informado" : null;
 
     await usuario.save();
 
     res.status(200).json({
       bloqueado: usuario.bloqueado,
-      message: usuario.bloqueado
-        ? "Usuário bloqueado com sucesso"
-        : "Usuário desbloqueado com sucesso",
+      message: usuario.bloqueado ? "Usuário bloqueado" : "Usuário desbloqueado",
     });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
 };
 
-// Bloquear usuário por tempo (admin)
+// 🔹 Bloquear usuário por tempo (admin)
 exports.bloquearPorTempo = async (req, res) => {
   try {
-    const { duracao, unidade, motivo } = req.body; 
+    const { duracao, unidade, motivo } = req.body;
     const usuario = await Usuario.findById(req.params.id);
+    if (!usuario) return res.status(404).json({ message: "Usuário não encontrado" });
 
-    if (!usuario) {
-      return res.status(404).json({ message: "Usuário não encontrado" });
-    }
-
-    // Calcular duração em horas
     let duracaoHoras = null;
-    if (unidade !== "indefinido" && duracao && !isNaN(duracao)) {
+    if (unidade && duracao && !isNaN(duracao)) {
       const dur = Number(duracao);
       switch (unidade) {
         case "segundos": duracaoHoras = dur / 3600; break;
         case "minutos": duracaoHoras = dur / 60; break;
         case "horas": duracaoHoras = dur; break;
         case "dias": duracaoHoras = dur * 24; break;
-        default: duracaoHoras = null;
       }
     }
 
-    // Definir bloqueio
     usuario.bloqueado = true;
-    usuario.bloqueadoUntil = duracaoHoras
-      ? new Date(Date.now() + duracaoHoras * 3600 * 1000)
-      : null;
+    usuario.bloqueadoUntil = duracaoHoras ? new Date(Date.now() + duracaoHoras * 3600 * 1000) : null;
     usuario.motivoBloqueio = motivo?.trim() || "Não informado";
 
     await usuario.save();
@@ -278,7 +242,7 @@ exports.bloquearPorTempo = async (req, res) => {
   }
 };
 
-// Atribuir/remover admin
+// 🔹 Atribuir/remover admin
 exports.atribuirAdmin = async (req, res) => {
   try {
     const usuario = await Usuario.findById(req.params.id);
