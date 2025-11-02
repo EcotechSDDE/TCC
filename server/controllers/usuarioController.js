@@ -208,13 +208,15 @@ exports.bloquearUsuario = async (req, res) => {
     if (!usuario) return res.status(404).json({ message: "Usuário não encontrado" });
 
     if (usuario.bloqueado) {
-      // Desbloqueando
+      // 🔹 Desbloqueando
       usuario.bloqueado = false;
       usuario.bloqueadoUntil = null;
+      usuario.motivoBloqueio = null; 
     } else {
-      // Bloqueando
+      // 🔹 Bloqueando
       usuario.bloqueado = true;
       usuario.bloqueadoUntil = null;
+      usuario.motivoBloqueio = req.body?.motivo || null; 
     }
 
     await usuario.save();

@@ -254,7 +254,6 @@ const RelatoriosAdmin = () => {
           💾 Salvar Relatório (PDF)
         </button>
 
-        <h2 style={styles.tituloSecao}>📊 Painel de Relatórios</h2>
         <p style={styles.subtitulo}>
           Bem-vindo, <b>{user?.nome || "Administrador"}</b>
         </p>
@@ -386,7 +385,7 @@ const styles = {
     cursor: "pointer",
   },
   tituloSecao: { fontSize: "28px", fontWeight: "bold", marginBottom: "10px" },
-  subtitulo: { fontSize: "16px", marginBottom: "30px" },
+  subtitulo: { fontSize: "20px", marginBottom: "30px" },
   filtroContainer: {
     display: "flex",
     alignItems: "center",
