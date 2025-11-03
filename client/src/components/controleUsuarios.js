@@ -17,7 +17,6 @@ export default function ControleUsuarios() {
   const [unidade, setUnidade] = useState("horas");
   const [motivo, setMotivo] = useState("");
 
-  // Buscar usuários do backend
   async function fetchUsuarios() {
     try {
       const res = await fetch(`${REACT_APP_YOUR_HOSTNAME}/user`, {
@@ -27,11 +26,15 @@ export default function ControleUsuarios() {
 
       const agora = new Date();
       data = data.map((u) => {
-        if (u.bloqueado && u.dataDesbloqueio) {
-          const desbloqueioData = new Date(u.dataDesbloqueio);
-          if (desbloqueioData <= agora) {
-            // Remove bloqueio expirado
-            return { ...u, bloqueado: false, dataDesbloqueio: null, motivoBloqueio: null };
+        if (u.bloqueado && u.bloqueadoUntil) {
+          const bloqueadoData = new Date(u.bloqueadoUntil);
+          if (bloqueadoData <= agora) {
+            return {
+              ...u,
+              bloqueado: false,
+              bloqueadoUntil: null,
+              motivoBloqueio: null,
+            };
           }
         }
         return u;
@@ -53,28 +56,34 @@ export default function ControleUsuarios() {
     }
 
     fetchUsuarios();
-    const interval = setInterval(fetchUsuarios, 30000); // Atualiza a lista a cada 30s
+
+    const interval = setInterval(() => {
+      fetchUsuarios();
+    }, 30000);
+
     return () => clearInterval(interval);
   }, [token, user, navigate]);
 
-  // Excluir usuário
   async function handleDelete(id) {
     if (!window.confirm("Tem certeza que deseja excluir este usuário?")) return;
+
     try {
-      const res = await fetch(`${REACT_APP_YOUR_HOSTNAME}/user/admin/${id}`, {
+      const res = await fetch(`${REACT_APP_YOUR_HOSTNAME}/user/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
+
       if (res.ok) {
         setUsuarios(usuarios.filter((u) => u._id !== id));
         alert("Usuário excluído com sucesso!");
-      } else alert("Erro ao excluir usuário.");
+      } else {
+        alert("Erro ao excluir usuário.");
+      }
     } catch (error) {
       console.error(error);
     }
   }
 
-  // Abrir modal de bloqueio
   function abrirModal(usuario) {
     setUsuarioSelecionado(usuario);
     setDuracao("");
@@ -88,21 +97,29 @@ export default function ControleUsuarios() {
     setUsuarioSelecionado(null);
   }
 
-  // Bloquear usuário temporariamente
   async function confirmarBloqueio() {
-    if (!usuarioSelecionado?._id) return alert("Usuário inválido.");
-    if (!motivo.trim()) return alert("Informe o motivo do bloqueio.");
-    if (unidade !== "indefinido" && (!duracao || isNaN(duracao) || duracao <= 0))
-      return alert("Digite uma duração válida.");
+    if (
+      unidade !== "indefinido" &&
+      (!duracao || isNaN(duracao) || duracao <= 0)
+    ) {
+      alert("Digite uma duração válida.");
+      return;
+    }
+
+    if (!motivo || motivo.trim() === "") {
+      alert("Informe o motivo do bloqueio.");
+      return;
+    }
 
     try {
+      // ✅ Alteração principal: enviar "motivo" em vez de "motivoBloqueio"
       const body =
         unidade === "indefinido"
-          ? { motivo, tempo: 99999 }
-          : { motivo, tempo: unidade === "dias" ? Number(duracao) : Number(duracao) / 24 };
+          ? { duracaoHoras: null, indefinido: true, motivo: motivo }
+          : { duracao, unidade, motivo: motivo };
 
       const res = await fetch(
-        `${REACT_APP_YOUR_HOSTNAME}/user/bloquear-tempo/${usuarioSelecionado._id}`,
+        `${REACT_APP_YOUR_HOSTNAME}/user/${usuarioSelecionado._id}/tempo`,
         {
           method: "PUT",
           headers: {
@@ -121,7 +138,7 @@ export default function ControleUsuarios() {
               ? {
                   ...u,
                   bloqueado: true,
-                  dataDesbloqueio: data.usuario.dataDesbloqueio,
+                  bloqueadoUntil: data.bloqueadoUntil,
                   motivoBloqueio: motivo,
                 }
               : u
@@ -129,43 +146,66 @@ export default function ControleUsuarios() {
         );
         fecharModal();
         alert("Usuário bloqueado com sucesso!");
-      } else alert("Erro ao bloquear usuário.");
+      } else {
+        alert("Erro ao bloquear usuário.");
+      }
     } catch (error) {
       console.error(error);
     }
   }
 
-  // Desbloquear usuário
   async function handleDesbloquear(id) {
     try {
-      const res = await fetch(`${REACT_APP_YOUR_HOSTNAME}/user/desbloquear/${id}`, {
-        method: "PUT",
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await fetch(
+        `${REACT_APP_YOUR_HOSTNAME}/user/${id}/bloquear`,
+        {
+          method: "PUT",
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
       if (res.ok) {
         setUsuarios(
           usuarios.map((u) =>
-            u._id === id ? { ...u, bloqueado: false, motivoBloqueio: null, dataDesbloqueio: null } : u
+            u._id === id
+              ? {
+                  ...u,
+                  bloqueado: false,
+                  bloqueadoUntil: null,
+                  motivoBloqueio: null,
+                }
+              : u
           )
         );
-        alert("Usuário desbloqueado com sucesso!");
-      } else alert("Erro ao desbloquear usuário.");
+        alert("Usuário desbloqueado!");
+      } else {
+        alert("Erro ao desbloquear usuário.");
+      }
     } catch (error) {
       console.error(error);
     }
   }
 
-  if (carregando) return <p style={styles.textoAdmin}>Carregando usuários...</p>;
-  if (user?.tipo !== "admin") return <p style={styles.textoAdmin}>🚫 Acesso negado.</p>;
+  if (carregando)
+    return <p style={styles.textoAdmin}>Carregando usuários...</p>;
+  if (user?.tipo !== "admin")
+    return <p style={styles.textoAdmin}>🚫 Acesso negado.</p>;
 
   return (
     <div style={styles.container}>
       <div style={styles.abasContainer}>
-        <button style={styles.aba} onClick={() => navigate("/produtos")}>Produtos</button>
-        <button style={styles.aba} onClick={() => navigate("/denuncias")}>Denúncias</button>
-        <button style={styles.aba} onClick={() => navigate("/relatorios")}>Relatórios</button>
-        <button style={{ ...styles.aba, ...styles.abaAtiva }}>Controle de Usuários</button>
+        <button style={styles.aba} onClick={() => navigate("/produtos")}>
+          Produtos
+        </button>
+        <button style={styles.aba} onClick={() => navigate("/denuncias")}>
+          Denúncias
+        </button>
+        <button style={styles.aba} onClick={() => navigate("/relatorios")}>
+          Relatórios
+        </button>
+        <button style={{ ...styles.aba, ...styles.abaAtiva }}>
+          Controle de Usuários
+        </button>
       </div>
 
       <div style={styles.quadradoGrande}>
@@ -186,30 +226,64 @@ export default function ControleUsuarios() {
             </thead>
             <tbody>
               {usuarios.map((u, index) => {
-                const bloqueadoData = u.dataDesbloqueio ? new Date(u.dataDesbloqueio) : null;
+                const bloqueadoData = u.bloqueadoUntil
+                  ? new Date(u.bloqueadoUntil)
+                  : null;
                 return (
-                  <tr key={u._id} style={{ backgroundColor: index % 2 === 0 ? "#e8f0eb" : "#d9e4dc" }}>
+                  <tr
+                    key={u._id}
+                    style={{
+                      backgroundColor: index % 2 === 0 ? "#e8f0eb" : "#d9e4dc",
+                    }}
+                  >
                     <td style={styles.tdCentralizado}>{u.nome}</td>
                     <td style={styles.tdCentralizado}>{u.email}</td>
                     <td style={styles.tdCentralizado}>{u.tipo}</td>
                     <td style={styles.tdCentralizado}>
-                      {u.bloqueado ? <span style={styles.statusBloqueado}>Bloqueado</span> : <span style={styles.statusAtivo}>Ativo</span>}
+                      {u.bloqueado ? (
+                        <span style={styles.statusBloqueado}>Bloqueado</span>
+                      ) : (
+                        <span style={styles.statusAtivo}>Ativo</span>
+                      )}
                     </td>
                     <td style={styles.tdCentralizado}>
-                      {bloqueadoData
-                        ? `${bloqueadoData.toLocaleDateString("pt-BR")} ${bloqueadoData.toLocaleTimeString("pt-BR")}`
-                        : "-"}
+                      {bloqueadoData ? (
+                        <>
+                          <div>{bloqueadoData.toLocaleDateString("pt-BR")}</div>
+                          <div style={{ fontSize: "0.9em" }}>
+                            {bloqueadoData.toLocaleTimeString("pt-BR")}
+                          </div>
+                        </>
+                      ) : (
+                        "-"
+                      )}
                     </td>
-                    <td style={styles.tdCentralizado}>{u.motivoBloqueio || "-"}</td>
+                    <td style={styles.tdCentralizado}>
+                      {u.motivoBloqueio || "-"}
+                    </td>
                     <td style={styles.acoes}>
                       {u.tipo !== "admin" ? (
                         <div style={styles.colunaBotoes}>
-                          <button style={styles.btnAcao} onClick={() => (u.bloqueado ? handleDesbloquear(u._id) : abrirModal(u))}>
+                          <button
+                            style={styles.btnAcao}
+                            onClick={() =>
+                              u.bloqueado
+                                ? handleDesbloquear(u._id)
+                                : abrirModal(u)
+                            }
+                          >
                             {u.bloqueado ? "Desbloquear" : "Bloquear"}
                           </button>
-                          <button style={styles.btnAcao} onClick={() => handleDelete(u._id)}>Excluir</button>
+                          <button
+                            style={styles.btnAcao}
+                            onClick={() => handleDelete(u._id)}
+                          >
+                            Excluir
+                          </button>
                         </div>
-                      ) : "-"}
+                      ) : (
+                        "-"
+                      )}
                     </td>
                   </tr>
                 );
@@ -218,26 +292,55 @@ export default function ControleUsuarios() {
           </table>
         )}
 
-        <Modal isOpen={modalOpen} onRequestClose={fecharModal} style={modalStyle} contentLabel="Bloquear Usuário">
-          <h2 style={styles.modalTitulo}>Bloquear {usuarioSelecionado?.nome || ""}</h2>
-          <p style={{ textAlign: "center", marginBottom: "15px" }}>Escolha o tempo de bloqueio:</p>
+        <Modal
+          isOpen={modalOpen}
+          onRequestClose={fecharModal}
+          style={modalStyle}
+          contentLabel="Bloquear Usuário"
+        >
+          <h2 style={styles.modalTitulo}>
+            Bloquear {usuarioSelecionado?.nome || ""}
+          </h2>
+          <p style={{ textAlign: "center", marginBottom: "15px" }}>
+            Escolha o tempo de bloqueio:
+          </p>
 
           <div style={styles.modalInputs}>
             {unidade !== "indefinido" && (
-              <input type="number" placeholder="0" value={duracao} onChange={(e) => setDuracao(e.target.value)} style={styles.input} />
+              <input
+                type="number"
+                placeholder="0"
+                value={duracao}
+                onChange={(e) => setDuracao(e.target.value)}
+                style={styles.input}
+              />
             )}
-            <select value={unidade} onChange={(e) => setUnidade(e.target.value)} style={styles.select}>
+            <select
+              value={unidade}
+              onChange={(e) => setUnidade(e.target.value)}
+              style={styles.select}
+            >
               <option value="horas">Horas</option>
               <option value="dias">Dias</option>
               <option value="indefinido">Indefinido</option>
             </select>
           </div>
 
-          <input type="text" placeholder="Motivo do bloqueio" value={motivo} onChange={(e) => setMotivo(e.target.value)} style={styles.inputMotivoQuadrado} />
+          <input
+            type="text"
+            placeholder="Motivo do bloqueio"
+            value={motivo}
+            onChange={(e) => setMotivo(e.target.value)}
+            style={styles.inputMotivoQuadrado}
+          />
 
           <div style={styles.modalBotoes}>
-            <button style={styles.btnConfirmar} onClick={confirmarBloqueio}>Confirmar</button>
-            <button style={styles.btnCancelar} onClick={fecharModal}>Cancelar</button>
+            <button style={styles.btnConfirmar} onClick={confirmarBloqueio}>
+              Confirmar
+            </button>
+            <button style={styles.btnCancelar} onClick={fecharModal}>
+              Cancelar
+            </button>
           </div>
         </Modal>
       </div>
