@@ -19,15 +19,16 @@ userRoutes.post("/add", upload.single("imagem"), usuarioController.criarUsuario)
 // 🔹 Rotas do usuário autenticado
 userRoutes.get("/me", autenticar, usuarioController.buscarUsuarioLogado);
 userRoutes.get("/:id", autenticar, usuarioController.buscarUsuarioPorId);
-userRoutes.post("/update/:id", autenticar, upload.single("imagem"), usuarioController.atualizarUsuario);
-userRoutes.delete("/:id", autenticar, usuarioController.deletarUsuario);
+userRoutes.put("/update/:id", autenticar, upload.single("imagem"), usuarioController.atualizarUsuario);
+userRoutes.delete("/delete/:id", autenticar, usuarioController.deletarUsuario);
 
-// 🔹 Rotas de administrador
+// 🔹 Rotas administrativas
 userRoutes.get("/", autenticar, autorizarAdmin, usuarioController.listarUsuarios);
-userRoutes.put("/:id", autenticar, autorizarAdmin, upload.single("imagem"), usuarioController.editarUsuario);
-userRoutes.put("/:id/bloquear", autenticar, autorizarAdmin, usuarioController.bloquearUsuario);
-userRoutes.put("/:id/tempo", autenticar, autorizarAdmin, usuarioController.bloquearPorTempo);
-userRoutes.put("/:id/admin", autenticar, autorizarAdmin, usuarioController.atribuirAdmin);
-userRoutes.delete("/:id/admin", autenticar, autorizarAdmin, usuarioController.deletarUsuario);
+userRoutes.put("/edit/:id", autenticar, autorizarAdmin, upload.single("imagem"), usuarioController.editarUsuario);
+userRoutes.put("/bloquear/:id", autenticar, autorizarAdmin, usuarioController.bloquearUsuario);
+userRoutes.put("/bloquear-tempo/:id", autenticar, autorizarAdmin, usuarioController.bloquearPorTempo);
+userRoutes.put("/desbloquear/:id", autenticar, autorizarAdmin, usuarioController.desbloquearUsuario); 
+userRoutes.put("/admin/:id", autenticar, autorizarAdmin, usuarioController.atribuirAdmin);
+userRoutes.delete("/admin/:id", autenticar, autorizarAdmin, usuarioController.deletarUsuario);
 
 module.exports = userRoutes;

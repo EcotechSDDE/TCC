@@ -7,98 +7,78 @@ const SECRET = process.env.JWT_SECRET || "seusegredoaqui";
 // 🔹 Criar novo usuário
 exports.criarUsuario = async (req, res) => {
   try {
-    const { nome, email, telefone, cpfCnpj, senha, tipo, dataNascimento } = req.body;
-    const senhaHash = await bcrypt.hash(senha, 10);
-    const imagem = req.file ? req.file.filename : null;
+    const { nome, email, telefone, cpfCnpj, password, tipo, dataNascimento } = req.body;
+
+    const usuarioExistente = await Usuario.findOne({ email });
+    if (usuarioExistente) {
+      return res.status(400).json({ message: "E-mail já cadastrado" });
+    }
+
+    const senhaHash = await bcrypt.hash(password, 10);
 
     const novoUsuario = new Usuario({
       nome,
       email,
       telefone,
       cpfCnpj,
-      dataNascimento: dataNascimento ? new Date(dataNascimento) : null,
-      imagem,
       senha: senhaHash,
-      tipo: tipo || "comum",
+      tipo,
+      dataNascimento,
+      imagem: req.file ? req.file.filename : null,
     });
 
-    const savedUser = await novoUsuario.save();
-
-    const token = jwt.sign(
-      { id: savedUser._id, email: savedUser.email, tipo: savedUser.tipo },
-      SECRET,
-      { expiresIn: "30m" } 
-    );
-
-    res.status(201).json({
-      token,
-      usuario: {
-        id: savedUser._id,
-        nome: savedUser.nome,
-        tipo: savedUser.tipo,
-        email: savedUser.email,
-      },
-    });
+    await novoUsuario.save();
+    res.status(201).json({ message: "Usuário criado com sucesso!" });
   } catch (error) {
-    console.error("Erro ao criar usuário:", error);
-    res.status(400).json({ message: error.message });
+    res.status(500).json({ message: "Erro ao criar usuário", error: error.message });
   }
 };
 
 // 🔹 Login
 exports.login = async (req, res) => {
   try {
-    const { email, senha } = req.body;
-    const usuario = await Usuario.findOne({ email });
-    if (!usuario)
-      return res.status(401).json({ message: "Usuário não encontrado" });
+    const { email, password } = req.body;
 
-    // Verifica bloqueio
+    const usuario = await Usuario.findOne({ email });
+    if (!usuario) return res.status(404).json({ message: "Usuário não encontrado" });
+
+    // Verifica bloqueio temporário
     if (usuario.bloqueado) {
-      if (usuario.bloqueadoUntil && usuario.bloqueadoUntil > Date.now()) {
-        return res.status(403).json({
-          bloqueado: true,
-          motivoBloqueio: usuario.motivoBloqueio || "Não informado",
-          bloqueadoUntil: usuario.bloqueadoUntil,
-          message: `Usuário bloqueado até ${usuario.bloqueadoUntil}`,
-        });
-      } else if (!usuario.bloqueadoUntil) {
-        return res.status(403).json({
-          bloqueado: true,
-          motivoBloqueio: usuario.motivoBloqueio || "Não informado",
-          message: "Usuário bloqueado permanentemente",
-        });
-      } else {
-        // desbloqueia automaticamente se expirou
+      const agora = new Date();
+      if (usuario.dataDesbloqueio && usuario.dataDesbloqueio <= agora) {
+        // Desbloqueia automaticamente
         usuario.bloqueado = false;
-        usuario.bloqueadoUntil = null;
         usuario.motivoBloqueio = null;
+        usuario.dataDesbloqueio = null;
         await usuario.save();
+      } else {
+        return res.status(403).json({
+          message: usuario.motivoBloqueio
+            ? `Usuário bloqueado: ${usuario.motivoBloqueio}`
+            : "Usuário bloqueado",
+        });
       }
     }
 
-    const senhaValida = await bcrypt.compare(senha, usuario.senha);
-    if (!senhaValida)
-      return res.status(401).json({ message: "Senha inválida" });
+    const senhaValida = await bcrypt.compare(password, usuario.senha);
+    if (!senhaValida) return res.status(401).json({ message: "Senha incorreta" });
 
-    const token = jwt.sign(
-      { id: usuario._id, email: usuario.email, tipo: usuario.tipo },
-      SECRET,
-      { expiresIn: "30m" }
-    );
+    const token = jwt.sign({ id: usuario._id, tipo: usuario.tipo }, SECRET, { expiresIn: "7d" });
 
     res.status(200).json({
+      message: "Login bem-sucedido",
       token,
       usuario: {
         id: usuario._id,
         nome: usuario.nome,
-        tipo: usuario.tipo,
         email: usuario.email,
+        tipo: usuario.tipo,
+        imagem: usuario.imagem,
       },
     });
   } catch (error) {
     console.error("Erro no login:", error);
-    res.status(500).json({ message: "Erro ao fazer login" });
+    res.status(500).json({ message: "Erro interno ao efetuar login" });
   }
 };
 
@@ -117,46 +97,31 @@ exports.buscarUsuarioLogado = async (req, res) => {
   }
 };
 
-// 🔹 Listar todos os usuários (admin)
-exports.listarUsuarios = async (req, res) => {
+// 🔹 Buscar usuário por ID
+exports.buscarUsuarioPorId = async (req, res) => {
   try {
-    const users = await Usuario.find().select("-senha");
-    res.status(200).json(users);
+    const usuario = await Usuario.findById(req.params.id).select("-senha");
+    if (!usuario) return res.status(404).json({ message: "Usuário não encontrado" });
+    res.status(200).json(usuario);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
-// 🔹 Atualizar usuário (usuario logado)
+// 🔹 Atualizar usuário (pelo próprio usuário)
 exports.atualizarUsuario = async (req, res) => {
   try {
-    const update = {};
-    if (req.body.nome) update.nome = req.body.nome;
-    if (req.body.email) update.email = req.body.email;
-    if (req.body.telefone) update.telefone = req.body.telefone;
-    if (req.body.senha) update.senha = await bcrypt.hash(req.body.senha, 10);
-    if (req.file) update.imagem = req.file.filename;
+    const id = req.params.id;
+    const { nome, email, telefone, cpfCnpj, password, dataNascimento } = req.body;
 
-    const updatedUser = await Usuario.findByIdAndUpdate(req.params.id, update, { new: true });
-    if (!updatedUser) return res.status(404).json({ message: "Usuário não encontrado" });
+    const updateData = { nome, email, telefone, cpfCnpj, dataNascimento };
+    if (password) updateData.senha = await bcrypt.hash(password, 10);
+    if (req.file) updateData.imagem = req.file.filename;
 
-    res.status(200).json(updatedUser);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-};
+    const usuarioAtualizado = await Usuario.findByIdAndUpdate(id, updateData, { new: true });
+    if (!usuarioAtualizado) return res.status(404).json({ message: "Usuário não encontrado" });
 
-// 🔹 Deletar usuário (admin)
-exports.deletarUsuario = async (req, res) => {
-  try {
-    const userId = req.params.id;
-    const Doacao = require("../models/Doacao");
-    await Doacao.deleteMany({ usuario: userId });
-
-    const usuario = await Usuario.findByIdAndDelete(userId);
-    if (!usuario) return res.status(404).json({ message: "Usuário não encontrado" });
-
-    res.status(200).json({ message: "Usuário e todas as suas doações foram deletados com sucesso" });
+    res.status(200).json({ message: "Usuário atualizado com sucesso", usuario: usuarioAtualizado });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -165,94 +130,119 @@ exports.deletarUsuario = async (req, res) => {
 // 🔹 Editar usuário (admin)
 exports.editarUsuario = async (req, res) => {
   try {
-    const update = {};
-    if (req.body.nome) update.nome = req.body.nome;
-    if (req.body.email) update.email = req.body.email;
-    if (req.body.telefone) update.telefone = req.body.telefone;
-    if (req.body.tipo) update.tipo = req.body.tipo;
-    if (req.body.senha) update.senha = await bcrypt.hash(req.body.senha, 10);
-    if (req.file) update.imagem = req.file.filename;
-    if (req.body.bloqueado !== undefined) update.bloqueado = req.body.bloqueado;
+    const { id } = req.params;
+    const { nome, email, telefone, cpfCnpj, tipo, password, dataNascimento } = req.body;
 
-    const updatedUser = await Usuario.findByIdAndUpdate(req.params.id, update, { new: true });
-    if (!updatedUser) return res.status(404).json({ message: "Usuário não encontrado" });
+    const updateData = { nome, email, telefone, cpfCnpj, tipo, dataNascimento };
+    if (password) updateData.senha = await bcrypt.hash(password, 10);
+    if (req.file) updateData.imagem = req.file.filename;
 
-    res.status(200).json(updatedUser);
+    const usuario = await Usuario.findByIdAndUpdate(id, updateData, { new: true });
+    if (!usuario) return res.status(404).json({ message: "Usuário não encontrado" });
+
+    res.status(200).json({ message: "Usuário atualizado com sucesso", usuario });
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(500).json({ message: error.message });
   }
 };
 
-// 🔹 Bloquear/desbloquear usuário (admin)
+// 🔹 Listar todos os usuários (admin)
+exports.listarUsuarios = async (req, res) => {
+  try {
+    const usuarios = await Usuario.find().select("-senha");
+    res.status(200).json(usuarios);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// 🔹 Bloquear usuário permanentemente
 exports.bloquearUsuario = async (req, res) => {
   try {
-    const usuario = await Usuario.findById(req.params.id);
+    const { id } = req.params;
+    const { motivo } = req.body;
+
+    const usuario = await Usuario.findByIdAndUpdate(
+      id,
+      { bloqueado: true, motivoBloqueio: motivo || "Bloqueio administrativo", dataDesbloqueio: null },
+      { new: true }
+    );
+
     if (!usuario) return res.status(404).json({ message: "Usuário não encontrado" });
 
-    usuario.bloqueado = !usuario.bloqueado;
-    usuario.bloqueadoUntil = usuario.bloqueado ? null : usuario.bloqueadoUntil;
-    usuario.motivoBloqueio = usuario.bloqueado ? req.body?.motivo || "Não informado" : null;
-
-    await usuario.save();
-
-    res.status(200).json({
-      bloqueado: usuario.bloqueado,
-      message: usuario.bloqueado ? "Usuário bloqueado" : "Usuário desbloqueado",
-    });
+    res.status(200).json({ message: "Usuário bloqueado com sucesso", usuario });
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(500).json({ message: error.message });
   }
 };
 
-// 🔹 Bloquear usuário por tempo (admin)
+// 🔹 Bloquear usuário temporariamente
 exports.bloquearPorTempo = async (req, res) => {
   try {
-    const { duracao, unidade, motivo } = req.body;
-    const usuario = await Usuario.findById(req.params.id);
+    const { id } = req.params;
+    const { motivo, tempo } = req.body;
+
+    const dataDesbloqueio = new Date(Date.now() + tempo * 24 * 60 * 60 * 1000);
+
+    const usuario = await Usuario.findByIdAndUpdate(
+      id,
+      { bloqueado: true, motivoBloqueio: motivo || "Bloqueio temporário", dataDesbloqueio },
+      { new: true }
+    );
+
     if (!usuario) return res.status(404).json({ message: "Usuário não encontrado" });
 
-    let duracaoHoras = null;
-    if (unidade && duracao && !isNaN(duracao)) {
-      const dur = Number(duracao);
-      switch (unidade) {
-        case "segundos": duracaoHoras = dur / 3600; break;
-        case "minutos": duracaoHoras = dur / 60; break;
-        case "horas": duracaoHoras = dur; break;
-        case "dias": duracaoHoras = dur * 24; break;
-      }
-    }
-
-    usuario.bloqueado = true;
-    usuario.bloqueadoUntil = duracaoHoras ? new Date(Date.now() + duracaoHoras * 3600 * 1000) : null;
-    usuario.motivoBloqueio = motivo?.trim() || "Não informado";
-
-    await usuario.save();
-
-    res.status(200).json({
-      bloqueado: usuario.bloqueado,
-      bloqueadoUntil: usuario.bloqueadoUntil,
-      motivoBloqueio: usuario.motivoBloqueio,
-      message: usuario.bloqueadoUntil
-        ? `Usuário bloqueado até ${usuario.bloqueadoUntil.toLocaleString("pt-BR")}`
-        : "Usuário bloqueado permanentemente",
-    });
+    res.status(200).json({ message: "Usuário bloqueado temporariamente", usuario });
   } catch (error) {
-    console.error("Erro ao bloquear usuário:", error);
-    res.status(400).json({ message: error.message });
+    res.status(500).json({ message: error.message });
   }
 };
 
-// 🔹 Atribuir/remover admin
-exports.atribuirAdmin = async (req, res) => {
+// 🔹 Desbloquear usuário
+exports.desbloquearUsuario = async (req, res) => {
   try {
-    const usuario = await Usuario.findById(req.params.id);
+    const { id } = req.params;
+
+    const usuario = await Usuario.findByIdAndUpdate(
+      id,
+      { bloqueado: false, motivoBloqueio: null, dataDesbloqueio: null },
+      { new: true }
+    );
+
     if (!usuario) return res.status(404).json({ message: "Usuário não encontrado" });
 
-    usuario.tipo = usuario.tipo === "admin" ? "comum" : "admin";
-    await usuario.save();
-
-    res.status(200).json({ tipo: usuario.tipo });
+    res.status(200).json({ message: "Usuário desbloqueado com sucesso", usuario });
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// 🔹 Tornar usuário admin
+exports.atribuirAdmin = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const usuario = await Usuario.findByIdAndUpdate(
+      id,
+      { tipo: "admin" },
+      { new: true }
+    );
+
+    if (!usuario) return res.status(404).json({ message: "Usuário não encontrado" });
+
+    res.status(200).json({ message: "Usuário agora é administrador", usuario });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// 🔹 Deletar usuário
+exports.deletarUsuario = async (req, res) => {
+  try {
+    const usuario = await Usuario.findByIdAndDelete(req.params.id);
+    if (!usuario) return res.status(404).json({ message: "Usuário não encontrado" });
+    res.status(200).json({ message: "Usuário deletado com sucesso" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };
