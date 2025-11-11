@@ -279,8 +279,8 @@ const RelatoriosAdmin = () => {
             <p style={styles.cardValue}>{relatorio.totalUsuarios}</p>
           </div>
           <div style={styles.card}>
-            <h3 style={styles.cardTitle}>Usuários Ativos</h3>
-            <p style={styles.cardValue}>{relatorio.usuariosAtivos}</p>
+            <h3 style={styles.cardTitle}>Denúncias Ativas</h3>
+            <p style={styles.cardValue}>{relatorio.denunciasAtivas}</p>
           </div>
           <div style={styles.card}>
             <h3 style={styles.cardTitle}>Usuários Bloqueados</h3>

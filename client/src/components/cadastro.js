@@ -2,7 +2,7 @@ import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import InputMask from "react-input-mask";
 import { AuthContext } from "../AuthContext";
-import { EyeOutlined, EyeInvisibleOutlined } from "@ant-design/icons";
+import { FaEye, FaEyeSlash } from "react-icons/fa"; // 👈 ÍCONES ATUALIZADOS
 
 const REACT_APP_YOUR_HOSTNAME = "http://localhost:5050";
 
@@ -210,7 +210,11 @@ export default function Cadastro() {
                   onClick={() => setShowPassword((prev) => !prev)}
                   style={styles.eyeButton}
                 >
-                  {showPassword ? <EyeInvisibleOutlined /> : <EyeOutlined />}
+                  {showPassword ? (
+                    <FaEyeSlash size={18} color="#555" />
+                  ) : (
+                    <FaEye size={18} color="#555" />
+                  )}
                 </button>
               </div>
 
@@ -232,9 +236,9 @@ export default function Cadastro() {
                   style={styles.eyeButton}
                 >
                   {showConfirmPassword ? (
-                    <EyeInvisibleOutlined />
+                    <FaEyeSlash size={18} color="#555" />
                   ) : (
-                    <EyeOutlined />
+                    <FaEye size={18} color="#555" />
                   )}
                 </button>
               </div>
@@ -321,10 +325,10 @@ const styles = {
     right: "10px",
     top: "50%",
     transform: "translateY(-50%)",
-    width: "20px",
-    height: "20px",
+    width: "22px",
+    height: "22px",
     cursor: "pointer",
-    opacity: 0.7,
+    opacity: 0.8,
     border: "none",
     background: "transparent",
   },

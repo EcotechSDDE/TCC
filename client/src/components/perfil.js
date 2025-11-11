@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useContext } from "react";
 import { AuthContext } from "../AuthContext";
 import InputMask from "react-input-mask";
+import { FaPencilAlt, FaTrash, FaEye, FaEyeSlash } from "react-icons/fa";
 
 const REACT_APP_YOUR_HOSTNAME = "http://localhost:5050";
 
@@ -276,7 +277,11 @@ export default function Perfil() {
                 onClick={() => setShowPassword((prev) => !prev)}
                 style={eyeButtonStyle}
               >
-                {showPassword ? "🔓" : "🔒"}
+                {showPassword ? (
+                  <FaEyeSlash size={18} color="#555" />
+                ) : (
+                  <FaEye size={18} color="#555" />
+                )}
               </button>
             </div>
             <input
@@ -294,15 +299,19 @@ export default function Perfil() {
               onChange={handleChange}
               style={{ marginTop: 8 }}
             />
-            <div style={{ display: "flex", gap: 12, marginTop: 16, justifyContent: "center", width: "100%" }}>
+            <div
+              style={{
+                display: "flex",
+                gap: 12,
+                marginTop: 16,
+                justifyContent: "center",
+                width: "100%",
+              }}
+            >
               <button type="submit" style={buttonStyle}>
                 Salvar
               </button>
-              <button
-                type="button"
-                style={buttonStyle}
-                onClick={handleCancel}
-              >
+              <button type="button" style={buttonStyle} onClick={handleCancel}>
                 Cancelar
               </button>
             </div>
@@ -313,46 +322,20 @@ export default function Perfil() {
       {!editMode && (
         <button
           onClick={handleEdit}
-          style={{
-            position: "absolute",
-            bottom: 24,
-            right: 24,
-            background: "#6f9064",
-            color: "#fff",
-            border: "none",
-            borderRadius: "50%",
-            width: 56,
-            height: 56,
-            fontSize: 28,
-            boxShadow: "0 2px 10px #0002",
-            cursor: "pointer",
-          }}
+          style={editButtonStyle}
           title="Editar perfil"
         >
-          ✎
+          <FaPencilAlt size={22} color="#fff" />
         </button>
       )}
 
       {!editMode && (
         <button
           onClick={handleDelete}
-          style={{
-            position: "absolute",
-            bottom: 24,
-            left: 24,
-            background: "#c62828",
-            color: "#fff",
-            border: "none",
-            borderRadius: "50%",
-            width: 56,
-            height: 56,
-            fontSize: 22,
-            boxShadow: "0 2px 10px #0002",
-            cursor: "pointer",
-          }}
+          style={deleteButtonStyle}
           title="Deletar conta"
         >
-          🗑️
+          <FaTrash size={20} color="#fff" />
         </button>
       )}
     </div>
@@ -390,4 +373,38 @@ const eyeButtonStyle = {
   cursor: "pointer",
   fontSize: 16,
   opacity: 0.7,
+};
+
+const editButtonStyle = {
+  position: "absolute",
+  bottom: 24,
+  right: 24,
+  background: "#6f9064",
+  color: "#fff",
+  border: "none",
+  borderRadius: "50%",
+  width: 56,
+  height: 56,
+  boxShadow: "0 2px 10px #0002",
+  cursor: "pointer",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+};
+
+const deleteButtonStyle = {
+  position: "absolute",
+  bottom: 24,
+  left: 24,
+  background: "#c62828",
+  color: "#fff",
+  border: "none",
+  borderRadius: "50%",
+  width: 56,
+  height: 56,
+  boxShadow: "0 2px 10px #0002",
+  cursor: "pointer",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
 };

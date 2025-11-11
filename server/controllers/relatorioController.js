@@ -1,11 +1,13 @@
 const Usuario = require("../models/Usuario");
 const Doacao = require("../models/Doacao");
+const Denuncia = require("../models/Denuncia"); 
 
 exports.gerarRelatorio = async (req, res) => {
   try {
     const { periodo } = req.query;
-
     const agora = new Date();
+
+    // 🔹 Filtro por período
     let filtroTempo = {};
     if (periodo === "7dias") {
       const inicio = new Date();
@@ -21,17 +23,17 @@ exports.gerarRelatorio = async (req, res) => {
       filtroTempo = { createdAt: { $gte: inicio } };
     }
 
-    // Totais gerais
+    // 🔹 Totais gerais
     const totalUsuarios = await Usuario.countDocuments();
     const usuariosBloqueados = await Usuario.countDocuments({ bloqueado: true });
-    const usuariosAtivos = await Usuario.countDocuments({
-      updatedAt: { $gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) },
-    });
     const usuariosAdmin = await Usuario.countDocuments({ tipo: "admin" });
     const usuariosComum = await Usuario.countDocuments({ tipo: "comum", bloqueado: false });
     const totalDoacoes = await Doacao.countDocuments(filtroTempo);
 
-    // Crescimento mensal (últimos 6 meses)
+    // 🔹 Denúncias ativas (pendentes)
+    const denunciasAtivas = await Denuncia.countDocuments({ status: "pendente" });
+
+    // 🔹 Crescimento mensal (últimos 6 meses)
     const mesesLabels = [];
     const usuariosPorMes = [];
     const doacoesPorMes = [];
@@ -49,6 +51,7 @@ exports.gerarRelatorio = async (req, res) => {
       const usuariosMes = await Usuario.countDocuments({
         createdAt: { $gte: inicioMes, $lt: fimMes },
       });
+
       const doacoesMes = await Doacao.countDocuments({
         createdAt: { $gte: inicioMes, $lt: fimMes },
       });
@@ -57,15 +60,7 @@ exports.gerarRelatorio = async (req, res) => {
       doacoesPorMes.push(doacoesMes);
     }
 
-    // Cálculo de crescimento percentual (proteção contra divisão por zero)
-    const anterior = usuariosPorMes[usuariosPorMes.length - 2] || 0;
-    const atual = usuariosPorMes[usuariosPorMes.length - 1] || 0;
-    let crescimentoUsuariosPercent = 0;
-    if (anterior > 0) {
-      crescimentoUsuariosPercent = (((atual - anterior) / anterior) * 100).toFixed(1);
-    }
-
-    // Faixa etária
+    // 🔹 Faixa etária
     const agoraAno = new Date().getFullYear();
     const faixaEtaria = {
       labels: ["<18", "18-25", "26-35", "36-50", ">50"],
@@ -83,17 +78,17 @@ exports.gerarRelatorio = async (req, res) => {
       else faixaEtaria.valores[4]++;
     });
 
+    // 🔹 Monta o relatório final
     const relatorio = {
       totalUsuarios,
-      usuariosAtivos,
       usuariosBloqueados,
       usuariosAdmin,
       usuariosComum,
       totalDoacoes,
+      denunciasAtivas, 
       meses: mesesLabels,
       usuariosPorMes,
       doacoesPorMes,
-      crescimentoUsuarios: crescimentoUsuariosPercent,
       faixaEtaria,
     };
 
