@@ -129,7 +129,7 @@ const RelatoriosAdmin = () => {
         tension: 0.4,
       },
       {
-        label: "Doações Criadas",
+        label: "Doações Cadastradas",
         data: relatorio.doacoesPorMes,
         borderColor: "#1b5e20",
         backgroundColor: "rgba(27, 94, 32, 0.3)",
@@ -277,11 +277,6 @@ const RelatoriosAdmin = () => {
           <div style={styles.card}>
             <h3 style={styles.cardTitle}>Usuários Cadastrados</h3>
             <p style={styles.cardValue}>{relatorio.totalUsuarios}</p>
-            <small style={styles.cardSub}>
-              {relatorio.crescimentoUsuarios >= 0
-                ? `+${relatorio.crescimentoUsuarios}% este mês`
-                : `${relatorio.crescimentoUsuarios}% este mês`}
-            </small>
           </div>
           <div style={styles.card}>
             <h3 style={styles.cardTitle}>Usuários Ativos</h3>
@@ -318,7 +313,6 @@ const RelatoriosAdmin = () => {
 
 export default RelatoriosAdmin;
 
-// estilos mantidos do seu código original
 const styles = {
   container: {
     display: "flex",

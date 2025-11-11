@@ -2,6 +2,7 @@ import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import InputMask from "react-input-mask";
 import { AuthContext } from "../AuthContext";
+import { EyeOutlined, EyeInvisibleOutlined } from "@ant-design/icons";
 
 const REACT_APP_YOUR_HOSTNAME = "http://localhost:5050";
 
@@ -27,7 +28,6 @@ export default function Cadastro() {
     setForm((prev) => ({ ...prev, ...value }));
   }
 
-  // 🔹 Função para validar senha forte
   function validateSenhaForte(senha) {
     const regex =
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_\-+=<>?{}[\]~]).{8,}$/;
@@ -37,7 +37,6 @@ export default function Cadastro() {
   async function onSubmit(e) {
     e.preventDefault();
 
-    // 🔹 Validação de senha
     if (form.senha !== form.confirmarSenha) {
       alert("Senhas não coincidem. Tente novamente.");
       return;
@@ -55,7 +54,6 @@ export default function Cadastro() {
       return;
     }
 
-    // 🔹 Validações individuais
     const validateEmail = (email) => /\S+@\S+\.\S+/.test(email);
     const validateTelefone = (telefone) =>
       telefone.replace(/\D/g, "").length === 11;
@@ -65,7 +63,6 @@ export default function Cadastro() {
     if (!validateTelefone(form.telefone)) return alert("Telefone inválido!");
     if (!validateNome(form.nome)) return alert("Digite o nome completo!");
 
-    // 🔹 Nova validação de senha forte
     if (!validateSenhaForte(form.senha)) {
       alert(
         "A senha deve ter no mínimo 8 caracteres e conter letras maiúsculas, minúsculas, números e símbolos."
@@ -74,7 +71,6 @@ export default function Cadastro() {
     }
 
     try {
-      // 🔹 Monta o corpo da requisição
       const formData = new FormData();
       formData.append("nome", form.nome);
       formData.append("email", form.email);
@@ -84,7 +80,6 @@ export default function Cadastro() {
       formData.append("senha", form.senha);
       if (form.imagem) formData.append("imagem", form.imagem);
 
-      // 🔹 Faz o cadastro
       const response = await fetch(`${REACT_APP_YOUR_HOSTNAME}/user/add`, {
         method: "POST",
         body: formData,
@@ -98,14 +93,11 @@ export default function Cadastro() {
 
       const result = await response.json();
 
-      // 🔹 Login automático após cadastro
       if (result.token) {
-        login(result.token, result.usuario); // salva token e usuário no contexto
-        navigate("/produtos"); // redireciona para produtos
+        login(result.token, result.usuario);
+        navigate("/produtos");
       } else {
-        alert(
-          "Cadastro realizado, mas não foi possível logar automaticamente."
-        );
+        alert("Cadastro realizado, mas não foi possível logar automaticamente.");
         navigate("/login");
       }
     } catch (error) {
@@ -160,13 +152,32 @@ export default function Cadastro() {
               />
 
               <label style={styles.label}>Data de Nascimento</label>
-              <input
-                type="date"
-                value={form.dataNascimento}
-                onChange={(e) => updateForm({ dataNascimento: e.target.value })}
-                style={styles.input}
-                required
-              />
+              <div style={{ position: "relative", width: "100%" }}>
+                <input
+                  type="date"
+                  value={form.dataNascimento}
+                  onChange={(e) =>
+                    updateForm({ dataNascimento: e.target.value })
+                  }
+                  style={{
+                    ...styles.input,
+                    paddingRight: "35px",
+                  }}
+                  required
+                />
+                <style>
+                  {`
+                    input[type="date"]::-webkit-calendar-picker-indicator {
+                      position: absolute;
+                      right: 10px;
+                      top: 50%;
+                      transform: translateY(-50%);
+                      cursor: pointer;
+                      opacity: 0.8;
+                    }
+                  `}
+                </style>
+              </div>
             </div>
 
             <div style={styles.formColumn}>
@@ -199,7 +210,7 @@ export default function Cadastro() {
                   onClick={() => setShowPassword((prev) => !prev)}
                   style={styles.eyeButton}
                 >
-                  {showPassword ? "🔓" : "🔒"}
+                  {showPassword ? <EyeInvisibleOutlined /> : <EyeOutlined />}
                 </button>
               </div>
 
@@ -220,7 +231,11 @@ export default function Cadastro() {
                   onClick={() => setShowConfirmPassword((prev) => !prev)}
                   style={styles.eyeButton}
                 >
-                  {showConfirmPassword ? "🔓" : "🔒"}
+                  {showConfirmPassword ? (
+                    <EyeInvisibleOutlined />
+                  ) : (
+                    <EyeOutlined />
+                  )}
                 </button>
               </div>
 

@@ -248,9 +248,9 @@ export default function CadastroProduto() {
                 <option value="">Selecione o tipo</option>
                 {[
                   "Caixa De Som",
-                  "Camera",
+                  "Câmera",
                   "Computador",
-                  "Consoles",
+                  "Console",
                   "Fone De Ouvido",
                   "Impressora",
                   "Monitor",
@@ -258,7 +258,7 @@ export default function CadastroProduto() {
                   "Smartphone",
                   "Tablet",
                   "Televisão",
-                  "Peças/Componentes",
+                  "Peça/Componente",
                   "Outro",
                 ].map((tipo) => (
                   <option key={tipo}>{tipo}</option>

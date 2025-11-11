@@ -2,6 +2,7 @@ import React, { useEffect, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { AuthContext } from "../AuthContext";
+import { FaTrash, FaPencilAlt } from "react-icons/fa";
 
 const REACT_APP_YOUR_HOSTNAME = "http://localhost:5050";
 
@@ -9,7 +10,7 @@ export default function MinhasDoacoes() {
   const [doacoes, setDoacoes] = useState([]);
   const [erro, setErro] = useState("");
   const navigate = useNavigate();
-  const { token, user } = useContext(AuthContext);
+  const { token } = useContext(AuthContext);
 
   useEffect(() => {
     async function fetchDoacoes() {
@@ -55,17 +56,11 @@ export default function MinhasDoacoes() {
       {/* Abas superiores */}
       <div style={styles.abasContainer}>
         <div style={styles.abasEsquerda}>
-          <button
-            style={{ ...styles.aba }}
-            onClick={() => navigate("/produtos")}
-          >
+          <button style={{ ...styles.aba }} onClick={() => navigate("/produtos")}>
             Receber
           </button>
 
-          <button
-            style={{ ...styles.aba }}
-            onClick={() => navigate("/cadastroProduto")}
-          >
+          <button style={{ ...styles.aba }} onClick={() => navigate("/cadastroProduto")}>
             Doar
           </button>
 
@@ -97,9 +92,7 @@ export default function MinhasDoacoes() {
                 style={styles.imagem}
               />
               <div style={styles.nome}>
-                {item.nome.length > 80
-                  ? item.nome.slice(0, 80) + "..."
-                  : item.nome}
+                {item.nome.length > 80 ? item.nome.slice(0, 80) + "..." : item.nome}
               </div>
               <button
                 style={styles.contato}
@@ -107,18 +100,23 @@ export default function MinhasDoacoes() {
               >
                 Mostrar Mais
               </button>
+
+              {/* Ícone de deletar */}
               <button
                 style={styles.deleteButton}
                 onClick={() => handleDelete(item._id)}
+                title="Excluir doação"
               >
-                🗑️
+                <FaTrash size={14} color="#3b5534" />
               </button>
+
+              {/* Ícone de editar */}
               <button
-                style={{ ...styles.iconButton, left: 42, top: 8 }}
+                style={styles.iconButton}
                 onClick={() => navigate(`/editarDoacao/${item._id}`)}
                 title="Editar doação"
               >
-                ✏️
+                <FaPencilAlt size={14} color="#3b5534" />
               </button>
             </div>
           ))
@@ -128,7 +126,6 @@ export default function MinhasDoacoes() {
   );
 }
 
-// === ESTILOS ===
 const styles = {
   container: {
     display: "flex",
@@ -211,7 +208,7 @@ const styles = {
     marginBottom: "12px",
     maxWidth: "160px",
     display: "-webkit-box",
-    WebkitLineClamp: 2, // até 2 linhas
+    WebkitLineClamp: 2,
     WebkitBoxOrient: "vertical",
     overflow: "hidden",
     textOverflow: "ellipsis",
@@ -235,11 +232,9 @@ const styles = {
     top: 8,
     left: 8,
     background: "#eee",
-    color: "#3b5534",
     border: "none",
     borderRadius: "50%",
-    fontSize: "1rem",
-    padding: "4px 8px",
+    padding: "6px 8px",
     cursor: "pointer",
     zIndex: 10,
   },
@@ -248,11 +243,9 @@ const styles = {
     top: 8,
     left: 42,
     background: "#eee",
-    color: "#3b5534",
     border: "none",
     borderRadius: "50%",
-    fontSize: "1rem",
-    padding: "4px 8px",
+    padding: "6px 8px",
     cursor: "pointer",
     zIndex: 11,
   },

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../AuthContext";
+import { FaPencilAlt, FaTrash } from "react-icons/fa";
 
 const REACT_APP_YOUR_HOSTNAME = "http://localhost:5050";
 
@@ -26,9 +27,9 @@ export default function Produtos() {
   }, []);
 
   const doacoesFiltradas = doacoes.filter((item) => {
-    const nomeMatch = item.nome.toLowerCase().includes(pesquisa.toLowerCase());
+    const nomeMatch = item.nome?.toLowerCase().includes(pesquisa.toLowerCase());
     const filtroMatch = filtro
-      ? item.nome.toLowerCase().includes(filtro.toLowerCase())
+      ? item.nome?.toLowerCase().includes(filtro.toLowerCase())
       : true;
     return nomeMatch && filtroMatch;
   });
@@ -145,9 +146,7 @@ export default function Produtos() {
         {abaAtiva === "receber" && (
           <>
             {doacoesFiltradas.length === 0 && (
-              <div
-                style={{ color: "#333", textAlign: "center", width: "100%" }}
-              >
+              <div style={{ color: "#333", textAlign: "center", width: "100%" }}>
                 Nenhuma doação encontrada.
               </div>
             )}
@@ -170,7 +169,7 @@ export default function Produtos() {
                   Mostrar Mais
                 </button>
 
-                {/* Botão delete: dono ou admin */}
+                {/* Botão excluir */}
                 {(user?.tipo === "admin" ||
                   (item.usuario && item.usuario._id === user?._id)) && (
                   <button
@@ -182,14 +181,17 @@ export default function Produtos() {
                         )
                       )
                         return;
+
                       const url =
                         user?.tipo === "admin"
                           ? `${REACT_APP_YOUR_HOSTNAME}/doacao/${item._id}/admin`
                           : `${REACT_APP_YOUR_HOSTNAME}/doacao/${item._id}`;
+
                       const response = await fetch(url, {
                         method: "DELETE",
                         headers: { Authorization: `Bearer ${token}` },
                       });
+
                       if (response.ok) {
                         setDoacoes(doacoes.filter((d) => d._id !== item._id));
                         window.alert("Doação deletada com sucesso!");
@@ -198,19 +200,20 @@ export default function Produtos() {
                         window.alert(data.message || "Erro ao deletar doação.");
                       }
                     }}
+                    title="Excluir doação"
                   >
-                    🗑️
+                    <FaTrash size={18} color="#3b5534" />
                   </button>
                 )}
 
-                {/* Botão editar (somente dono) */}
+                {/* Botão editar */}
                 {item.usuario && item.usuario._id === user?._id && (
                   <button
-                    style={{ ...styles.iconButton, left: 42, top: 8 }}
+                    style={styles.iconButton}
                     onClick={() => navigate(`/editarDoacao/${item._id}`)}
                     title="Editar doação"
                   >
-                    ✏️
+                    <FaPencilAlt size={18} color="#3b5534" />
                   </button>
                 )}
               </div>
@@ -258,9 +261,6 @@ const styles = {
   abaAtiva: {
     backgroundColor: "#6f9064",
     color: "#fff",
-    borderTopLeftRadius: "16px",
-    borderTopRightRadius: "16px",
-    borderBottom: "none",
   },
   abaPesquisaFiltro: {
     display: "flex",
@@ -355,11 +355,9 @@ const styles = {
     top: 8,
     left: 8,
     background: "#eee",
-    color: "#3b5534",
     border: "none",
     borderRadius: "50%",
-    fontSize: "1rem",
-    padding: "4px 8px",
+    padding: "6px",
     cursor: "pointer",
     zIndex: 10,
   },
@@ -368,11 +366,9 @@ const styles = {
     top: 8,
     left: 42,
     background: "#eee",
-    color: "#3b5534",
     border: "none",
     borderRadius: "50%",
-    fontSize: "1rem",
-    padding: "4px 8px",
+    padding: "6px",
     cursor: "pointer",
     zIndex: 11,
   },
